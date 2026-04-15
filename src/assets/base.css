@@ -1,0 +1,93 @@
+:root {
+  --c-background-nav-top: #f4f4f4;
+  --c-triangle: #d8dadb;
+  --c-white: #ffffff;
+  --c-white-mute: #ededed;
+  --c-border: #00539c;
+  --c-main: #3a79b0;
+  --c-background-table-header: rgba(125, 163, 196, 0.399);
+  --c-grey: #444444;
+  --c-black: #000000;
+  --c-grey-dark: #333333;
+  --c-background-table: #f3f3f3;
+  --c-background-nav: #e5e5e5;
+
+  --section-gap: 8rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  font-family: 'Mulish', sans-serif;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+ul {
+  display: flex;
+}
+li {
+  padding-inline: 1rem;
+  list-style-type: none;
+}
+h3 {
+  font-size: 1.7rem;
+  font-weight: 300;
+  line-height: 2.4rem;
+}
+
+h4 {
+  font-size: 1.6rem;
+  font-weight: 400;
+}
+h5 {
+  font-size: 1.7rem;
+  font-weight: 400;
+}
+.disp-1 {
+  font-size: 7.9rem;
+  font-weight: 300;
+  line-height: 8.7rem;
+  color: inherit;
+  text-shadow: 2px 2px 3px rgba(255, 255, 255, 0.5);
+}
+
+.disp-2 {
+  font-size: 6.1rem;
+  font-weight: 300;
+  line-height: 8rem;
+}
+.disp-3 {
+  font-size: 3.4rem;
+  font-weight: 300;
+  line-height: 3.7rem;
+}
+.disp-4 {
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 3.7rem;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

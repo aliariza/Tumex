@@ -1,0 +1,64 @@
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 0;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.14);
+}
+
+.form-group.has-error input {
+  border-color: #dc2626;
+}
+
+.error-message {
+  display: inline-block;
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 1rem 2rem;
+  cursor: pointer;
+  background-color: var(--c-main);
+  color: var(--c-white-mute);
+  border: none;
+  border-radius: 0;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+}
+
+button:hover {
+  background-color: rgba(0, 83, 156, 0.9);
+}
