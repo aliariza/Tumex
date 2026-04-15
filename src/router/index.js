@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import api from '../lib/api'
 import store from '../store'
 import HomeView from '../views/HomeView.vue'
@@ -122,29 +122,43 @@ const routes = [
   }
 ]
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes
-})
+export function createAppRouter(options = {}) {
+  const {
+    apiClient = api,
+    appStore = store,
+    history = createWebHistory(import.meta.env.BASE_URL)
+  } = options
 
-router.beforeEach(async (to) => {
-  if (!to.matched.some((record) => record.meta.requiresAuth)) {
-    return true
-  }
+  const router = createRouter({
+    history,
+    routes
+  })
 
-  const token = sessionStorage.getItem('token')
-  if (!token) {
-    store.dispatch('logout')
-    return { name: 'bayi' }
-  }
+  router.beforeEach(async (to) => {
+    if (!to.matched.some((record) => record.meta.requiresAuth)) {
+      return true
+    }
 
-  try {
-    await api.get('/protected')
-    return true
-  } catch {
-    store.dispatch('logout')
-    return { name: 'bayi' }
-  }
-})
+    const token = sessionStorage.getItem('token')
+    if (!token) {
+      appStore.dispatch('logout')
+      return { name: 'bayi' }
+    }
+
+    try {
+      await apiClient.get('/protected')
+      return true
+    } catch {
+      appStore.dispatch('logout')
+      return { name: 'bayi' }
+    }
+  })
+
+  return router
+}
+
+export { createMemoryHistory }
+
+const router = createAppRouter()
 
 export default router

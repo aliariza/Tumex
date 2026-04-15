@@ -7,111 +7,145 @@ const User = require('./models/User')
 const authenticateToken = require('./middleware/authMiddleware')
 require('dotenv').config()
 
-const app = express()
-
-// ─── Middleware ────────────────────────────────────────────────────────────────
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
-}))
-app.use(express.json())
-
-// ─── Env guards ───────────────────────────────────────────────────────────────
-if (!process.env.TOKEN_SECRET) {
-  console.error('FATAL: TOKEN_SECRET environment variable is not set. Exiting.')
-  process.exit(1)
-}
-
-// ─── DB ───────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 4000
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tumex'
 
-mongoose
-  .connect(MONGO_URI)
-  .then(() => console.log('MongoDB bağlandı'))
-  .catch((err) => {
-    console.error('MongoDB bağlantı hatası:', err.message)
-    process.exit(1)
+function createApp(options = {}) {
+  const {
+    userModel = User,
+    bcryptLib = bcrypt,
+    jwtLib = jwt,
+    authMiddleware = authenticateToken,
+    corsOrigin = process.env.FRONTEND_URL || 'http://localhost:5173',
+    tokenSecret = process.env.TOKEN_SECRET
+  } = options
+
+  if (!tokenSecret) {
+    throw new Error('TOKEN_SECRET environment variable is not set')
+  }
+
+  const app = express()
+
+  app.use(cors({
+    origin: corsOrigin,
+    credentials: true
+  }))
+  app.use(express.json())
+
+  app.post('/login', createLoginHandler({ userModel, bcryptLib, jwtLib, tokenSecret }))
+  app.post('/register', createRegisterHandler({ userModel, bcryptLib }))
+  app.get('/protected', authMiddleware, (_req, res) => {
+    res.json({ message: 'Korunaklı bölgeye erişildi' })
   })
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+  app.use((_req, res) => {
+    res.status(404).json({ message: 'Sayfa bulunamadı' })
+  })
 
-app.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body
-    if (!email || !password) {
-      return res.status(400).json({ message: 'E-posta ve şifre gerekli' })
-    }
-
-    const user = await User.findOne({ email: email.toLowerCase().trim() })
-    if (!user) {
-      return res.status(401).json({ message: 'Yanlış bilgi' })
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Yanlış bilgi' })
-    }
-
-    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, { expiresIn: '1h' })
-    res.status(200).json({ message: 'Hoşgeldiniz', token })
-  } catch (error) {
-    console.error('[/login]', error.message)
+  app.use((err, _req, res, next) => {
+    void next
+    console.error('[unhandled]', err.message)
     res.status(500).json({ message: 'Sunucu hatası' })
-  }
-})
+  })
 
-app.post('/register', async (req, res) => {
+  return app
+}
+
+function createLoginHandler({ userModel = User, bcryptLib = bcrypt, jwtLib = jwt, tokenSecret = process.env.TOKEN_SECRET } = {}) {
+  return async (req, res) => {
+    try {
+      const { email, password } = req.body
+      if (!email || !password) {
+        return res.status(400).json({ message: 'E-posta ve şifre gerekli' })
+      }
+
+      const user = await userModel.findOne({ email: email.toLowerCase().trim() })
+      if (!user) {
+        return res.status(401).json({ message: 'Yanlış bilgi' })
+      }
+
+      const isMatch = await bcryptLib.compare(password, user.password)
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Yanlış bilgi' })
+      }
+
+      const token = jwtLib.sign({ _id: user._id }, tokenSecret, { expiresIn: '1h' })
+      return res.status(200).json({ message: 'Hoşgeldiniz', token })
+    } catch (error) {
+      console.error('[/login]', error.message)
+      return res.status(500).json({ message: 'Sunucu hatası' })
+    }
+  }
+}
+
+function createRegisterHandler({ userModel = User, bcryptLib = bcrypt } = {}) {
+  return async (req, res) => {
+    try {
+      const { username, email, password, companyname, telephone, address } = req.body
+
+      if (!username || !email || !password || !companyname || !telephone || !address) {
+        return res.status(400).json({ message: 'Lütfen tüm alanları doldurun' })
+      }
+
+      const normalizedEmail = email.toLowerCase().trim()
+
+      const existingUser = await userModel.findOne({ email: normalizedEmail })
+      if (existingUser) {
+        return res.status(400).json({ message: 'Bu e-posta zaten kayıtlı' })
+      }
+
+      const hashedPassword = await bcryptLib.hash(password, 10)
+
+      const newUser = new userModel({
+        username: username.trim(),
+        email: normalizedEmail,
+        password: hashedPassword,
+        companyname: companyname.trim(),
+        telephone: telephone.trim(),
+        address: address.trim()
+      })
+
+      await newUser.save()
+      return res.status(201).json({ message: 'Başarıyla kayıt yapıldı' })
+    } catch (error) {
+      console.error('[/register]', error.message)
+      return res.status(500).json({ message: 'Sunucu hatası' })
+    }
+  }
+}
+
+async function connectToDatabase(uri = MONGO_URI) {
+  await mongoose.connect(uri)
+  console.log('MongoDB bağlandı')
+}
+
+async function startServer(options = {}) {
+  const { port = PORT, mongoUri = MONGO_URI } = options
+  const app = createApp()
+
   try {
-    const { username, email, password, companyname, telephone, address } = req.body
-
-    if (!username || !email || !password || !companyname || !telephone || !address) {
-      return res.status(400).json({ message: 'Lütfen tüm alanları doldurun' })
-    }
-
-    const normalizedEmail = email.toLowerCase().trim()
-
-    const existingUser = await User.findOne({ email: normalizedEmail })
-    if (existingUser) {
-      return res.status(400).json({ message: 'Bu e-posta zaten kayıtlı' })
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    const newUser = new User({
-      username: username.trim(),
-      email: normalizedEmail,
-      password: hashedPassword,
-      companyname: companyname.trim(),
-      telephone: telephone.trim(),
-      address: address.trim()
-    })
-
-    await newUser.save()
-    res.status(201).json({ message: 'Başarıyla kayıt yapıldı' })
-  } catch (error) {
-    console.error('[/register]', error.message)
-    res.status(500).json({ message: 'Sunucu hatası' })
+    await connectToDatabase(mongoUri)
+  } catch (err) {
+    console.error('MongoDB bağlantı hatası:', err.message)
+    process.exit(1)
   }
-})
 
-app.get('/protected', authenticateToken, (_req, res) => {
-  res.json({ message: 'Korunaklı bölgeye erişildi' })
-})
+  return app.listen(port, () => {
+    console.log(`Sunucu http://localhost:${port} adresinde çalışıyor`)
+  })
+}
 
-// ─── 404 ──────────────────────────────────────────────────────────────────────
-app.use((_req, res) => {
-  res.status(404).json({ message: 'Sayfa bulunamadı' })
-})
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error('FATAL:', error.message)
+    process.exit(1)
+  })
+}
 
-// ─── Global error handler ─────────────────────────────────────────────────────
-app.use((err, _req, res, next) => {
-  void next
-  console.error('[unhandled]', err.message)
-  res.status(500).json({ message: 'Sunucu hatası' })
-})
-
-// ─── Start ────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`)
-})
+module.exports = {
+  createApp,
+  createLoginHandler,
+  createRegisterHandler,
+  connectToDatabase,
+  startServer
+}
