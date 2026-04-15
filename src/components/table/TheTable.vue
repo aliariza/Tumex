@@ -1,13 +1,17 @@
 <template>
   <section>
     <table>
+      <colgroup>
+        <col style="width: 50%" />
+        <col style="width: 50%" />
+      </colgroup>
       <tbody @click="showStandard">
         <tr :style="headerStyle">
           <td>Standart</td>
           <td>
             <div class="felan" style="justify-content: flex-end">
-              <span v-if="!isStandart" class="chevron"><chevron-down /></span>
-              <span v-else class="chevron"><chevron-right /></span>
+              <span v-if="!isStandart" class="chevron"><chevron-right /></span>
+              <span v-else class="chevron"><chevron-down /></span>
             </div>
           </td>
         </tr>
@@ -37,14 +41,13 @@
           <td>Opsiyonlar</td>
           <td>
             <div class="felan" style="justify-content: flex-end">
-              <span v-if="!isOption" class="chevron"><chevron-down /></span>
-              <span v-else class="chevron"><chevron-right /></span>
+              <span v-if="!isOption" class="chevron"><chevron-right /></span>
+              <span v-else class="chevron"><chevron-down /></span>
             </div>
           </td>
         </tr>
         <tr v-show="isOption">
-          <td>hello</td>
-          <td>welcome</td>
+          <td colspan="2">Henüz hazır değil.</td>
         </tr>
       </tbody>
     </table>
@@ -175,6 +178,7 @@ section {
 
 table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 1.8rem;
   tr {
@@ -185,7 +189,6 @@ table {
       background-color: var(--c-background-table);
 
       & > td {
-        width: 50%;
         border-top: 1px solid var(--c-main);
         border-bottom: 1px solid var(--c-main);
       }

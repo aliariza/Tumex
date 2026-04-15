@@ -76,16 +76,23 @@ const isDefault = computed(() => props.selected === 'SEÇİNİZ')
     position: absolute;
     top: 100%;
     left: 0;
+    display: flex !important;
+    flex-direction: column !important;
     background-color: #fff;
     border: 1px solid #ccc;
-    width: 100%;
-    z-index: 1;
+    min-width: 100%;
+    width: max-content;
+    max-height: 24rem;
+    overflow-y: auto;
+    z-index: 100;
     list-style: none;
     padding: 0;
     margin: 0;
 
     li {
-      padding: 0.5rem 1rem;
+      display: block;
+      padding: 0.6rem 1.2rem;
+      white-space: nowrap;
       cursor: pointer;
       &:hover {
         background-color: #eee;
