@@ -156,7 +156,7 @@ async function handleRegister() {
       }
     } catch (error) {
       showRequestErrorToast(toast, error, {
-        400: error.response?.data.message || 'Gecersiz kayit bilgileri',
+        400: error.response?.data?.message || 'Gecersiz kayit bilgileri',
         500: 'Sunucu hatasi, lutfen daha sonra tekrar deneyin'
       })
     }

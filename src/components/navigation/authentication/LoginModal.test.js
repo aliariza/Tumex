@@ -3,9 +3,10 @@ import { createStore } from 'vuex'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import LoginModal from './LoginModal.vue'
 
-const { push, success, apiPost } = vi.hoisted(() => ({
+const { push, success, error, apiPost } = vi.hoisted(() => ({
   push: vi.fn(),
   success: vi.fn(),
+  error: vi.fn(),
   apiPost: vi.fn()
 }))
 
@@ -17,7 +18,8 @@ vi.mock('vue-router', () => ({
 
 vi.mock('vue-toastification', () => ({
   useToast: () => ({
-    success
+    success,
+    error
   })
 }))
 
@@ -44,6 +46,7 @@ describe('LoginModal', () => {
     apiPost.mockReset()
     push.mockReset()
     success.mockReset()
+    error.mockReset()
   })
 
   it('shows validation errors when the form is submitted empty', async () => {
@@ -92,5 +95,35 @@ describe('LoginModal', () => {
     })
     expect(store.dispatch).toHaveBeenCalledWith('closeLoginModal')
     expect(push).toHaveBeenCalledWith('/protected')
+  })
+
+  it('shows an auth error toast and stays on the modal when login fails', async () => {
+    apiPost.mockRejectedValue({
+      response: {
+        status: 401
+      }
+    })
+
+    const store = createTestStore()
+    const wrapper = mount(LoginModal, {
+      global: {
+        plugins: [store]
+      }
+    })
+
+    await wrapper.get('#email').setValue('dealer@example.com')
+    await wrapper.get('#password').setValue('wrong-password')
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    expect(error).toHaveBeenCalledWith(
+      'E-posta veya sifre hatali',
+      expect.objectContaining({ timeout: 3000 })
+    )
+    expect(store.dispatch).not.toHaveBeenCalledWith(
+      'setAuthentication',
+      expect.anything()
+    )
+    expect(push).not.toHaveBeenCalled()
   })
 })
