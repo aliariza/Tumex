@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import api from '../lib/api'
+import store from '../store'
 import HomeView from '../views/HomeView.vue'
 import NotFound from '../views/NotFound.vue'
 import HakkindaView from '../views/hakkimizda/HakkindaView.vue'
@@ -125,11 +127,23 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, _from, next) => {
-  if (to.matched.some((record) => record.meta.requiresAuth) && !sessionStorage.getItem('token')) {
-    next({ name: 'bayi' })
-  } else {
-    next()
+router.beforeEach(async (to) => {
+  if (!to.matched.some((record) => record.meta.requiresAuth)) {
+    return true
+  }
+
+  const token = sessionStorage.getItem('token')
+  if (!token) {
+    store.dispatch('logout')
+    return { name: 'bayi' }
+  }
+
+  try {
+    await api.get('/protected')
+    return true
+  } catch {
+    store.dispatch('logout')
+    return { name: 'bayi' }
   }
 })
 

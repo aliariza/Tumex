@@ -105,7 +105,8 @@ app.use((_req, res) => {
 })
 
 // ─── Global error handler ─────────────────────────────────────────────────────
-app.use((err, _req, res, _next) => {
+app.use((err, _req, res, next) => {
+  void next
   console.error('[unhandled]', err.message)
   res.status(500).json({ message: 'Sunucu hatası' })
 })

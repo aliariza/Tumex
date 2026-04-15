@@ -18,9 +18,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid — clear session and let the component handle redirect
+      // Keep session storage and in-memory auth state in sync on auth failures.
       sessionStorage.removeItem('isAuthenticated')
       sessionStorage.removeItem('token')
+      window.dispatchEvent(new Event('auth:unauthorized'))
     }
     return Promise.reject(error)
   }

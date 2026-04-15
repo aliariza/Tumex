@@ -1,13 +1,13 @@
 <template>
   <section class="product-view">
-    <product-hero :item="heroItem"></product-hero>
-    <alt-bolumler :item="altBolumler"></alt-bolumler>
+    <ProductHero :item="heroItem"></ProductHero>
+    <AltBolumler :item="altBolumler"></AltBolumler>
     <div class="table-section">
       <h2 class="disp-2">Teknik veriler</h2>
       <h1>{{ productType }} serisi</h1>
       <TheTable :tableData="currentTableData" :machines="machineData" />
     </div>
-    <highlights-downloads :pdfPath="pdfPath"></highlights-downloads>
+    <HighlightsDownloads :pdfPath="pdfPath"></HighlightsDownloads>
   </section>
 </template>
 
