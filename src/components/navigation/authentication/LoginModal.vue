@@ -38,7 +38,12 @@ import { useRouter } from 'vue-router'
 import Modal from './Modal.vue'
 import { useToast } from 'vue-toastification'
 import api from '@/lib/api'
-import { isValidEmail, showRequestErrorToast, TOAST_OPTIONS } from './authHelpers'
+import {
+  showRequestErrorToast,
+  TOAST_OPTIONS,
+  validateEmailField,
+  validateRequiredField
+} from './authHelpers'
 import { useAuthForm } from './useAuthForm'
 
 const createLoginForm = () => ({
@@ -58,15 +63,8 @@ const setAuthentication = (value) => store.dispatch('setAuthentication', value)
 function validateForm() {
   form.errors = {}
 
-  if (!form.email) {
-    form.errors.email = 'E-posta gerekli'
-  } else if (!isValidEmail(form.email)) {
-    form.errors.email = 'Geçerli e-posta gerekli'
-  }
-
-  if (!form.password) {
-    form.errors.password = 'Şifre gerekli'
-  }
+  validateEmailField(form.errors, 'email', form.email, 'E-posta gerekli', 'Geçerli e-posta gerekli')
+  validateRequiredField(form.errors, 'password', form.password, 'Şifre gerekli')
 
   return Object.keys(form.errors).length === 0
 }

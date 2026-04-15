@@ -9,6 +9,31 @@ require('dotenv').config()
 
 const PORT = process.env.PORT || 4000
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tumex'
+const INTERNAL_SERVER_MESSAGE = 'Sunucu hatası'
+
+function normalizeEmail(email = '') {
+  return email.toLowerCase().trim()
+}
+
+function trimValue(value = '') {
+  return value.trim()
+}
+
+function createRegisterPayload(body, hashedPassword) {
+  return {
+    username: trimValue(body.username),
+    email: normalizeEmail(body.email),
+    password: hashedPassword,
+    companyname: trimValue(body.companyname),
+    telephone: trimValue(body.telephone),
+    address: trimValue(body.address)
+  }
+}
+
+function sendInternalServerError(res, scope, error) {
+  console.error(`[${scope}]`, error.message)
+  return res.status(500).json({ message: INTERNAL_SERVER_MESSAGE })
+}
 
 function createApp(options = {}) {
   const {
@@ -59,7 +84,7 @@ function createLoginHandler({ userModel = User, bcryptLib = bcrypt, jwtLib = jwt
         return res.status(400).json({ message: 'E-posta ve şifre gerekli' })
       }
 
-      const user = await userModel.findOne({ email: email.toLowerCase().trim() })
+      const user = await userModel.findOne({ email: normalizeEmail(email) })
       if (!user) {
         return res.status(401).json({ message: 'Yanlış bilgi' })
       }
@@ -72,8 +97,7 @@ function createLoginHandler({ userModel = User, bcryptLib = bcrypt, jwtLib = jwt
       const token = jwtLib.sign({ _id: user._id }, tokenSecret, { expiresIn: '1h' })
       return res.status(200).json({ message: 'Hoşgeldiniz', token })
     } catch (error) {
-      console.error('[/login]', error.message)
-      return res.status(500).json({ message: 'Sunucu hatası' })
+      return sendInternalServerError(res, '/login', error)
     }
   }
 }
@@ -87,7 +111,7 @@ function createRegisterHandler({ userModel = User, bcryptLib = bcrypt } = {}) {
         return res.status(400).json({ message: 'Lütfen tüm alanları doldurun' })
       }
 
-      const normalizedEmail = email.toLowerCase().trim()
+      const normalizedEmail = normalizeEmail(email)
 
       const existingUser = await userModel.findOne({ email: normalizedEmail })
       if (existingUser) {
@@ -95,21 +119,12 @@ function createRegisterHandler({ userModel = User, bcryptLib = bcrypt } = {}) {
       }
 
       const hashedPassword = await bcryptLib.hash(password, 10)
-
-      const newUser = new userModel({
-        username: username.trim(),
-        email: normalizedEmail,
-        password: hashedPassword,
-        companyname: companyname.trim(),
-        telephone: telephone.trim(),
-        address: address.trim()
-      })
+      const newUser = new userModel(createRegisterPayload(req.body, hashedPassword))
 
       await newUser.save()
       return res.status(201).json({ message: 'Başarıyla kayıt yapıldı' })
     } catch (error) {
-      console.error('[/register]', error.message)
-      return res.status(500).json({ message: 'Sunucu hatası' })
+      return sendInternalServerError(res, '/register', error)
     }
   }
 }

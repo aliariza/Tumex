@@ -85,7 +85,13 @@ import { useStore } from 'vuex'
 import Modal from './Modal.vue'
 import { useToast } from 'vue-toastification'
 import api from '@/lib/api'
-import { isValidEmail, showRequestErrorToast, TOAST_OPTIONS } from './authHelpers'
+import {
+  showRequestErrorToast,
+  TOAST_OPTIONS,
+  validateEmailField,
+  validateMinLengthField,
+  validateRequiredField
+} from './authHelpers'
 import { useAuthForm } from './useAuthForm'
 
 const createRegisterForm = () => ({
@@ -107,33 +113,19 @@ const closeRegisterModal = () => store.dispatch('closeRegisterModal')
 function validateForm() {
   form.errors = {}
 
-  if (!form.username) {
-    form.errors.username = 'Kullanıcı adı gerekli'
-  }
-
-  if (!form.email) {
-    form.errors.email = 'E-posta gerekli'
-  } else if (!isValidEmail(form.email)) {
-    form.errors.email = 'Geçerli e-posta gerekli'
-  }
-
-  if (!form.companyname) {
-    form.errors.companyname = 'Şirket adı gerekli'
-  }
-
-  if (!form.password) {
-    form.errors.password = 'Şifre gerekli'
-  } else if (form.password.length < 6) {
-    form.errors.password = 'Şifre minimum 6 hane olmalıdır'
-  }
-
-  if (!form.telephone) {
-    form.errors.telephone = 'Telefon no. gerekli'
-  }
-
-  if (!form.address) {
-    form.errors.address = 'Adres gerekli'
-  }
+  validateRequiredField(form.errors, 'username', form.username, 'Kullanıcı adı gerekli')
+  validateEmailField(form.errors, 'email', form.email, 'E-posta gerekli', 'Geçerli e-posta gerekli')
+  validateRequiredField(form.errors, 'companyname', form.companyname, 'Şirket adı gerekli')
+  validateMinLengthField(
+    form.errors,
+    'password',
+    form.password,
+    'Şifre gerekli',
+    6,
+    'Şifre minimum 6 hane olmalıdır'
+  )
+  validateRequiredField(form.errors, 'telephone', form.telephone, 'Telefon no. gerekli')
+  validateRequiredField(form.errors, 'address', form.address, 'Adres gerekli')
 
   return Object.keys(form.errors).length === 0
 }

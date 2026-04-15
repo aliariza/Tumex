@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import ProductHero from '../components/hero/ProductHero.vue'
 import TheTable from '../components/table/TheTable.vue'
@@ -26,6 +26,17 @@ import { MODEL_DATA } from '../data/modelData.js'
 defineOptions({ name: 'ProductView' })
 
 const route = useRoute()
+
+const MACHINE_DATA_BY_TYPE = {
+  'laser-cutting': laserMachinesData,
+  abkant: abkantMachinesData,
+  'laser-welding': laserWeldingMachinesData
+}
+
+const PDF_BY_MACHINE_TYPE = {
+  'laser-cutting': 'Durmark_Laser.pdf',
+  abkant: 'DurMarkAbkant.pdf'
+}
 
 const machineType = computed(() => route.params.machineType)
 const productType = computed(() => route.params.productType)
@@ -56,34 +67,19 @@ const TABLE_DATA_ABKANT = [
   }
 ]
 
-function getMachineData(type) {
-  switch (type) {
-    case 'laser-cutting': return laserMachinesData
-    case 'abkant': return abkantMachinesData
-    case 'laser-welding': return laserWeldingMachinesData
-    default: return {}
-  }
+function getModelData(type) {
+  return MODEL_DATA[type] || {}
 }
 
-const machineData = ref(getMachineData(machineType.value))
-const pdfPath = ref('')
-
-function updateFromRoute(type) {
-  machineData.value = getMachineData(type)
-  if (type === 'laser-cutting') pdfPath.value = 'Durmark_Laser.pdf'
-  else if (type === 'abkant') pdfPath.value = 'DurMarkAbkant.pdf'
-  else pdfPath.value = ''
-}
-
-// Reactively update when route changes
-watch(machineType, (type) => updateFromRoute(type), { immediate: true })
+const machineData = computed(() => MACHINE_DATA_BY_TYPE[machineType.value] || {})
+const pdfPath = computed(() => PDF_BY_MACHINE_TYPE[machineType.value] || '')
 
 const currentTableData = computed(() =>
   machineType.value === 'laser-cutting' ? TABLE_DATA_LASER : TABLE_DATA_ABKANT
 )
 
 const heroItem = computed(() => {
-  const data = MODEL_DATA[productType.value] || {}
+  const data = getModelData(productType.value)
   return {
     title: data.title || 'Default Title',
     text: data.text || 'Default Text',
@@ -93,7 +89,7 @@ const heroItem = computed(() => {
 })
 
 const altBolumler = computed(() => {
-  const data = MODEL_DATA[productType.value] || {}
+  const data = getModelData(productType.value)
   return {
     title: data.altTitle || 'Default Alt Title',
     subtitle: data.altSubtitle || 'Default Alt Subtitle',

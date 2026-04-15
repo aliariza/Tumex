@@ -77,18 +77,23 @@ const props = defineProps({
 const route = useRoute()
 const isStandart = ref(true)
 const isOption = ref(false)
+const DEFAULT_DROPDOWN_VALUE = 'SEÇİNİZ'
 
 // Unified dropdown state: { [rowKey]: { selected, open } }
 const dropdowns = ref({})
 
-function initDropdowns() {
+function createDropdownState(tableData) {
   const state = {}
-  for (const row of props.tableData) {
+  for (const row of tableData) {
     if (row.options) {
-      state[row.key] = { selected: 'SEÇİNİZ', open: false }
+      state[row.key] = { selected: DEFAULT_DROPDOWN_VALUE, open: false }
     }
   }
-  dropdowns.value = state
+  return state
+}
+
+function initDropdowns() {
+  dropdowns.value = createDropdownState(props.tableData)
 }
 
 initDropdowns()
@@ -122,25 +127,34 @@ onBeforeUnmount(() => document.removeEventListener('click', outsideClickListener
 
 const productType = computed(() => route.params.productType)
 
-const selectedDetails = computed(() => {
-  const modelData = props.machines[productType.value]
+function getSelectedDropdownValues(state) {
+  const keys = Object.keys(state)
+  return {
+    primary: state[keys[0]]?.selected,
+    secondary: state[keys[1]]?.selected
+  }
+}
+
+function getSelectedModelDetails(modelData, selections) {
   if (!modelData) return null
 
-  // Find the first two dropdown selections
-  const keys = Object.keys(dropdowns.value)
-  const primary = dropdowns.value[keys[0]]?.selected
-  const secondary = dropdowns.value[keys[1]]?.selected
-
-  if (primary && primary !== 'SEÇİNİZ' && modelData[primary]) {
-    if (secondary && secondary !== 'SEÇİNİZ' && modelData[primary][secondary]) {
+  const { primary, secondary } = selections
+  if (primary && primary !== DEFAULT_DROPDOWN_VALUE && modelData[primary]) {
+    if (secondary && secondary !== DEFAULT_DROPDOWN_VALUE && modelData[primary][secondary]) {
       return modelData[primary][secondary]
     }
-    if (!secondary || secondary === 'SEÇİNİZ') {
+
+    if (!secondary || secondary === DEFAULT_DROPDOWN_VALUE) {
       return modelData[primary]
     }
   }
 
   return null
+}
+
+const selectedDetails = computed(() => {
+  const modelData = props.machines[productType.value]
+  return getSelectedModelDetails(modelData, getSelectedDropdownValues(dropdowns.value))
 })
 
 const headerStyle = {
