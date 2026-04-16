@@ -38,7 +38,9 @@ describe('app route flow', () => {
   it('renders the protected home page when the token is valid', async () => {
     sessionStorage.setItem('token', 'valid-token')
     const apiClient = {
-      get: vi.fn().mockResolvedValue({ status: 200 })
+      get: vi.fn().mockResolvedValue({
+        data: { role: 'dealer' }
+      })
     }
     const store = createAppStore({ post: vi.fn() })
     const router = createAppRouter({
@@ -62,7 +64,7 @@ describe('app route flow', () => {
     await router.isReady()
     await flushPromises()
 
-    expect(apiClient.get).toHaveBeenCalledWith('/protected')
+    expect(apiClient.get).toHaveBeenCalledWith('/me')
     expect(router.currentRoute.value.name).toBe('Protected')
     expect(wrapper.text()).toContain('Tumex bayi alanına hoş geldiniz')
   })

@@ -29,9 +29,11 @@ describe('router auth guard', () => {
     expect(appStore.dispatch).toHaveBeenCalledWith('logout')
   })
 
-  it('allows access when the backend validates the token', async () => {
+  it('allows access when the backend returns a dealer user', async () => {
     sessionStorage.setItem('token', 'valid-token')
-    apiClient.get.mockResolvedValue({ status: 200 })
+    apiClient.get.mockResolvedValue({
+      data: { role: 'dealer' }
+    })
 
     const router = createAppRouter({
       apiClient,
@@ -41,7 +43,7 @@ describe('router auth guard', () => {
 
     await router.push('/protected/laser')
 
-    expect(apiClient.get).toHaveBeenCalledWith('/protected')
+    expect(apiClient.get).toHaveBeenCalledWith('/me')
     expect(router.currentRoute.value.name).toBe('ProtectedLaser')
     expect(appStore.dispatch).not.toHaveBeenCalled()
   })
@@ -58,7 +60,7 @@ describe('router auth guard', () => {
 
     await router.push('/protected/abkant')
 
-    expect(apiClient.get).toHaveBeenCalledWith('/protected')
+    expect(apiClient.get).toHaveBeenCalledWith('/me')
     expect(appStore.dispatch).toHaveBeenCalledWith('logout')
     expect(router.currentRoute.value.name).toBe('bayi')
   })
