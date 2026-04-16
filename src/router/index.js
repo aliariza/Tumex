@@ -100,21 +100,32 @@ const routes = [
     path: '/protected',
     name: 'Protected',
     component: () => import('../views/protected/Protected.vue'),
-    meta: { requiresAuth: true }
+    meta: { access: 'protected' }
   },
   {
     path: '/protected/abkant',
     name: 'ProtectedAbkant',
     component: () => import('../views/protected/ProtectedAbkant.vue'),
-    meta: { requiresAuth: true }
+    meta: { access: 'protected' }
   },
   {
     path: '/protected/laser',
     name: 'ProtectedLaser',
     component: () => import('../views/protected/ProtectedLaser.vue'),
-    meta: { requiresAuth: true }
+    meta: { access: 'protected' }
   },
-  // Catch-all route for 404 not found
+  {
+    path: '/admin',
+    name: 'AdminLogin',
+    component: () => import('../views/admin/AdminLoginView.vue'),
+    meta: { access: 'public' }
+  },
+  {
+    path: '/admin/machines',
+    name: 'AdminMachines',
+    component: () => import('../views/admin/AdminMachinesView.vue'),
+    meta: { access: 'admin' }
+  },
   {
     path: '/:catchAll(.*)*',
     name: 'NotFound',
@@ -135,18 +146,49 @@ export function createAppRouter(options = {}) {
   })
 
   router.beforeEach(async (to) => {
-    if (!to.matched.some((record) => record.meta.requiresAuth)) {
+    const access = to.meta.access || 'public'
+    const token = sessionStorage.getItem('token')
+
+    if (to.name === 'AdminLogin' && token) {
+      try {
+        const { data: user } = await apiClient.get('/me')
+        if (user.role === 'admin') {
+          return { name: 'AdminMachines' }
+        }
+      } catch {
+        // allow login page
+      }
+    }
+
+    if (access === 'public') {
       return true
     }
 
-    const token = sessionStorage.getItem('token')
     if (!token) {
       appStore.dispatch('logout')
       return { name: 'bayi' }
     }
 
     try {
-      await apiClient.get('/protected')
+      const { data: user } = await apiClient.get('/me')
+
+      if (access === 'protected') {
+        if (user.role === 'dealer' || user.role === 'admin') {
+          return true
+        }
+
+        appStore.dispatch('logout')
+        return { name: 'bayi' }
+      }
+
+      if (access === 'admin') {
+        if (user.role === 'admin') {
+          return true
+        }
+
+        return { name: 'home' }
+      }
+
       return true
     } catch {
       appStore.dispatch('logout')

@@ -5,6 +5,9 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const User = require('./models/User')
 const authenticateToken = require('./middleware/authMiddleware')
+const requireRole = require('./middleware/requireRole')
+const Machine = require('./models/Machine')
+
 require('dotenv').config()
 
 const PORT = process.env.PORT || 4000
@@ -26,7 +29,22 @@ function createRegisterPayload(body, hashedPassword) {
     password: hashedPassword,
     companyname: trimValue(body.companyname),
     telephone: trimValue(body.telephone),
-    address: trimValue(body.address)
+    address: trimValue(body.address),
+    role: 'user'
+  }
+}
+
+function buildMachinePayload(body = {}) {
+  return {
+    name: trimValue(body.name || ''),
+    brand: trimValue(body.brand || ''),
+    category: trimValue(body.category || ''),
+    model: trimValue(body.model || ''),
+    description: trimValue(body.description || ''),
+    price: Number(body.price || 0),
+    image: trimValue(body.image || ''),
+    specs: body.specs || {},
+    isPublished: typeof body.isPublished === 'boolean' ? body.isPublished : true
   }
 }
 
@@ -59,8 +77,107 @@ function createApp(options = {}) {
 
   app.post('/login', createLoginHandler({ userModel, bcryptLib, jwtLib, tokenSecret }))
   app.post('/register', createRegisterHandler({ userModel, bcryptLib }))
-  app.get('/protected', authMiddleware, (_req, res) => {
+
+  app.get('/me', authMiddleware, async (req, res) => {
+    try {
+      const user = await userModel.findById(req.user._id).select('-password')
+      if (!user) {
+        return res.status(404).json({ message: 'Kullanıcı bulunamadı' })
+      }
+
+      return res.status(200).json(user)
+    } catch (error) {
+      return sendInternalServerError(res, '/me', error)
+    }
+  })
+
+  app.get('/protected', authMiddleware, requireRole('dealer', 'admin'), (_req, res) => {
     res.json({ message: 'Korunaklı bölgeye erişildi' })
+  })
+
+  app.get('/admin', authMiddleware, requireRole('admin'), (_req, res) => {
+    res.json({ message: 'Admin bölgesine erişildi' })
+  })
+
+  app.get('/admin/machines', authMiddleware, requireRole('admin'), async (_req, res) => {
+    try {
+      const machines = await Machine.find().sort({ createdAt: -1 })
+      return res.status(200).json(machines)
+    } catch (error) {
+      return sendInternalServerError(res, '/admin/machines GET', error)
+    }
+  })
+
+  app.post('/admin/machines', authMiddleware, requireRole('admin'), async (req, res) => {
+    try {
+      const machine = new Machine(buildMachinePayload(req.body))
+      await machine.save()
+      return res.status(201).json(machine)
+    } catch (error) {
+      console.error('[/admin/machines POST]', error.message)
+      return res.status(400).json({ message: 'Makine kaydı oluşturulamadı' })
+    }
+  })
+
+  app.put('/admin/machines/:id', authMiddleware, requireRole('admin'), async (req, res) => {
+    try {
+      const updatedMachine = await Machine.findByIdAndUpdate(
+        req.params.id,
+        buildMachinePayload(req.body),
+        {
+          new: true,
+          runValidators: true
+        }
+      )
+
+      if (!updatedMachine) {
+        return res.status(404).json({ message: 'Makine bulunamadı' })
+      }
+
+      return res.status(200).json(updatedMachine)
+    } catch (error) {
+      console.error('[/admin/machines/:id PUT]', error.message)
+      return res.status(400).json({ message: 'Makine güncellenemedi' })
+    }
+  })
+
+  app.delete('/admin/machines/:id', authMiddleware, requireRole('admin'), async (req, res) => {
+    try {
+      const deletedMachine = await Machine.findByIdAndDelete(req.params.id)
+
+      if (!deletedMachine) {
+        return res.status(404).json({ message: 'Makine bulunamadı' })
+      }
+
+      return res.status(200).json({ message: 'Makine silindi' })
+    } catch (error) {
+      return sendInternalServerError(res, '/admin/machines/:id DELETE', error)
+    }
+  })
+
+  app.get('/machines', async (_req, res) => {
+    try {
+      const machines = await Machine.find({ isPublished: true }).sort({ createdAt: -1 })
+      return res.status(200).json(machines)
+    } catch (error) {
+      return sendInternalServerError(res, '/machines GET', error)
+    }
+  })
+  app.get('/machines/:id', async (req, res) => {
+    try {
+      const machine = await Machine.findOne({
+        _id: req.params.id,
+        isPublished: true
+      })
+
+      if (!machine) {
+        return res.status(404).json({ message: 'Makine bulunamadı' })
+      }
+
+      return res.status(200).json(machine)
+    } catch (error) {
+      return sendInternalServerError(res, '/machines/:id GET', error)
+    }
   })
 
   app.use((_req, res) => {
@@ -76,10 +193,16 @@ function createApp(options = {}) {
   return app
 }
 
-function createLoginHandler({ userModel = User, bcryptLib = bcrypt, jwtLib = jwt, tokenSecret = process.env.TOKEN_SECRET } = {}) {
+function createLoginHandler({
+  userModel = User,
+  bcryptLib = bcrypt,
+  jwtLib = jwt,
+  tokenSecret = process.env.TOKEN_SECRET
+} = {}) {
   return async (req, res) => {
     try {
       const { email, password } = req.body
+
       if (!email || !password) {
         return res.status(400).json({ message: 'E-posta ve şifre gerekli' })
       }
@@ -94,8 +217,20 @@ function createLoginHandler({ userModel = User, bcryptLib = bcrypt, jwtLib = jwt
         return res.status(401).json({ message: 'Yanlış bilgi' })
       }
 
-      const token = jwtLib.sign({ _id: user._id }, tokenSecret, { expiresIn: '1h' })
-      return res.status(200).json({ message: 'Hoşgeldiniz', token })
+      const token = jwtLib.sign(
+        {
+          _id: user._id,
+          role: user.role
+        },
+        tokenSecret,
+        { expiresIn: '1h' }
+      )
+
+      return res.status(200).json({
+        message: 'Hoşgeldiniz',
+        token,
+        role: user.role
+      })
     } catch (error) {
       return sendInternalServerError(res, '/login', error)
     }
@@ -112,8 +247,8 @@ function createRegisterHandler({ userModel = User, bcryptLib = bcrypt } = {}) {
       }
 
       const normalizedEmail = normalizeEmail(email)
-
       const existingUser = await userModel.findOne({ email: normalizedEmail })
+
       if (existingUser) {
         return res.status(400).json({ message: 'Bu e-posta zaten kayıtlı' })
       }

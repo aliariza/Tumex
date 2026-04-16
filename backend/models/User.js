@@ -25,7 +25,12 @@ const userSchema = new mongoose.Schema(
     },
     companyname: { type: String, trim: true },
     telephone: { type: String, trim: true },
-    address: { type: String, trim: true }
+    address: { type: String, trim: true },
+    role: {
+      type: String,
+      enum: ['user', 'dealer', 'admin'],
+      default: 'user'
+    }
   },
   { timestamps: true }
 )
