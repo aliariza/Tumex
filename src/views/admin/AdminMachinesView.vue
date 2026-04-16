@@ -156,6 +156,11 @@ export default {
 
       try {
         await api.delete(`/admin/machines/${id}`)
+
+        if (this.editingId === id) {
+          this.resetForm()
+        }
+        
         await this.fetchMachines()
       } catch (error) {
         this.error = error.response?.data?.message || 'Makine silinemedi'
