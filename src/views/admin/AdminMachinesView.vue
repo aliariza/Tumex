@@ -5,6 +5,13 @@
       :message="toast.message"
       :type="toast.type"
     />
+    <ConfirmDialog
+      :show="confirmDialog.show"
+      title="Makineyi Sil"
+      message="Bu makineyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+      @confirm="confirmDelete"
+      @cancel="closeDeleteDialog"
+    />
     <header class="page-header">
       <div>
         <h1>Makine Yönetimi</h1>
@@ -78,6 +85,7 @@
 import AdminMachinesTable from '../../components/admin/AdminMachinesTable.vue'
 import AdminMachineForm from '../../components/admin/AdminMachineForm.vue'
 import AppToast from '../../components/ui/AppToast.vue'
+import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
 import {
   getAdminMachines,
   createAdminMachine,
@@ -90,7 +98,8 @@ export default {
   components: {
     AdminMachinesTable,
     AdminMachineForm,
-    AppToast
+    AppToast,
+    ConfirmDialog
   },
   data() {
     return {
@@ -120,6 +129,10 @@ export default {
         message: '',
         type: 'success'
       },
+      confirmDialog: {
+        show: false,
+        machineId: null
+      }
     }
   },
   computed: {
@@ -230,9 +243,22 @@ export default {
       }
     },
 
-    async handleDelete(id) {
-      const confirmed = window.confirm('Bu makineyi silmek istediğinize emin misiniz?')
-      if (!confirmed) return
+    handleDelete(id) {
+      this.confirmDialog = {
+        show: true,
+        machineId: id
+      }
+    },
+    closeDeleteDialog() {
+      this.confirmDialog = {
+        show: false,
+        machineId: null
+      }
+    },
+
+    async confirmDelete() {
+      const id = this.confirmDialog.machineId
+      if (!id) return
 
       this.error = ''
 
@@ -244,14 +270,15 @@ export default {
         }
 
         this.showToast('Makine silindi.', 'success')
+        this.closeDeleteDialog()
         await this.fetchMachines()
       } catch (error) {
-          const message = error.response?.data?.message || 'Makine silinemedi'
-          this.error = message
-          this.showToast(message, 'error')
+        const message = error.response?.data?.message || 'Makine silinemedi'
+        this.error = message
+        this.showToast(message, 'error')
+        this.closeDeleteDialog()
       }
     },
-
     resetForm() {
       this.editingId = null
       this.error = ''
