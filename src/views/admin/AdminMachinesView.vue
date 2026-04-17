@@ -50,6 +50,12 @@
           <option value="laser-cutting">Lazer Kesim</option>
           <option value="laser-welding">Lazer Kaynak</option>
         </select>
+
+          <select v-model="selectedStatus" class="filter-select">
+            <option value="all">Tüm Durumlar</option>
+            <option value="published">Yayında</option>
+            <option value="passive">Pasif</option>
+          </select>
       </div>
       <p v-if="loading" class="info-text">Yükleniyor...</p>
       <p v-if="error" class="error">{{ error }}</p>
@@ -94,6 +100,7 @@ export default {
       editingId: null,
       searchTerm: '',
       selectedCategory: 'all',
+      selectedStatus: 'all',
       sortKey: 'name',
       sortDirection: 'asc',
       toastTimeout: null,
@@ -121,6 +128,11 @@ export default {
           this.selectedCategory === 'all' ||
           machine.category === this.selectedCategory
 
+        const matchesStatus =
+          this.selectedStatus === 'all' ||
+          (this.selectedStatus === 'published' && machine.isPublished) ||
+          (this.selectedStatus === 'passive' && !machine.isPublished)
+
         const keyword = this.searchTerm.trim().toLowerCase()
         const matchesSearch =
           !keyword ||
@@ -128,7 +140,7 @@ export default {
           machine.brand?.toLowerCase().includes(keyword) ||
           machine.model?.toLowerCase().includes(keyword)
 
-        return matchesCategory && matchesSearch
+        return matchesCategory && matchesStatus && matchesSearch
       })
 
       const sorted = [...filtered].sort((a, b) => {
