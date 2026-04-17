@@ -31,6 +31,7 @@
         :form="form"
         :editing-id="editingId"
         :saving="saving"
+        :errors="formErrors"
         @update:form="form = $event"
         @submit="handleCreate"
         @cancel="resetForm"
@@ -122,7 +123,7 @@ export default {
         description: '',
         price: 0,
         image: '',
-        isPublished: true
+        isPublished: false
       },
       toast: {
         show: false,
@@ -132,7 +133,8 @@ export default {
       confirmDialog: {
         show: false,
         machineId: null
-      }
+      },
+      formErrors: {}
     }
   },
   computed: {
@@ -214,6 +216,13 @@ export default {
 
     async handleCreate() {
       this.error = ''
+      this.formErrors = {}
+
+      if (!this.validateForm()) {
+        this.showToast('Lütfen form hatalarını düzeltin.', 'error')
+        return
+      }
+
       this.saving = true
 
       try {
@@ -290,8 +299,9 @@ export default {
         description: '',
         price: 0,
         image: '',
-        isPublished: true
+        isPublished: false
       }
+      this.formErrors = {}
     },
     setSort(key) {
       if (this.sortKey === key) {
@@ -347,6 +357,40 @@ export default {
         this.showToast(message, 'error')
       }
     },
+
+    validateForm() {
+      const errors = {}
+
+      if (!this.form.name?.trim()) {
+        errors.name = 'Makine adı zorunludur.'
+      }
+
+      if (!this.form.brand?.trim()) {
+        errors.brand = 'Marka zorunludur.'
+      }
+
+      if (!this.form.category?.trim()) {
+        errors.category = 'Kategori zorunludur.'
+      }
+
+      if (!this.form.model?.trim()) {
+        errors.model = 'Model zorunludur.'
+      }
+
+      if (this.form.price < 0) {
+        errors.price = 'Fiyat 0 veya daha büyük olmalıdır.'
+      }
+
+      if (this.form.image?.trim()) {
+        const looksLikeUrl = /^(https?:\/\/|\/).+/i.test(this.form.image.trim())
+        if (!looksLikeUrl) {
+          errors.image = 'Görsel URL geçerli görünmüyor.'
+        }
+      }
+
+      this.formErrors = errors
+      return Object.keys(errors).length === 0
+    }
   }
 }
 </script>

@@ -40,7 +40,7 @@ const machineSchema = new mongoose.Schema(
     },
     isPublished: {
       type: Boolean,
-      default: true
+      default: false
     }
   },
   { timestamps: true }

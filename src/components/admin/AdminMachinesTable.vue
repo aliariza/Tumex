@@ -52,22 +52,24 @@
               {{ machine.isPublished ? 'Yayında' : 'Pasif' }}
             </span>
           </td>
-          <td class="actions">
-            <button class="secondary-btn" type="button" @click="$emit('edit', machine)">
-              <Pencil class="btn-icon" :size="16" />
-            </button>
+          <td>
+            <div class="actions">
+              <button class="secondary-btn" type="button" @click="$emit('edit', machine)">
+                <Pencil class="btn-icon" :size="16" />
+              </button>
 
-            <button
-              class="status-btn"
-              type="button"
-              @click="$emit('toggle-publish', machine)"
-            >
-              {{ machine.isPublished ? 'Pasife Al' : 'Yayına Al' }}
-            </button>
+              <button
+                class="status-btn"
+                type="button"
+                @click="$emit('toggle-publish', machine)"
+              >
+                {{ machine.isPublished ? 'Pasife Al' : 'Yayına Al' }}
+              </button>
 
-            <button class="danger-btn" type="button" @click="$emit('delete', machine._id)">
-              <Trash2 class="btn-icon" :size="16" />
-            </button>
+              <button class="danger-btn" type="button" @click="$emit('delete', machine._id)">
+                <Trash2 class="btn-icon" :size="16" />
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>

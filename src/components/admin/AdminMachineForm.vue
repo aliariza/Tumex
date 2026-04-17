@@ -1,34 +1,51 @@
 <template>
-  <form class="machine-form" @submit.prevent="$emit('submit')">
+  <form class="machine-form" novalidate @submit.prevent="$emit('submit')">
     <div class="field-grid">
-      <input :value="form.name" @input="updateField('name', $event.target.value)" type="text" placeholder="Makine adı" required />
-      <input :value="form.brand" @input="updateField('brand', $event.target.value)" type="text" placeholder="Marka" required />
+      <div class="field-group">
+        <input :value="form.name" @input="updateField('name', $event.target.value)" type="text" placeholder="Makine adı"  />
+        <p v-if="errors.name" class="field-error">{{ errors.name }}</p>
+      </div>
 
-      <select :value="form.category" @change="updateField('category', $event.target.value)" required>
-        <option value="abkant">Abkant</option>
-        <option value="laser-cutting">Lazer Kesim</option>
-        <option value="laser-welding">Lazer Kaynak</option>
-      </select>
+      <div class="field-group">
+        <input :value="form.brand" @input="updateField('brand', $event.target.value)" type="text" placeholder="Marka"  />
+        <p v-if="errors.brand" class="field-error">{{ errors.brand }}</p>
+      </div>
 
-      <input :value="form.model" @input="updateField('model', $event.target.value)" type="text" placeholder="Model" required />
-      <input :value="form.description" @input="updateField('description', $event.target.value)" type="text" placeholder="Açıklama" />
-      <input :value="form.price" @input="updateField('price', $event.target.value === '' ? 0 : Number($event.target.value))" type="number" min="0" placeholder="Fiyat" />
-      <input 
-        class="full-width" 
-        :value="form.image" 
-        @input="updateField('image', $event.target.value)" 
-        type="text" 
-        placeholder="Görsel URL" 
-      />
-      <div v-if="form.image" class="image-preview">
-        <img :src="form.image" alt="Önizleme" class="preview-image" />
+      <div class="field-group">
+        <select :value="form.category" @change="updateField('category', $event.target.value)" >
+          <option value="abkant">Abkant</option>
+          <option value="laser-cutting">Lazer Kesim</option>
+          <option value="laser-welding">Lazer Kaynak</option>
+        </select>
+        <p v-if="errors.category" class="field-error">{{ errors.category }}</p>
+      </div>
+
+      <div class="field-group">
+        <input :value="form.model" @input="updateField('model', $event.target.value)" type="text" placeholder="Model"  />
+        <p v-if="errors.model" class="field-error">{{ errors.model }}</p>
+      </div>
+
+      <div class="field-group">
+        <input :value="form.description" @input="updateField('description', $event.target.value)" type="text" placeholder="Açıklama" />
+      </div>
+
+      <div class="field-group">
+        <input :value="form.price" @input="updateField('price', $event.target.value === '' ? 0 : Number($event.target.value))" type="number" min="0" placeholder="Fiyat" />
+        <p v-if="errors.price" class="field-error">{{ errors.price }}</p>
+      </div>
+
+      <div class="field-group full-width">
+        <input :value="form.image" @input="updateField('image', $event.target.value)" type="text" placeholder="Görsel URL" />
+        <p v-if="errors.image" class="field-error">{{ errors.image }}</p>
       </div>
     </div>
-
-    <label class="checkbox-row">
-      <input :checked="form.isPublished" @change="updateField('isPublished', $event.target.checked)" type="checkbox" />
-      <span>Yayında mı?</span>
-    </label>
+    <div v-if="form.image" class="image-preview">
+      <img
+        :src="form.image"
+        alt="Önizleme"
+        class="preview-image"
+      />
+    </div>
 
     <div class="form-actions">
       <button class="primary-btn" type="submit" :disabled="saving">
@@ -56,6 +73,10 @@ export default {
     saving: {
       type: Boolean,
       default: false
+    },
+    errors: {
+      type: Object,
+      default: () => ({})
     }
   },
   emits: ['update:form', 'submit', 'cancel'],
@@ -95,13 +116,6 @@ select {
   font-size: 14px;
   background: #fff;
   box-sizing: border-box;
-}
-
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
 }
 
 .form-actions {
@@ -147,6 +161,17 @@ select {
   max-width: 180px;
   max-height: 180px;
   object-fit: contain;
+}
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-error {
+  margin: 0;
+  font-size: 12px;
+  color: #b91c1c;
 }
 
 @media (max-width: 700px) {
