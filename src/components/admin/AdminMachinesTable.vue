@@ -220,12 +220,7 @@ export default {
   background: #dbeafe;
   color: #1d4ed8;
 }
-.icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 36px;
-}
+
 .empty-state {
   color: #6b7280;
   padding: 20px 0;
