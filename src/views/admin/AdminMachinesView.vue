@@ -1,85 +1,102 @@
 <template>
-  <div class="admin-machines">
-    <h1>Makine Yönetimi</h1>
-    <p>Makine ekleme, listeleme ve silme işlemleri</p>
-    <p v-if="editingId"><strong>Düzenleme modundasınız</strong></p>
-
-    <form class="machine-form" @submit.prevent="handleCreate">
-      <input v-model="form.name" type="text" placeholder="Makine adı" required />
-      <input v-model="form.brand" type="text" placeholder="Marka" required />
-
-      <select v-model="form.category" required>
-        <option value="abkant">Abkant</option>
-        <option value="laser-cutting">Lazer Kesim</option>
-        <option value="laser-welding">Lazer Kaynak</option>
-      </select>
-
-      <input v-model="form.model" type="text" placeholder="Model" required />
-      <input v-model="form.description" type="text" placeholder="Açıklama" />
-      <input v-model.number="form.price" type="number" min="0" placeholder="Fiyat" />
-      <input v-model="form.image" type="text" placeholder="Görsel URL" />
-
-      <label>
-        Yayında mı?
-        <input v-model="form.isPublished" type="checkbox" />
-      </label>
-
-      <div class="form-actions">
-        <button type="submit">
-          {{ editingId ? 'Güncelle' : 'Makine Ekle' }}
-        </button>
-        <button v-if="editingId" type="button" @click="resetForm">
-          İptal
-        </button>
+  <div class="admin-machines-page">
+    <AppToast
+      :show="toast.show"
+      :message="toast.message"
+      :type="toast.type"
+    />
+    <header class="page-header">
+      <div>
+        <h1>Makine Yönetimi</h1>
+        <p>Makine ekleme, güncelleme ve silme işlemleri</p>
       </div>
-    </form>
+      <div v-if="editingId" class="editing-badge">
+        Düzenleme Modu
+      </div>
+    </header>
 
-    <p v-if="loading">Yükleniyor...</p>
-    <p v-if="error" class="error">{{ error }}</p>
+    <section class="card">
+      <h2 class="section-title">
+        {{ editingId ? 'Makine Düzenle' : 'Yeni Makine Ekle' }}
+      </h2>
 
-    <table v-if="machines.length" class="machines-table">
-      <thead>
-        <tr>
-          <th>Ad</th>
-          <th>Marka</th>
-          <th>Kategori</th>
-          <th>Model</th>
-          <th>Fiyat</th>
-          <th>Yayında</th>
-          <th>İşlem</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="machine in machines" :key="machine._id">
-          <td>{{ machine.name }}</td>
-          <td>{{ machine.brand }}</td>
-          <td>{{ machine.category }}</td>
-          <td>{{ machine.model }}</td>
-          <td>{{ machine.price }}</td>
-          <td>{{ machine.isPublished ? 'Evet' : 'Hayır' }}</td>
-          <td>
-            <button type="button" @click="handleDelete(machine._id)">Sil</button>
-            <button type="button" @click="startEdit(machine)">Düzenle</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <AdminMachineForm
+        :form="form"
+        :editing-id="editingId"
+        :saving="saving"
+        @update:form="form = $event"
+        @submit="handleCreate"
+        @cancel="resetForm"
+      />
+    </section>
 
-    <p v-else-if="!loading">Henüz makine kaydı yok.</p>
+    <section class="card">
+      <div class="section-header">
+        <h2 class="section-title">Makine Listesi</h2>
+        <span class="count-badge">{{ filteredMachines.length }}</span>
+      </div>
+
+      <div class="toolbar">
+        <input
+          v-model="searchTerm"
+          class="search-input"
+          type="text"
+          placeholder="Makine ara..."
+        />
+
+        <select v-model="selectedCategory" class="filter-select">
+          <option value="all">Tüm Kategoriler</option>
+          <option value="abkant">Abkant</option>
+          <option value="laser-cutting">Lazer Kesim</option>
+          <option value="laser-welding">Lazer Kaynak</option>
+        </select>
+      </div>
+      <p v-if="loading" class="info-text">Yükleniyor...</p>
+      <p v-if="error" class="error">{{ error }}</p>
+
+      <AdminMachinesTable
+        v-if="!loading"
+        :machines="filteredMachines"
+        :sort-key="sortKey"
+        :sort-direction="sortDirection"
+        @edit="startEdit"
+        @delete="handleDelete"
+        @sort="setSort"
+      />
+    </section>
   </div>
 </template>
 
 <script>
-import api from '../../lib/api'
+import AdminMachinesTable from '../../components/admin/AdminMachinesTable.vue'
+import AdminMachineForm from '../../components/admin/AdminMachineForm.vue'
+import AppToast from '../../components/ui/AppToast.vue'
+import {
+  getAdminMachines,
+  createAdminMachine,
+  updateAdminMachine,
+  deleteAdminMachine
+} from '../../services/adminMachineService'
 
 export default {
   name: 'AdminMachinesView',
+  components: {
+    AdminMachinesTable,
+    AdminMachineForm,
+    AppToast
+  },
   data() {
     return {
       machines: [],
       loading: false,
+      saving: false,
       error: '',
       editingId: null,
+      searchTerm: '',
+      selectedCategory: 'all',
+      sortKey: 'name',
+      sortDirection: 'asc',
+      toastTimeout: null,
       form: {
         name: '',
         brand: '',
@@ -89,11 +106,55 @@ export default {
         price: 0,
         image: '',
         isPublished: true
-      }
+      },
+      toast: {
+        show: false,
+        message: '',
+        type: 'success'
+      },
+    }
+  },
+  computed: {
+    filteredMachines() {
+      const filtered = this.machines.filter((machine) => {
+        const matchesCategory =
+          this.selectedCategory === 'all' ||
+          machine.category === this.selectedCategory
+
+        const keyword = this.searchTerm.trim().toLowerCase()
+        const matchesSearch =
+          !keyword ||
+          machine.name?.toLowerCase().includes(keyword) ||
+          machine.brand?.toLowerCase().includes(keyword) ||
+          machine.model?.toLowerCase().includes(keyword)
+
+        return matchesCategory && matchesSearch
+      })
+
+      const sorted = [...filtered].sort((a, b) => {
+        const aValue = a[this.sortKey]
+        const bValue = b[this.sortKey]
+
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return this.sortDirection === 'asc' ? aValue - bValue : bValue - aValue
+        }
+
+        const aText = String(aValue || '').toLowerCase()
+        const bText = String(bValue || '').toLowerCase()
+
+        if (aText < bText) return this.sortDirection === 'asc' ? -1 : 1
+        if (aText > bText) return this.sortDirection === 'asc' ? 1 : -1
+        return 0
+      })
+
+      return sorted
     }
   },
   async mounted() {
     await this.fetchMachines()
+  },
+  beforeUnmount() {
+    clearTimeout(this.toastTimeout)
   },
   methods: {
     async fetchMachines() {
@@ -101,7 +162,7 @@ export default {
       this.error = ''
 
       try {
-        const { data } = await api.get('/admin/machines')
+        const { data } = await getAdminMachines()
         this.machines = data
       } catch (error) {
         this.error = error.response?.data?.message || 'Makine listesi alınamadı'
@@ -111,6 +172,7 @@ export default {
     },
 
     startEdit(machine) {
+      this.error = ''
       this.editingId = machine._id
       this.form = {
         name: machine.name || '',
@@ -126,6 +188,7 @@ export default {
 
     async handleCreate() {
       this.error = ''
+      this.saving = true
 
       try {
         const payload = {
@@ -134,17 +197,23 @@ export default {
         }
 
         if (this.editingId) {
-          await api.put(`/admin/machines/${this.editingId}`, payload)
+          await updateAdminMachine(this.editingId, payload)
+          this.showToast('Makine başarıyla güncellendi.', 'success')
         } else {
-          await api.post('/admin/machines', payload)
+          await createAdminMachine(payload)
+          this.showToast('Makine başarıyla eklendi.', 'success')
         }
 
         this.resetForm()
         await this.fetchMachines()
       } catch (error) {
-        this.error = error.response?.data?.message || (
+        const message = error.response?.data?.message || (
           this.editingId ? 'Makine güncellenemedi' : 'Makine oluşturulamadı'
         )
+        this.error = message
+        this.showToast(message, 'error')
+      } finally {
+        this.saving = false
       }
     },
 
@@ -155,20 +224,24 @@ export default {
       this.error = ''
 
       try {
-        await api.delete(`/admin/machines/${id}`)
+        await deleteAdminMachine(id)
 
         if (this.editingId === id) {
           this.resetForm()
         }
-        
+
+        this.showToast('Makine silindi.', 'success')
         await this.fetchMachines()
       } catch (error) {
-        this.error = error.response?.data?.message || 'Makine silinemedi'
+          const message = error.response?.data?.message || 'Makine silinemedi'
+          this.error = message
+          this.showToast(message, 'error')
       }
     },
 
     resetForm() {
       this.editingId = null
+      this.error = ''
       this.form = {
         name: '',
         brand: '',
@@ -180,41 +253,136 @@ export default {
         isPublished: true
       }
     },
+    setSort(key) {
+      if (this.sortKey === key) {
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'
+      } else {
+        this.sortKey = key
+        this.sortDirection = 'asc'
+      }
+    },
+    showToast(message, type = 'success') {
+      this.toast = {
+        show: true,
+        message,
+        type
+      }
+
+      clearTimeout(this.toastTimeout)
+      this.toastTimeout = setTimeout(() => {
+        this.toast.show = false
+      }, 2500)
+    }
   }
 }
 </script>
 
 <style scoped>
-.admin-machines {
-  max-width: 1100px;
+.admin-machines-page {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
-}
-
-.machine-form {
+  padding: 28px 20px 40px;
   display: grid;
+  gap: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.page-header p {
+  margin: 6px 0 0;
+  color: #6b7280;
+}
+
+.editing-badge {
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0px;
+  padding: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 
-.machines-table {
-  width: 100%;
-  border-collapse: collapse;
+.section-title {
+  margin: 0 0 16px;
+  font-size: 20px;
 }
 
-.machines-table th,
-.machines-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
+.count-badge {
+  min-width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #111827;
+  color: white;
+  display: inline-grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.info-text {
+  color: #6b7280;
 }
 
 .error {
-  color: #c00;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 0px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
 }
 
-.form-actions {
+.toolbar {
   display: flex;
   gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.search-input,
+.filter-select {
+  padding: 12px 14px;
+  border: 1px solid #d8dbe2;
+  border-radius: 0px;
+  font-size: 14px;
+  background: white;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.filter-select {
+  min-width: 180px;
+}
+
+@media (max-width: 700px) {
+  .page-header {
+    flex-direction: column;
+  }
 }
 </style>
