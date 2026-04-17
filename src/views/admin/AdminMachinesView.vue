@@ -68,6 +68,7 @@
         @edit="startEdit"
         @delete="handleDelete"
         @sort="setSort"
+        @toggle-publish="togglePublish"
       />
     </section>
   </div>
@@ -284,7 +285,41 @@ export default {
       this.toastTimeout = setTimeout(() => {
         this.toast.show = false
       }, 2500)
-    }
+    },
+    async togglePublish(machine) {
+      this.error = ''
+
+      try {
+        const payload = {
+          name: machine.name || '',
+          brand: machine.brand || '',
+          category: machine.category || 'abkant',
+          model: machine.model || '',
+          description: machine.description || '',
+          price: machine.price || 0,
+          image: machine.image || '',
+          isPublished: !machine.isPublished,
+          specs: machine.specs || {}
+        }
+
+        await updateAdminMachine(machine._id, payload)
+
+        this.showToast(
+          payload.isPublished ? 'Makine yayına alındı.' : 'Makine pasife alındı.',
+          'success'
+        )
+
+        if (this.editingId === machine._id) {
+          this.form.isPublished = payload.isPublished
+        }
+
+        await this.fetchMachines()
+      } catch (error) {
+        const message = error.response?.data?.message || 'Makine durumu güncellenemedi'
+        this.error = message
+        this.showToast(message, 'error')
+      }
+    },
   }
 }
 </script>

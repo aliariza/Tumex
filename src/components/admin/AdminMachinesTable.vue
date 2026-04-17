@@ -56,6 +56,15 @@
             <button class="secondary-btn" type="button" @click="$emit('edit', machine)">
               <Pencil class="btn-icon" :size="16" />
             </button>
+
+            <button
+              class="status-btn"
+              type="button"
+              @click="$emit('toggle-publish', machine)"
+            >
+              {{ machine.isPublished ? 'Pasife Al' : 'Yayına Al' }}
+            </button>
+
             <button class="danger-btn" type="button" @click="$emit('delete', machine._id)">
               <Trash2 class="btn-icon" :size="16" />
             </button>
@@ -91,7 +100,7 @@ export default {
       default: 'asc'
     }
   },
-  emits: ['edit', 'delete', 'sort'],
+  emits: ['edit', 'delete', 'sort', 'toggle-publish'],
   computed: {
     sortArrow() {
       return this.sortDirection === 'asc' ? '↑' : '↓'
@@ -202,7 +211,21 @@ export default {
   background: #fee2e2;
   color: #991b1b;
 }
-
+.status-btn {
+  border: none;
+  border-radius: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+}
 .empty-state {
   color: #6b7280;
   padding: 20px 0;
