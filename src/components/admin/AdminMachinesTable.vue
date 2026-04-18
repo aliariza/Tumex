@@ -5,8 +5,8 @@
         <tr>
           <th>Görsel</th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', 'name')">
-              Ad {{ sortKey === 'name' ? sortArrow : '' }}
+            <button class="sort-btn" type="button" @click="$emit('sort', 'title')">
+              Başlık {{ sortKey === 'title' ? sortArrow : '' }}
             </button>
           </th>
           <th>
@@ -14,10 +14,29 @@
               Marka {{ sortKey === 'brand' ? sortArrow : '' }}
             </button>
           </th>
-          <th>Kategori</th>
+          <th>
+            <button class="sort-btn" type="button" @click="$emit('sort', 'family')">
+              Aile {{ sortKey === 'family' ? sortArrow : '' }}
+            </button>
+          </th>
+          <th>
+            <button class="sort-btn" type="button" @click="$emit('sort', 'series')">
+              Seri {{ sortKey === 'series' ? sortArrow : '' }}
+            </button>
+          </th>
           <th>
             <button class="sort-btn" type="button" @click="$emit('sort', 'model')">
               Model {{ sortKey === 'model' ? sortArrow : '' }}
+            </button>
+          </th>
+          <th>
+            <button class="sort-btn" type="button" @click="$emit('sort', 'pressForceTon')">
+              Tonaj {{ sortKey === 'pressForceTon' ? sortArrow : '' }}
+            </button>
+          </th>
+          <th>
+            <button class="sort-btn" type="button" @click="$emit('sort', 'bendingLengthMm')">
+              Bükme Uzunluğu {{ sortKey === 'bendingLengthMm' ? sortArrow : '' }}
             </button>
           </th>
           <th>
@@ -29,29 +48,34 @@
           <th>İşlem</th>
         </tr>
       </thead>
+
       <tbody>
         <tr v-for="machine in machines" :key="machine._id">
           <td>
             <img
               v-if="machine.image"
               :src="machine.image"
-              :alt="machine.name"
+              :alt="machine.title || machine.model"
               class="thumb"
             />
             <span v-else class="no-image">Yok</span>
           </td>
-          <td>{{ machine.name }}</td>
-          <td>{{ machine.brand }}</td>
-          <td>
-            <span class="category-badge">{{ machine.category }}</span>
-          </td>
-          <td>{{ machine.model }}</td>
+
+          <td>{{ machine.title || '-' }}</td>
+          <td>{{ machine.brand || '-' }}</td>
+          <td>{{ machine.family || '-' }}</td>
+          <td>{{ machine.series || '-' }}</td>
+          <td>{{ machine.model || '-' }}</td>
+          <td>{{ machine.pressForceTon ?? '-' }}</td>
+          <td>{{ machine.bendingLengthMm ?? '-' }}</td>
           <td>{{ formatPrice(machine.price) }}</td>
+
           <td>
             <span :class="['status-badge', machine.isPublished ? 'published' : 'draft']">
               {{ machine.isPublished ? 'Yayında' : 'Pasif' }}
             </span>
           </td>
+
           <td>
             <div class="actions">
               <button class="secondary-btn" type="button" @click="$emit('edit', machine)">
@@ -95,7 +119,7 @@ export default {
     },
     sortKey: {
       type: String,
-      default: 'name'
+      default: 'title'
     },
     sortDirection: {
       type: String,
@@ -115,6 +139,7 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 .table-wrapper {
   overflow-x: auto;
@@ -131,6 +156,7 @@ export default {
   padding: 14px 12px;
   text-align: left;
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 .machines-table th {
@@ -152,7 +178,7 @@ export default {
   width: 56px;
   height: 56px;
   object-fit: cover;
-  border-radius: 0px;
+  border-radius: 0;
   border: 1px solid #e5e7eb;
 }
 
@@ -161,17 +187,11 @@ export default {
   font-size: 12px;
 }
 
-.category-badge,
 .status-badge {
   display: inline-block;
   border-radius: 999px;
   padding: 6px 10px;
   font-size: 12px;
-}
-
-.category-badge {
-  background: #eef2ff;
-  color: #3730a3;
 }
 
 .status-badge.published {
@@ -201,9 +221,11 @@ export default {
   font-size: 13px;
   cursor: pointer;
 }
+
 .btn-icon {
   flex-shrink: 0;
 }
+
 .secondary-btn {
   background: #e5e7eb;
   color: #111827;
@@ -213,6 +235,7 @@ export default {
   background: #fee2e2;
   color: #991b1b;
 }
+
 .status-btn {
   border: none;
   border-radius: 0;

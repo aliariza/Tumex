@@ -32,7 +32,8 @@
         :editing-id="editingId"
         :saving="saving"
         :errors="formErrors"
-        @update:form="form = $event"
+        @update:form="handleFormUpdate"
+        @clear-error="clearFieldError"
         @submit="handleCreate"
         @cancel="resetForm"
       />
@@ -112,17 +113,23 @@ export default {
       searchTerm: '',
       selectedCategory: 'all',
       selectedStatus: 'all',
-      sortKey: 'name',
+      sortKey: 'title',
       sortDirection: 'asc',
       toastTimeout: null,
       form: {
-        name: '',
-        brand: '',
         category: 'abkant',
+        brand: '',
+        family: '',
+        series: '',
         model: '',
+        title: '',
         description: '',
         price: 0,
+        pressForceTon: null,
+        bendingLengthMm: null,
         image: '',
+        gallery: [],
+        specs: [],
         isPublished: false
       },
       toast: {
@@ -152,11 +159,14 @@ export default {
         const keyword = this.searchTerm.trim().toLowerCase()
         const matchesSearch =
           !keyword ||
-          machine.name?.toLowerCase().includes(keyword) ||
-          machine.brand?.toLowerCase().includes(keyword) ||
-          machine.model?.toLowerCase().includes(keyword)
-
-        return matchesCategory && matchesStatus && matchesSearch
+            machine.title?.toLowerCase().includes(keyword) ||
+            machine.brand?.toLowerCase().includes(keyword) ||
+            machine.family?.toLowerCase().includes(keyword) ||
+            machine.series?.toLowerCase().includes(keyword) ||
+            machine.model?.toLowerCase().includes(keyword) ||
+            machine.category?.toLowerCase().includes(keyword) ||
+            machine.description?.toLowerCase().includes(keyword) 
+         return matchesCategory && matchesStatus && matchesSearch
       })
 
       const sorted = [...filtered].sort((a, b) => {
@@ -201,15 +211,22 @@ export default {
 
     startEdit(machine) {
       this.error = ''
+      this.formErrors = {}
       this.editingId = machine._id
       this.form = {
-        name: machine.name || '',
-        brand: machine.brand || '',
         category: machine.category || 'abkant',
+        brand: machine.brand || '',
+        family: machine.family || '',
+        series: machine.series || '',
         model: machine.model || '',
+        title: machine.title || '',
         description: machine.description || '',
         price: machine.price || 0,
+        pressForceTon: machine.pressForceTon ?? null,
+        bendingLengthMm: machine.bendingLengthMm ?? null,
         image: machine.image || '',
+        gallery: Array.isArray(machine.gallery) ? machine.gallery : [],
+        specs: Array.isArray(machine.specs) ? machine.specs : [],
         isPublished: Boolean(machine.isPublished)
       }
     },
@@ -226,9 +243,20 @@ export default {
       this.saving = true
 
       try {
+
+        const cleanedSpecs = (Array.isArray(this.form.specs) ? this.form.specs : [])
+          .map((spec, index) => ({
+            key: spec?.key?.trim() || '',
+            label: spec?.label?.trim() || '',
+            value: spec?.value?.trim() || '',
+            order: index + 1
+          }))
+          .filter((spec) => spec.key || spec.label || spec.value)
+          
         const payload = {
           ...this.form,
-          specs: {}
+          specs: cleanedSpecs,
+          gallery: Array.isArray(this.form.gallery) ? this.form.gallery : []
         }
 
         if (this.editingId) {
@@ -291,18 +319,25 @@ export default {
     resetForm() {
       this.editingId = null
       this.error = ''
-      this.form = {
-        name: '',
-        brand: '',
-        category: 'abkant',
-        model: '',
-        description: '',
-        price: 0,
-        image: '',
-        isPublished: false
-      }
       this.formErrors = {}
+      this.form = {
+      category: 'abkant',
+      brand: '',
+      family: '',
+      series: '',
+      model: '',
+      title: '',
+      description: '',
+      price: 0,
+      pressForceTon: null,
+      bendingLengthMm: null,
+      image: '',
+      gallery: [],
+      specs: [],
+      isPublished: false
+      }
     },
+
     setSort(key) {
       if (this.sortKey === key) {
         this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'
@@ -328,15 +363,20 @@ export default {
 
       try {
         const payload = {
-          name: machine.name || '',
-          brand: machine.brand || '',
           category: machine.category || 'abkant',
+          brand: machine.brand || '',
+          family: machine.family || '',
+          series: machine.series || '',
           model: machine.model || '',
+          title: machine.title || '',
           description: machine.description || '',
           price: machine.price || 0,
+          pressForceTon: machine.pressForceTon ?? null,
+          bendingLengthMm: machine.bendingLengthMm ?? null,
           image: machine.image || '',
-          isPublished: !machine.isPublished,
-          specs: machine.specs || {}
+          gallery: Array.isArray(machine.gallery) ? machine.gallery : [],
+          specs: Array.isArray(machine.specs) ? machine.specs : [],
+          isPublished: !machine.isPublished
         }
 
         await updateAdminMachine(machine._id, payload)
@@ -361,24 +401,40 @@ export default {
     validateForm() {
       const errors = {}
 
-      if (!this.form.name?.trim()) {
-        errors.name = 'Makine adı zorunludur.'
+      if (!this.form.category?.trim()) {
+        errors.category = 'Kategori zorunludur.'
       }
 
       if (!this.form.brand?.trim()) {
         errors.brand = 'Marka zorunludur.'
       }
 
-      if (!this.form.category?.trim()) {
-        errors.category = 'Kategori zorunludur.'
+      if (!this.form.family?.trim()) {
+        errors.family = 'Aile / Family zorunludur.'
+      }
+
+      if (!this.form.series?.trim()) {
+        errors.series = 'Seri zorunludur.'
       }
 
       if (!this.form.model?.trim()) {
         errors.model = 'Model zorunludur.'
       }
 
+      if (!this.form.title?.trim()) {
+        errors.title = 'Başlık zorunludur.'
+      }
+
       if (this.form.price < 0) {
         errors.price = 'Fiyat 0 veya daha büyük olmalıdır.'
+      }
+
+      if (this.form.pressForceTon != null && this.form.pressForceTon < 0) {
+        errors.pressForceTon = 'Tonaj 0 veya daha büyük olmalıdır.'
+      }
+
+      if (this.form.bendingLengthMm != null && this.form.bendingLengthMm < 0) {
+        errors.bendingLengthMm = 'Bükme uzunluğu 0 veya daha büyük olmalıdır.'
       }
 
       if (this.form.image?.trim()) {
@@ -388,9 +444,70 @@ export default {
         }
       }
 
+      if (Array.isArray(this.form.specs)) {
+        this.form.specs.forEach((spec, index) => {
+          const hasAnyValue =
+            spec?.label?.trim() ||
+            spec?.key?.trim() ||
+            spec?.value?.trim()
+
+          if (!hasAnyValue) return
+
+          if (!spec?.label?.trim()) {
+            errors[`specs.${index}.label`] = `Özellik ${index + 1} için etiket zorunludur.`
+          }
+
+          if (!spec?.key?.trim()) {
+            errors[`specs.${index}.key`] = `Özellik ${index + 1} için key zorunludur.`
+          }
+        })
+      }
+
       this.formErrors = errors
       return Object.keys(errors).length === 0
-    }
+    },
+    clearFieldError(field) {
+      if (!this.formErrors[field]) return
+
+      const nextErrors = { ...this.formErrors }
+      delete nextErrors[field]
+      this.formErrors = nextErrors
+    },
+    buildMachineTitle() {
+      const parts = []
+
+      if (this.form.family?.trim()) {
+        parts.push(this.form.family.trim())
+      }
+
+      if (this.form.pressForceTon != null && this.form.pressForceTon !== '') {
+        parts.push(`${this.form.pressForceTon} Ton`)
+      }
+
+      if (this.form.bendingLengthMm != null && this.form.bendingLengthMm !== '') {
+        parts.push(`${this.form.bendingLengthMm} mm`)
+      }
+
+      return parts.join(' ').trim()
+    },
+    syncAutoTitle() {
+      this.form = {
+        ...this.form,
+        title: this.buildMachineTitle()
+      }
+    },
+    handleFormUpdate(nextForm) {
+      const watchedFieldsChanged =
+        nextForm.family !== this.form.family ||
+        nextForm.pressForceTon !== this.form.pressForceTon ||
+        nextForm.bendingLengthMm !== this.form.bendingLengthMm
+
+      this.form = nextForm
+
+      if (watchedFieldsChanged) {
+        this.syncAutoTitle()
+      }
+    },
   }
 }
 </script>
