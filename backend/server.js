@@ -36,15 +36,33 @@ function createRegisterPayload(body, hashedPassword) {
 
 function buildMachinePayload(body = {}) {
   return {
-    name: trimValue(body.name || ''),
-    brand: trimValue(body.brand || ''),
     category: trimValue(body.category || ''),
+    brand: trimValue(body.brand || ''),
+    family: trimValue(body.family || ''),
+    series: trimValue(body.series || ''),
     model: trimValue(body.model || ''),
+    title: trimValue(body.title || ''),
     description: trimValue(body.description || ''),
     price: Number(body.price || 0),
+    pressForceTon: body.pressForceTon === '' || body.pressForceTon == null
+      ? null
+      : Number(body.pressForceTon),
+    bendingLengthMm: body.bendingLengthMm === '' || body.bendingLengthMm == null
+      ? null
+      : Number(body.bendingLengthMm),
     image: trimValue(body.image || ''),
-    specs: body.specs || {},
-    isPublished: typeof body.isPublished === 'boolean' ? body.isPublished : true
+    gallery: Array.isArray(body.gallery) ? body.gallery : [],
+    specs: Array.isArray(body.specs)
+      ? body.specs
+          .map((spec, index) => ({
+            key: trimValue(spec?.key || ''),
+            label: trimValue(spec?.label || ''),
+            value: trimValue(spec?.value || ''),
+            order: index + 1
+          }))
+          .filter((spec) => spec.key || spec.label || spec.value)
+      : [],
+      isPublished: typeof body.isPublished === 'boolean' ? body.isPublished : false
   }
 }
 
