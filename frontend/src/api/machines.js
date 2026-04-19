@@ -1,19 +1,16 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+import api from '@/lib/api'
 
 export async function fetchMachines(params = {}) {
-  const url = new URL(`${API_BASE_URL}/machines`)
+  const response = await api.get('/machines', { params })
+  return response.data
+}
 
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      url.searchParams.set(key, value)
-    }
-  })
+export async function fetchMachineById(id) {
+  const response = await api.get(`/machines/${id}`)
+  return response.data
+}
 
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch machines')
-  }
-
-  return response.json()
+export async function fetchMachineByModel(model) {
+  const response = await api.get(`/machines/model/${encodeURIComponent(model)}`)
+  return response.data
 }

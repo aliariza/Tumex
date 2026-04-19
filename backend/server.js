@@ -230,6 +230,10 @@ function createApp(options = {}) {
     }
   })
 
+  app.get('/health', (_req, res) => {
+    res.status(200).json({ ok: true })
+  })
+
   app.use((_req, res) => {
     res.status(404).json({ message: 'Sayfa bulunamadı' })
   })
@@ -331,7 +335,7 @@ async function startServer(options = {}) {
   }
 
   return app.listen(port, () => {
-    console.log(`Sunucu http://localhost:${port} adresinde çalışıyor`)
+    console.log(`Server running on port ${port}`)
   })
 }
 
