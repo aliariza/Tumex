@@ -74,7 +74,17 @@ const machineSchema = new mongoose.Schema(
       default: null,
       index: true
     },
-
+    powerKw: {
+      type: Number,
+      default: null,
+      index: true
+    },
+    workingAreaCode: {
+      type: String,
+      default: '',
+      trim: true,
+      index: true
+    },
     description: {
       type: String,
       default: ''
@@ -108,7 +118,7 @@ const machineSchema = new mongoose.Schema(
 )
 
 machineSchema.index(
-  { category: 1, family: 1, pressForceTon: 1, bendingLengthMm: 1 },
+  { category: 1, series: 1, model: 1 },
   { unique: true }
 )
 

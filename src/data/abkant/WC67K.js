@@ -1,43 +1,4 @@
 const WC67K = {
-  30: {
-    1600: [
-      { key: 'CNC kontrol Ekseni', control_axis: '2 Eksen' },
-      { key: 'Bükme kuvveti (ton)', press_force: '30' },
-      { key: 'Bükme uzunluğu  (A) (mm)', bending_length: '1600' },
-      { key: 'Kolonlar arası mesafe (B) (mm)', distance_between_columns: '1200' },
-      { key: 'Kiriş stroku (C) (mm)', stroke: '85' },
-      { key: 'İşlem boşluğu (D) (mm)', daylight: '280' },
-      { key: 'Boğaz derinliği (E) (mm)', throat: '200' },
-      { key: 'Tabla genişliği (mm)', table_width: '120' },
-      { key: 'Çalışma yüksekliği (mm)', working_height: '' },
-      { key: 'Destek plakası kalınlığı (mm)', support_plate_thickness: '' },
-      { key: 'Güç (kW)', power: '3' },
-      { key: 'Dengelemeler', balance: 'Mekanik Dengelemeler' },
-      { key: 'Maks. Hız (mm/sn)', max_speed: '0 ~200' },
-      { key: 'Çalışma hızı (mm/sn)', working_speed: '0 ~ 18' },
-      { key: 'Geri dönüş hızı (mm/sn)', returning_speed: '0 ~200' },
-      { key: 'X-ekseni maks. Hız (mm/sn)', x_axis_max_speed: '500' },
-      { key: 'X-ekseni maks. Mesafe (mm)', x_axis_max_length: '500' },
-      { key: 'R-ekseni maks. Hız (mm/sn)', r_axis_max_speed: '200' },
-      { key: 'R-ekseni maks. Mesafe (mm)', r_axis_max_length: '100' },
-      { key: 'Kontrol sistemi', control_system: 'E30' },
-      { key: 'Elektrik Aksamı', electrical_parts: 'Fransız Schneider' },
-      { key: 'Ana motor', main_motor: 'Alman Siemens' },
-      { key: 'Hidrolik sistem', Hydrolic_system: 'Alman Rexroth' },
-      { key: 'Ayak pedalı (Güvenlik seviye 4) ', foot_pedal: 'Fransız Schneider' },
-      { key: 'Yağ pompası', oil_pump: 'Amerikan First veya Sunny' },
-      { key: 'Yağ boru bağlantısı', oil_connections: 'Alman EMB' },
-      { key: 'Küresel vida', screw: 'Tayvan HIWIN' },
-      { key: 'Lineer kılavuz', linear_rails: 'Tayvan HIWIN' },
-      { key: 'Mekanik dengeleme', mechanical_balancing: 'Çin Durmark' },
-      { key: 'Yağ silindiri', oil_cilynder: 'Çin Heyan' },
-      { key: 'Pozisyon sensörü', position_sensor: 'İtalyan Givi' },
-      { key: 'Yükseklik (mm)', height: '1100' },
-      { key: 'Boy (mm)', length: '2000' },
-      { key: 'En (mm)', width: '1900' },
-      { key: 'Ağırlık (kg)', weight: '1400' }
-    ]
-  },
   40: {
     1600: [
       { key: 'CNC kontrol Ekseni', control_axis: '2 Eksen' },

@@ -173,12 +173,44 @@ function createApp(options = {}) {
     }
   })
 
-  app.get('/machines', async (_req, res) => {
+  app.get('/machines', async (req, res) => {
     try {
-      const machines = await Machine.find({ isPublished: true }).sort({ createdAt: -1 })
+      const { category, series, brand } = req.query
+
+      const filter = { isPublished: true }
+
+      if (category) filter.category = category
+      if (series) filter.series = series
+      if (brand) filter.brand = brand
+
+      const machines = await Machine.find(filter).sort({
+        pressForceTon: 1,
+        bendingLengthMm: 1,
+        title: 1
+      })
+
       return res.status(200).json(machines)
     } catch (error) {
+      console.error('[/machines GET]', error)
       return sendInternalServerError(res, '/machines GET', error)
+    }
+  })
+  
+  app.get('/machines/model/:model', async (req, res) => {
+    try {
+      const machine = await Machine.findOne({
+        model: req.params.model,
+        isPublished: true
+      })
+
+      if (!machine) {
+        return res.status(404).json({ message: 'Machine not found' })
+      }
+
+      return res.status(200).json(machine)
+    } catch (error) {
+      console.error('[/machines/model/:model GET]', error)
+      return sendInternalServerError(res, '/machines/model/:model GET', error)
     }
   })
   app.get('/machines/:id', async (req, res) => {

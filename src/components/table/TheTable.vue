@@ -20,7 +20,7 @@
           <td>{{ row.key }}</td>
           <td v-if="row.options">
             <dropdown-cell
-              :options="row.options"
+              :options="getOptionsForRow(row.key, row.options)"
               :selected="dropdowns[row.key]?.selected ?? 'SEÇİNİZ'"
               :open="dropdowns[row.key]?.open ?? false"
               @toggle="toggleDropdown(row.key)"
@@ -31,7 +31,7 @@
         </tr>
 
         <tr v-show="isStandart" v-for="detail in selectedDetails" :key="detail.key">
-          <td>{{ detail.key }}</td>
+          <td>{{ detail.label || detail.key }}</td>
           <td>{{ getDetailValue(detail) }}</td>
         </tr>
       </tbody>
@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ChevronDown from '../icons/ChevronDown.vue'
 import ChevronRight from '../icons/ChevronRight.vue'
@@ -79,7 +79,6 @@ const isStandart = ref(true)
 const isOption = ref(false)
 const DEFAULT_DROPDOWN_VALUE = 'SEÇİNİZ'
 
-// Unified dropdown state: { [rowKey]: { selected, open } }
 const dropdowns = ref({})
 
 function createDropdownState(tableData) {
@@ -96,7 +95,13 @@ function initDropdowns() {
   dropdowns.value = createDropdownState(props.tableData)
 }
 
-initDropdowns()
+watch(
+  () => props.tableData,
+  () => {
+    initDropdowns()
+  },
+  { immediate: true, deep: true }
+)
 
 function toggleDropdown(key) {
   for (const k of Object.keys(dropdowns.value)) {
@@ -109,14 +114,18 @@ function toggleDropdown(key) {
 }
 
 function selectOption(key, value) {
-  if (dropdowns.value[key]) {
-    dropdowns.value[key].selected = value
-    dropdowns.value[key].open = false
+  if (!dropdowns.value[key]) return
+
+  dropdowns.value[key].selected = value
+  dropdowns.value[key].open = false
+
+  if (key === primaryRowKey.value && secondaryRowKey.value && dropdowns.value[secondaryRowKey.value]) {
+    dropdowns.value[secondaryRowKey.value].selected = DEFAULT_DROPDOWN_VALUE
+    dropdowns.value[secondaryRowKey.value].open = false
   }
 }
 
 function outsideClickListener() {
-  // Close all dropdowns when clicking outside
   for (const k of Object.keys(dropdowns.value)) {
     dropdowns.value[k].open = false
   }
@@ -136,25 +145,44 @@ function getSelectedDropdownValues(state) {
 }
 
 function getSelectedModelDetails(modelData, selections) {
-  if (!modelData) return null
+  if (!modelData) return []
 
   const { primary, secondary } = selections
-  if (primary && primary !== DEFAULT_DROPDOWN_VALUE && modelData[primary]) {
-    if (secondary && secondary !== DEFAULT_DROPDOWN_VALUE && modelData[primary][secondary]) {
-      return modelData[primary][secondary]
-    }
 
-    if (!secondary || secondary === DEFAULT_DROPDOWN_VALUE) {
-      return modelData[primary]
-    }
+  if (!primary || primary === DEFAULT_DROPDOWN_VALUE) {
+    return []
   }
 
-  return null
+  const primaryData = modelData[primary]
+  if (!primaryData) {
+    return []
+  }
+
+  if (!secondary || secondary === DEFAULT_DROPDOWN_VALUE) {
+    return []
+  }
+
+  const details = primaryData[secondary]
+  return Array.isArray(details) ? details : []
+}
+
+function resolveModelData() {
+  if (!props.machines || typeof props.machines !== 'object') {
+    return null
+  }
+
+  if (props.machines[productType.value]) {
+    return props.machines[productType.value]
+  }
+
+  return props.machines
 }
 
 const selectedDetails = computed(() => {
-  const modelData = props.machines[productType.value]
-  return getSelectedModelDetails(modelData, getSelectedDropdownValues(dropdowns.value))
+  const modelData = resolveModelData()
+  const selections = getSelectedDropdownValues(dropdowns.value)
+
+  return getSelectedModelDetails(modelData, selections)
 })
 
 const headerStyle = {
@@ -177,13 +205,58 @@ function showOption() {
 }
 
 function getDetailValue(detail) {
+  if (!detail || typeof detail !== 'object') return ''
+
+  if ('value' in detail) {
+    return detail.value ?? ''
+  }
+
   for (const key in detail) {
     if (key !== 'key' && detail[key]) return detail[key]
   }
+
   return ''
 }
-</script>
 
+const dropdownRowKeys = computed(() =>
+  props.tableData.filter(row => row.options).map(row => row.key)
+)
+
+const primaryRowKey = computed(() => dropdownRowKeys.value[0] || '')
+const secondaryRowKey = computed(() => dropdownRowKeys.value[1] || '')
+
+const selectedPrimaryValue = computed(() => {
+  return dropdowns.value[primaryRowKey.value]?.selected ?? DEFAULT_DROPDOWN_VALUE
+})
+
+function getSecondaryOptions() {
+  const modelData = resolveModelData()
+  const primary = selectedPrimaryValue.value
+
+  if (!modelData || !primary || primary === DEFAULT_DROPDOWN_VALUE) {
+    return []
+  }
+
+  const primaryData = modelData[primary]
+  if (!primaryData || typeof primaryData !== 'object') {
+    return []
+  }
+
+  return Object.keys(primaryData)
+    .map(Number)
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b)
+    .map(String)
+}
+
+function getOptionsForRow(rowKey, fallbackOptions = []) {
+  if (rowKey === secondaryRowKey.value) {
+    return getSecondaryOptions()
+  }
+
+  return fallbackOptions
+}
+</script>
 <style lang="scss" scoped>
 section {
   max-width: 1050px;
