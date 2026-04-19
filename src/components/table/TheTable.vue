@@ -5,23 +5,28 @@
         <col style="width: 50%" />
         <col style="width: 50%" />
       </colgroup>
+
       <tbody @click="showStandard">
         <tr :style="headerStyle">
           <td>Standart</td>
           <td>
             <div class="felan" style="justify-content: flex-end">
-              <span v-if="!isStandart" class="chevron"><chevron-right /></span>
-              <span v-else class="chevron"><chevron-down /></span>
+              <span v-if="!isStandart" class="chevron"><ChevronRight /></span>
+              <span v-else class="chevron"><ChevronDown /></span>
             </div>
           </td>
         </tr>
 
-        <tr v-show="isStandart" v-for="(row, index) in tableData" :key="index">
+        <tr
+          v-for="(row, index) in tableData"
+          :key="index"
+          v-show="isStandart"
+        >
           <td>{{ row.key }}</td>
           <td v-if="row.options">
-            <dropdown-cell
+            <DropdownCell
               :options="getOptionsForRow(row.key, row.options)"
-              :selected="dropdowns[row.key]?.selected ?? 'SEÇİNİZ'"
+              :selected="dropdowns[row.key]?.selected ?? DEFAULT_DROPDOWN_VALUE"
               :open="dropdowns[row.key]?.open ?? false"
               @toggle="toggleDropdown(row.key)"
               @select="(val) => selectOption(row.key, val)"
@@ -30,7 +35,11 @@
           <td v-else>{{ row.value }}</td>
         </tr>
 
-        <tr v-show="isStandart" v-for="detail in selectedDetails" :key="detail.key">
+        <tr
+          v-for="detail in selectedDetails"
+          :key="detail.key"
+          v-show="isStandart"
+        >
           <td>{{ detail.label || detail.key }}</td>
           <td>{{ getDetailValue(detail) }}</td>
         </tr>
@@ -41,8 +50,8 @@
           <td>Opsiyonlar</td>
           <td>
             <div class="felan" style="justify-content: flex-end">
-              <span v-if="!isOption" class="chevron"><chevron-right /></span>
-              <span v-else class="chevron"><chevron-down /></span>
+              <span v-if="!isOption" class="chevron"><ChevronRight /></span>
+              <span v-else class="chevron"><ChevronDown /></span>
             </div>
           </td>
         </tr>
@@ -75,19 +84,37 @@ const props = defineProps({
 })
 
 const route = useRoute()
+
 const isStandart = ref(true)
 const isOption = ref(false)
 const DEFAULT_DROPDOWN_VALUE = 'SEÇİNİZ'
-
 const dropdowns = ref({})
+
+const productType = computed(() => route.params.productType)
+
+const dropdownRowKeys = computed(() =>
+  props.tableData.filter(row => row.options).map(row => row.key)
+)
+
+const primaryRowKey = computed(() => dropdownRowKeys.value[0] || '')
+const secondaryRowKey = computed(() => dropdownRowKeys.value[1] || '')
+
+const selectedPrimaryValue = computed(() =>
+  dropdowns.value[primaryRowKey.value]?.selected ?? DEFAULT_DROPDOWN_VALUE
+)
 
 function createDropdownState(tableData) {
   const state = {}
+
   for (const row of tableData) {
     if (row.options) {
-      state[row.key] = { selected: DEFAULT_DROPDOWN_VALUE, open: false }
+      state[row.key] = {
+        selected: DEFAULT_DROPDOWN_VALUE,
+        open: false
+      }
     }
   }
+
   return state
 }
 
@@ -105,11 +132,7 @@ watch(
 
 function toggleDropdown(key) {
   for (const k of Object.keys(dropdowns.value)) {
-    if (k === key) {
-      dropdowns.value[k].open = !dropdowns.value[k].open
-    } else {
-      dropdowns.value[k].open = false
-    }
+    dropdowns.value[k].open = k === key ? !dropdowns.value[k].open : false
   }
 }
 
@@ -119,7 +142,11 @@ function selectOption(key, value) {
   dropdowns.value[key].selected = value
   dropdowns.value[key].open = false
 
-  if (key === primaryRowKey.value && secondaryRowKey.value && dropdowns.value[secondaryRowKey.value]) {
+  if (
+    key === primaryRowKey.value &&
+    secondaryRowKey.value &&
+    dropdowns.value[secondaryRowKey.value]
+  ) {
     dropdowns.value[secondaryRowKey.value].selected = DEFAULT_DROPDOWN_VALUE
     dropdowns.value[secondaryRowKey.value].open = false
   }
@@ -134,36 +161,13 @@ function outsideClickListener() {
 onMounted(() => document.addEventListener('click', outsideClickListener))
 onBeforeUnmount(() => document.removeEventListener('click', outsideClickListener))
 
-const productType = computed(() => route.params.productType)
-
 function getSelectedDropdownValues(state) {
   const keys = Object.keys(state)
+
   return {
     primary: state[keys[0]]?.selected,
     secondary: state[keys[1]]?.selected
   }
-}
-
-function getSelectedModelDetails(modelData, selections) {
-  if (!modelData) return []
-
-  const { primary, secondary } = selections
-
-  if (!primary || primary === DEFAULT_DROPDOWN_VALUE) {
-    return []
-  }
-
-  const primaryData = modelData[primary]
-  if (!primaryData) {
-    return []
-  }
-
-  if (!secondary || secondary === DEFAULT_DROPDOWN_VALUE) {
-    return []
-  }
-
-  const details = primaryData[secondary]
-  return Array.isArray(details) ? details : []
 }
 
 function resolveModelData() {
@@ -178,31 +182,27 @@ function resolveModelData() {
   return props.machines
 }
 
+function getSelectedModelDetails(modelData, selections) {
+  if (!modelData) return []
+
+  const { primary, secondary } = selections
+
+  if (!primary || primary === DEFAULT_DROPDOWN_VALUE) return []
+
+  const primaryData = modelData[primary]
+  if (!primaryData) return []
+
+  if (!secondary || secondary === DEFAULT_DROPDOWN_VALUE) return []
+
+  const details = primaryData[secondary]
+  return Array.isArray(details) ? details : []
+}
+
 const selectedDetails = computed(() => {
   const modelData = resolveModelData()
   const selections = getSelectedDropdownValues(dropdowns.value)
-
   return getSelectedModelDetails(modelData, selections)
 })
-
-const headerStyle = {
-  backgroundColor: 'var(--c-background-table-header)',
-  borderTop: '1px solid var(--c-main)'
-}
-
-function showStandard() {
-  if (!isStandart.value) {
-    isStandart.value = true
-    isOption.value = false
-  }
-}
-
-function showOption() {
-  if (!isOption.value) {
-    isStandart.value = false
-    isOption.value = true
-  }
-}
 
 function getDetailValue(detail) {
   if (!detail || typeof detail !== 'object') return ''
@@ -217,17 +217,6 @@ function getDetailValue(detail) {
 
   return ''
 }
-
-const dropdownRowKeys = computed(() =>
-  props.tableData.filter(row => row.options).map(row => row.key)
-)
-
-const primaryRowKey = computed(() => dropdownRowKeys.value[0] || '')
-const secondaryRowKey = computed(() => dropdownRowKeys.value[1] || '')
-
-const selectedPrimaryValue = computed(() => {
-  return dropdowns.value[primaryRowKey.value]?.selected ?? DEFAULT_DROPDOWN_VALUE
-})
 
 function getSecondaryOptions() {
   const modelData = resolveModelData()
@@ -256,7 +245,27 @@ function getOptionsForRow(rowKey, fallbackOptions = []) {
 
   return fallbackOptions
 }
+
+const headerStyle = {
+  backgroundColor: 'var(--c-background-table-header)',
+  borderTop: '1px solid var(--c-main)'
+}
+
+function showStandard() {
+  if (!isStandart.value) {
+    isStandart.value = true
+    isOption.value = false
+  }
+}
+
+function showOption() {
+  if (!isOption.value) {
+    isStandart.value = false
+    isOption.value = true
+  }
+}
 </script>
+
 <style lang="scss" scoped>
 section {
   max-width: 1050px;
@@ -268,10 +277,12 @@ table {
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 1.8rem;
+
   tr {
     &:nth-child(odd) {
       background: none;
     }
+
     &:nth-child(even) {
       background-color: var(--c-background-table);
 
@@ -280,12 +291,15 @@ table {
         border-bottom: 1px solid var(--c-main);
       }
     }
+
     td {
       padding: 0.8rem;
+
       .felan {
         display: flex;
         justify-content: space-between;
         align-items: center;
+
         span.chevron {
           width: 2rem;
           height: 2rem;

@@ -8,15 +8,14 @@
       <h1>{{ productType }} serisi</h1>
 
       <div
-        v-if="(machineType === 'abkant' || machineType === 'laser-cutting') && loading"
+        v-if="isApiDrivenType && loading"
         class="status-message"
       >
         Veriler yükleniyor...
       </div>
 
-
       <div
-        v-else-if="(machineType === 'abkant' || machineType === 'laser-cutting') && error"
+        v-else-if="isApiDrivenType && error"
         class="status-message error"
       >
         {{ error }}
@@ -55,15 +54,20 @@ const error = ref('')
 const machineType = computed(() => route.params.machineType)
 const productType = computed(() => route.params.productType)
 
+const isApiDrivenType = computed(() =>
+  machineType.value === 'abkant' || machineType.value === 'laser-cutting'
+)
+
 const PDF_BY_MACHINE_TYPE = {
   'laser-cutting': 'Durmark_Laser.pdf',
   abkant: 'DurMarkAbkant.pdf'
 }
 
-const laserPowerOptions = computed(() => {
-  return Object.keys(laserApiMachines.value)
-    .sort((a, b) => Number(a.replace('KW', '')) - Number(b.replace('KW', '')))
-})
+const laserPowerOptions = computed(() =>
+  Object.keys(laserApiMachines.value).sort(
+    (a, b) => Number(a.replace('KW', '')) - Number(b.replace('KW', ''))
+  )
+)
 
 const laserSizeOptions = computed(() => {
   const sizes = new Set()
@@ -93,13 +97,14 @@ const tableDataLaser = computed(() => [
     options: laserSizeOptions.value
   }
 ])
-const abkantTonOptions = computed(() => {
-  return Object.keys(abkantMachines.value)
+
+const abkantTonOptions = computed(() =>
+  Object.keys(abkantMachines.value)
     .map(Number)
     .filter(Number.isFinite)
     .sort((a, b) => a - b)
     .map(String)
-})
+)
 
 const abkantLengthOptions = computed(() => {
   const lengths = new Set()
@@ -161,41 +166,6 @@ function groupAbkantMachinesForTable(machines) {
   return grouped
 }
 
-async function loadMachinesForCurrentType() {
-  loading.value = true
-  error.value = ''
-  if (machineType.value === 'abkant') {
-    abkantMachines.value = {}
-  }
-
-  if (machineType.value === 'laser-cutting') {
-    laserApiMachines.value = {}
-  }
-  try {
-    if (machineType.value === 'abkant') {
-      const machines = await fetchMachines({
-        category: 'abkant',
-        series: productType.value
-      })
-      abkantMachines.value = groupAbkantMachinesForTable(machines)
-      return
-    }
-
-    if (machineType.value === 'laser-cutting') {
-      const machines = await fetchMachines({
-        category: 'laser-cutting',
-        series: productType.value
-      })
-      laserApiMachines.value = groupLaserMachinesForTable(machines)
-      return
-    }
-  } catch (err) {
-    console.error(err)
-    error.value = 'Makine verileri alınamadı.'
-  } finally {
-    loading.value = false
-  }
-}
 function groupLaserMachinesForTable(machines) {
   const grouped = {}
 
@@ -221,6 +191,44 @@ function groupLaserMachinesForTable(machines) {
   }
 
   return grouped
+}
+
+async function loadMachinesForCurrentType() {
+  loading.value = true
+  error.value = ''
+
+  if (machineType.value === 'abkant') {
+    abkantMachines.value = {}
+  }
+
+  if (machineType.value === 'laser-cutting') {
+    laserApiMachines.value = {}
+  }
+
+  try {
+    if (machineType.value === 'abkant') {
+      const machines = await fetchMachines({
+        category: 'abkant',
+        series: productType.value
+      })
+      abkantMachines.value = groupAbkantMachinesForTable(machines)
+      return
+    }
+
+    if (machineType.value === 'laser-cutting') {
+      const machines = await fetchMachines({
+        category: 'laser-cutting',
+        series: productType.value
+      })
+      laserApiMachines.value = groupLaserMachinesForTable(machines)
+      return
+    }
+  } catch (err) {
+    console.error(err)
+    error.value = 'Makine verileri alınamadı.'
+  } finally {
+    loading.value = false
+  }
 }
 
 const machineData = computed(() => {

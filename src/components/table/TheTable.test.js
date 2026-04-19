@@ -3,7 +3,6 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { describe, expect, it } from 'vitest'
 import TheTable from './TheTable.vue'
 import DropdownCell from './DropdownCell.vue'
-import { laserMachinesData } from '@/data/laserMachineData'
 
 const laserTableData = [
   {
@@ -17,6 +16,69 @@ const laserTableData = [
     options: ['3015', '4015']
   }
 ]
+
+const laserMachinesData = {
+  '3KW': {
+    '3015': [
+      {
+        key: 'laser_head',
+        label: 'LAZER KAFASI',
+        value: 'Raytools-BM 111',
+        order: 1
+      },
+      {
+        key: 'working_area',
+        label: 'ÇALIŞMA ALANI',
+        value: '3050 x 1530mm',
+        order: 2
+      }
+    ],
+    '4015': [
+      {
+        key: 'laser_head',
+        label: 'LAZER KAFASI',
+        value: 'Raytools-BM 111',
+        order: 1
+      },
+      {
+        key: 'working_area',
+        label: 'ÇALIŞMA ALANI',
+        value: '4050 x 1530mm',
+        order: 2
+      }
+    ]
+  },
+  '6KW': {
+    '3015': [
+      {
+        key: 'laser_head',
+        label: 'LAZER KAFASI',
+        value: 'BOCI-BLT-421',
+        order: 1
+      },
+      {
+        key: 'working_area',
+        label: 'ÇALIŞMA ALANI',
+        value: '3050 x 1530mm',
+        order: 2
+      }
+    ],
+    '4015': [
+      {
+        key: 'laser_head',
+        label: 'LAZER KAFASI',
+        value: 'BOCI-BLT-421',
+        order: 1
+      },
+      {
+        key: 'working_area',
+        label: 'ÇALIŞMA ALANI',
+        value: '4050 x 1530mm',
+        order: 2
+      }
+    ]
+  }
+}
 
 async function mountTable() {
   const router = createRouter({
@@ -55,6 +117,15 @@ describe('TheTable', () => {
     expect(wrapper.text()).toContain('Raytools-BM 111')
     expect(wrapper.text()).toContain('ÇALIŞMA ALANI')
     expect(wrapper.text()).toContain('3050 x 1530mm')
+  })
+
+  it('filters second dropdown options based on the first dropdown selection', async () => {
+    const wrapper = await mountTable()
+    const dropdowns = wrapper.findAllComponents(DropdownCell)
+
+    await dropdowns[0].vm.$emit('select', '6KW')
+
+    expect(dropdowns[1].props('options')).toEqual(['3015', '4015'])
   })
 
   it('toggles to the options section when the options header is clicked', async () => {
