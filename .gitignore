@@ -1,14 +1,19 @@
 # Dependencies
 node_modules/
-backend/node_modules/
+**/node_modules/
 
 # Build output
 dist/
+**/dist/
+.vite/
+**/.vite/
 
 # Environment variables
 .env
 .env.*
 !.env.example
+**/.env
+**/.env.*
 
 # Editor / OS
 .DS_Store
