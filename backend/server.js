@@ -14,6 +14,40 @@ const PORT = process.env.PORT || 4000
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tumex'
 const INTERNAL_SERVER_MESSAGE = 'Sunucu hatası'
 
+function parseAllowedOrigins(value = '') {
+  return value
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+}
+
+function createCorsOriginMatcher({
+  corsOrigin = process.env.FRONTEND_URL || 'http://localhost:5173',
+  corsOriginRegex = process.env.FRONTEND_URL_REGEX || ''
+} = {}) {
+  const allowedOrigins = parseAllowedOrigins(corsOrigin)
+  const allowedOriginPattern = corsOriginRegex ? new RegExp(corsOriginRegex) : null
+
+  return (origin, callback) => {
+    if (!origin) {
+      callback(null, true)
+      return
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true)
+      return
+    }
+
+    if (allowedOriginPattern?.test(origin)) {
+      callback(null, true)
+      return
+    }
+
+    callback(new Error(`CORS blocked for origin: ${origin}`))
+  }
+}
+
 function normalizeEmail(email = '') {
   return email.toLowerCase().trim()
 }
@@ -78,6 +112,7 @@ function createApp(options = {}) {
     jwtLib = jwt,
     authMiddleware = authenticateToken,
     corsOrigin = process.env.FRONTEND_URL || 'http://localhost:5173',
+    corsOriginRegex = process.env.FRONTEND_URL_REGEX || '',
     tokenSecret = process.env.TOKEN_SECRET
   } = options
 
@@ -88,7 +123,7 @@ function createApp(options = {}) {
   const app = express()
 
   app.use(cors({
-    origin: corsOrigin,
+    origin: createCorsOriginMatcher({ corsOrigin, corsOriginRegex }),
     credentials: true
   }))
   app.use(express.json())
@@ -348,6 +383,7 @@ if (require.main === module) {
 
 module.exports = {
   createApp,
+  createCorsOriginMatcher,
   createLoginHandler,
   createRegisterHandler,
   connectToDatabase,

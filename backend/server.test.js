@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import serverModule from './server'
 
-const { createLoginHandler, createRegisterHandler } = serverModule
+const { createCorsOriginMatcher, createLoginHandler, createRegisterHandler } = serverModule
 
 function createUserModel() {
   const instances = []
@@ -150,5 +150,41 @@ describe('backend routes', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.body.message).toBe('Bu e-posta zaten kayıtlı')
+  })
+
+  it('allows configured frontend origins for CORS', () => {
+    const matcher = createCorsOriginMatcher({
+      corsOrigin: 'https://tumex.vercel.app,https://tumex.com'
+    })
+    const callback = vi.fn()
+
+    matcher('https://tumex.vercel.app', callback)
+
+    expect(callback).toHaveBeenCalledWith(null, true)
+  })
+
+  it('allows origins that match the configured regex for preview deployments', () => {
+    const matcher = createCorsOriginMatcher({
+      corsOrigin: 'https://tumex.com',
+      corsOriginRegex: '^https://.*\\.vercel\\.app$'
+    })
+    const callback = vi.fn()
+
+    matcher('https://tumex-git-feature-branch.vercel.app', callback)
+
+    expect(callback).toHaveBeenCalledWith(null, true)
+  })
+
+  it('rejects unknown frontend origins for CORS', () => {
+    const matcher = createCorsOriginMatcher({
+      corsOrigin: 'https://tumex.vercel.app'
+    })
+    const callback = vi.fn()
+
+    matcher('https://example.com', callback)
+
+    expect(callback).toHaveBeenCalledOnce()
+    expect(callback.mock.calls[0][0]).toBeInstanceOf(Error)
+    expect(callback.mock.calls[0][1]).toBeUndefined()
   })
 })

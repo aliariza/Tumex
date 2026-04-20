@@ -179,7 +179,9 @@ run().catch(async (error) => {
 
   try {
     await mongoose.disconnect()
-  } catch {}
+  } catch {
+    // Ignore cleanup errors while handling the original migration failure.
+  }
 
   process.exit(1)
 })
