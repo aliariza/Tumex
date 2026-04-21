@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { isValidEmail, showRequestErrorToast, TOAST_OPTIONS } from './authHelpers'
+import { isValidEmail, runValidationChecks, showRequestErrorToast, TOAST_OPTIONS } from './authHelpers'
 
 describe('authHelpers', () => {
   it('accepts valid email addresses and rejects invalid ones', () => {
@@ -27,5 +27,18 @@ describe('authHelpers', () => {
     })
 
     expect(toast.error).toHaveBeenCalledWith('Yetkisiz giris', TOAST_OPTIONS)
+  })
+
+  it('runs grouped validation checks and reports whether any errors were added', () => {
+    const errors = {}
+
+    const isValid = runValidationChecks(errors, [
+      () => {
+        errors.email = 'E-posta gerekli'
+      }
+    ])
+
+    expect(isValid).toBe(false)
+    expect(errors).toEqual({ email: 'E-posta gerekli' })
   })
 })

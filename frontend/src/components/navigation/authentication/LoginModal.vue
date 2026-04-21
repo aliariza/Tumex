@@ -1,4 +1,9 @@
 <template>
+  <AppToast
+    :show="toast.show"
+    :message="toast.message"
+    :type="toast.type"
+  />
   <Modal :visible="showLoginModal" @close="closeLoginModal">
     <h2>Giriş</h2>
     <form autocomplete="off" @submit.prevent="handleLogin">
@@ -32,13 +37,15 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import Modal from './Modal.vue'
-import { useToast } from 'vue-toastification'
+import AppToast from '@/components/ui/AppToast.vue'
 import api from '@/lib/api'
+import { useAppToast } from '@/composables/useAppToast'
+import { useAuthModals } from '@/composables/useAuthModals'
 import {
+  runValidationChecks,
   showRequestErrorToast,
   TOAST_OPTIONS,
   validateEmailField,
@@ -54,42 +61,48 @@ const createLoginForm = () => ({
 
 const store = useStore()
 const router = useRouter()
-const toast = useToast()
-const showLoginModal = computed(() => store.getters.showLoginModal)
+const { toast, toastApi } = useAppToast()
+const { showLoginModal, closeLoginModal } = useAuthModals()
 const { form, submitForm } = useAuthForm(createLoginForm, showLoginModal)
-const closeLoginModal = () => store.dispatch('closeLoginModal')
 const setAuthentication = (value) => store.dispatch('setAuthentication', value)
 
 function validateForm() {
   form.errors = {}
 
-  validateEmailField(form.errors, 'email', form.email, 'E-posta gerekli', 'Geçerli e-posta gerekli')
-  validateRequiredField(form.errors, 'password', form.password, 'Şifre gerekli')
-
-  return Object.keys(form.errors).length === 0
+  return runValidationChecks(form.errors, [
+    () => validateEmailField(form.errors, 'email', form.email, 'E-posta gerekli', 'Geçerli e-posta gerekli'),
+    () => validateRequiredField(form.errors, 'password', form.password, 'Şifre gerekli')
+  ])
 }
 
 async function handleLogin() {
-  await submitForm(validateForm, async () => {
-    try {
+  await submitForm(
+    validateForm,
+    async () => {
       const response = await api.post('/login', {
         email: form.email,
         password: form.password
       })
 
       if (response.status === 200) {
-        toast.success(response.data.message, TOAST_OPTIONS)
-        await setAuthentication({ isAuthenticated: true, token: response.data.token })
+        toastApi.success(response.data.message, TOAST_OPTIONS)
+        await setAuthentication({
+          isAuthenticated: true,
+          token: response.data.token,
+          role: response.data.role
+        })
         await closeLoginModal()
         router.push('/protected')
       }
-    } catch (error) {
-      showRequestErrorToast(toast, error, {
+    },
+    (error) => {
+      showRequestErrorToast(toastApi, error, {
         401: 'E-posta veya sifre hatali',
+        403: 'Talebiniz alindi. Onay sonrasi bayi sayfalarina erisebilirsiniz.',
         500: 'Sunucu hatasi, lutfen daha sonra tekrar deneyin'
       })
     }
-  })
+  )
 }
 </script>
 <style scoped src="./auth-form.css"></style>

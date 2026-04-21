@@ -19,13 +19,20 @@ export function useAuthForm(createInitialState, visibleRef) {
     )
   }
 
-  async function submitForm(validateForm, submitHandler) {
+  async function submitForm(validateForm, submitHandler, errorHandler) {
     if (!validateForm()) {
-      return
+      return false
     }
 
     try {
       await submitHandler()
+      return true
+    } catch (error) {
+      if (errorHandler) {
+        await errorHandler(error)
+      }
+
+      return false
     } finally {
       resetForm()
     }

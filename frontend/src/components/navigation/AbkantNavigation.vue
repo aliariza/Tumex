@@ -11,11 +11,11 @@
 </template>
 
 <script setup>
-import machineData from '../../data/machinesData.js'
+import { useMachineCatalog } from '../../composables/useMachineCatalog.js'
 
 defineOptions({ name: 'AbkantNavigation' })
 
-const items = machineData['abkant'].items
+const { machineItems: items } = useMachineCatalog('abkant')
 </script>
 
 <style lang="scss" scoped>

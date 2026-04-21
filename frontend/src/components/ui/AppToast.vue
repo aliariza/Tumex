@@ -6,29 +6,27 @@
   </transition>
 </template>
 
-<script>
-export default {
-  name: 'AppToast',
-  props: {
-    show: {
-      type: Boolean,
-      default: false
-    },
-    message: {
-      type: String,
-      default: ''
-    },
-    type: {
-      type: String,
-      default: 'success'
-    }
+<script setup>
+import { computed } from 'vue'
+
+defineOptions({ name: 'AppToast' })
+
+const props = defineProps({
+  show: {
+    type: Boolean,
+    default: false
   },
-  computed: {
-    typeClass() {
-      return this.type === 'error' ? 'toast-error' : 'toast-success'
-    }
+  message: {
+    type: String,
+    default: ''
+  },
+  type: {
+    type: String,
+    default: 'success'
   }
-}
+})
+
+const typeClass = computed(() => (props.type === 'error' ? 'toast-error' : 'toast-success'))
 </script>
 
 <style scoped>

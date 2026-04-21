@@ -18,11 +18,10 @@
       </AuthActionButton>
     </div>
     <p v-if="showReminder && !isAuthenticated" class="reminder">
-      Kayit isleminiz sirketimiz tarafindan incelenecektir.
+      Erisim talebiniz e-posta ile artumay@gmail.com adresine iletilecektir.
       <br />
-      Eger kabul edilirse sifreniz gonderilecektir.
+      Onaylandiktan sonra bayi sayfalarini kullanabilirsiniz.
     </p>
-    <RegisterModal />
   </section>
 </template>
 
@@ -30,11 +29,11 @@
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 import GirisCikis from './GirisCikis.vue'
-import RegisterModal from './RegisterModal.vue'
 import AuthActionButton from './AuthActionButton.vue'
-import { AUTH_MODAL_NAMES } from './authModalNames'
+import { useAuthModals } from '@/composables/useAuthModals'
 
 const store = useStore()
+const { openRegisterModal } = useAuthModals()
 const showReminder = ref(false)
 const activeButton = ref('login')
 const isAuthenticated = computed(() => store.getters.isAuthenticated)
@@ -46,7 +45,7 @@ function setActiveButton(buttonName) {
 function handleRegisterClick() {
   showReminder.value = true
   setActiveButton('register')
-  store.dispatch('openAuthModal', AUTH_MODAL_NAMES.register)
+  openRegisterModal()
 }
 </script>
 

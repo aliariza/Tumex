@@ -9,11 +9,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import machinesData from '../data/machinesData.js'
 import BaseCard from '../components/card/BaseCard.vue'
 import TheHero from '../components/hero/TheHero.vue'
 import AltBolumler from '../components/altbolumler/AltBolumler.vue'
+import { useMachineCatalog } from '../composables/useMachineCatalog.js'
 
 defineOptions({ name: 'MachineView' })
 
@@ -25,10 +24,8 @@ const props = defineProps({
   }
 })
 
-const machineData = computed(() => machinesData[props.machineType] || {})
-const currentItem = computed(() => machineData.value.item || {})
-const currentItems = computed(() => machineData.value.items || [])
-const currentAltBolumler = computed(() => machineData.value.altBolumler || {})
+const { heroItem: currentItem, machineItems: currentItems, altBolumler: currentAltBolumler } =
+  useMachineCatalog(() => props.machineType)
 </script>
 
 <style lang="scss" scoped>

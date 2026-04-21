@@ -51,10 +51,10 @@ describe('store', () => {
     expect(sessionStorage.getItem('token')).toBeNull()
   })
 
-  it('opens the register modal through the helper action', async () => {
+  it('opens the register modal through the shared auth modal action', async () => {
     const store = createAppStore(apiClient)
 
-    await store.dispatch('openRegisterModal')
+    await store.dispatch('openAuthModal', AUTH_MODAL_NAMES.register)
 
     expect(store.state.activeAuthModal).toBe(AUTH_MODAL_NAMES.register)
     expect(store.getters.showRegisterModal).toBe(true)

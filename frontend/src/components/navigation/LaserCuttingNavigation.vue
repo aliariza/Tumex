@@ -11,11 +11,11 @@
 </template>
 
 <script setup>
-import machineData from '../../data/machinesData.js'
+import { useMachineCatalog } from '../../composables/useMachineCatalog.js'
 
 defineOptions({ name: 'LaserCuttingNavigation' })
 
-const items = machineData['laser-cutting'].items
+const { machineItems: items } = useMachineCatalog('laser-cutting')
 </script>
 
 <style lang="scss" scoped>

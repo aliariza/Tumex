@@ -151,80 +151,82 @@
   </form>
 </template>
 
-<script>
-export default {
-  name: 'AdminMachineForm',
-  props: {
-    form: {
-      type: Object,
-      required: true
-    },
-    editingId: {
-      type: [String, null],
-      default: null
-    },
-    saving: {
-      type: Boolean,
-      default: false
-    },
-    errors: {
-      type: Object,
-      default: () => ({})
-    }
+<script setup>
+defineOptions({ name: 'AdminMachineForm' })
+
+const props = defineProps({
+  form: {
+    type: Object,
+    required: true
   },
-  emits: ['update:form', 'submit', 'cancel', 'clear-error'],
-  methods: {
-    updateField(field, value) {
-      this.$emit('clear-error', field)
-      this.$emit('update:form', {
-        ...this.form,
-        [field]: value
-      })
-    },
-    updateSpecField(index, field, value) {
-      const nextSpecs = Array.isArray(this.form.specs) ? [...this.form.specs] : []
-      const current = nextSpecs[index] || { key: '', label: '', value: '', order: index + 1 }
-
-      nextSpecs[index] = {
-        ...current,
-        [field]: value,
-        order: index + 1
-      }
-
-      this.$emit('clear-error', `specs.${index}.${field}`)
-      this.$emit('update:form', {
-        ...this.form,
-        specs: nextSpecs
-      })
-    },
-    addSpecRow() {
-      const nextSpecs = Array.isArray(this.form.specs) ? [...this.form.specs] : []
-      nextSpecs.push({
-        key: '',
-        label: '',
-        value: '',
-        order: nextSpecs.length + 1
-      })
-
-      this.$emit('update:form', {
-        ...this.form,
-        specs: nextSpecs
-      })
-    },
-    removeSpecRow(index) {
-      const nextSpecs = (Array.isArray(this.form.specs) ? [...this.form.specs] : [])
-        .filter((_, i) => i !== index)
-        .map((spec, i) => ({
-          ...spec,
-          order: i + 1
-        }))
-
-      this.$emit('update:form', {
-        ...this.form,
-        specs: nextSpecs
-      })
-    }
+  editingId: {
+    type: [String, null],
+    default: null
+  },
+  saving: {
+    type: Boolean,
+    default: false
+  },
+  errors: {
+    type: Object,
+    default: () => ({})
   }
+})
+
+const emit = defineEmits(['update:form', 'submit', 'cancel', 'clear-error'])
+
+function updateField(field, value) {
+  emit('clear-error', field)
+  emit('update:form', {
+    ...props.form,
+    [field]: value
+  })
+}
+
+function updateSpecField(index, field, value) {
+  const nextSpecs = Array.isArray(props.form.specs) ? [...props.form.specs] : []
+  const current = nextSpecs[index] || { key: '', label: '', value: '', order: index + 1 }
+
+  nextSpecs[index] = {
+    ...current,
+    [field]: value,
+    order: index + 1
+  }
+
+  emit('clear-error', `specs.${index}.${field}`)
+  emit('update:form', {
+    ...props.form,
+    specs: nextSpecs
+  })
+}
+
+function addSpecRow() {
+  const nextSpecs = Array.isArray(props.form.specs) ? [...props.form.specs] : []
+  nextSpecs.push({
+    key: '',
+    label: '',
+    value: '',
+    order: nextSpecs.length + 1
+  })
+
+  emit('update:form', {
+    ...props.form,
+    specs: nextSpecs
+  })
+}
+
+function removeSpecRow(index) {
+  const nextSpecs = (Array.isArray(props.form.specs) ? [...props.form.specs] : [])
+    .filter((_, i) => i !== index)
+    .map((spec, i) => ({
+      ...spec,
+      order: i + 1
+    }))
+
+  emit('update:form', {
+    ...props.form,
+    specs: nextSpecs
+  })
 }
 </script>
 

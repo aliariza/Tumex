@@ -3,17 +3,8 @@ import { createStore } from 'vuex'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import RegisterModal from './RegisterModal.vue'
 
-const { success, error, apiPost } = vi.hoisted(() => ({
-  success: vi.fn(),
-  error: vi.fn(),
+const { apiPost } = vi.hoisted(() => ({
   apiPost: vi.fn()
-}))
-
-vi.mock('vue-toastification', () => ({
-  useToast: () => ({
-    success,
-    error
-  })
 }))
 
 vi.mock('@/lib/api', () => ({
@@ -37,8 +28,6 @@ function createTestStore({ showRegisterModal = true } = {}) {
 describe('RegisterModal', () => {
   beforeEach(() => {
     apiPost.mockReset()
-    success.mockReset()
-    error.mockReset()
   })
 
   it('shows validation errors when required fields are missing', async () => {
@@ -91,8 +80,12 @@ describe('RegisterModal', () => {
       telephone: '123456',
       address: 'Istanbul'
     })
-    expect(success).toHaveBeenCalled()
-    expect(store.dispatch).toHaveBeenCalledWith('closeRegisterModal')
+    expect(wrapper.getComponent({ name: 'AppToast' }).props()).toMatchObject({
+      show: true,
+      message: 'Kayit tamam',
+      type: 'success'
+    })
+    expect(store.dispatch).toHaveBeenCalledWith('closeAuthModal')
   })
 
   it('shows the backend validation message when registration is rejected', async () => {
@@ -121,11 +114,12 @@ describe('RegisterModal', () => {
     await wrapper.find('form').trigger('submit.prevent')
     await flushPromises()
 
-    expect(error).toHaveBeenCalledWith(
-      'Bu e-posta zaten kayıtlı',
-      expect.objectContaining({ timeout: 3000 })
-    )
-    expect(store.dispatch).not.toHaveBeenCalledWith('closeRegisterModal')
+    expect(wrapper.getComponent({ name: 'AppToast' }).props()).toMatchObject({
+      show: true,
+      message: 'Bu e-posta zaten kayıtlı',
+      type: 'error'
+    })
+    expect(store.dispatch).not.toHaveBeenCalledWith('closeAuthModal')
   })
 
   it('shows the generic server error toast on registration failure', async () => {
@@ -151,9 +145,10 @@ describe('RegisterModal', () => {
     await wrapper.find('form').trigger('submit.prevent')
     await flushPromises()
 
-    expect(error).toHaveBeenCalledWith(
-      'Sunucu hatasi, lutfen daha sonra tekrar deneyin',
-      expect.objectContaining({ timeout: 3000 })
-    )
+    expect(wrapper.getComponent({ name: 'AppToast' }).props()).toMatchObject({
+      show: true,
+      message: 'Sunucu hatasi, lutfen daha sonra tekrar deneyin',
+      type: 'error'
+    })
   })
 })

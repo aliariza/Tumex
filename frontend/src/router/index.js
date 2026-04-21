@@ -7,6 +7,8 @@ import HakkindaView from '../views/hakkimizda/HakkindaView.vue'
 import TumexCalismaView from '../views/kariyer/TumexCalismaView.vue'
 import AcikPozisyonlarView from '../views/kariyer/AcikPozisyonlarView.vue'
 import ServislerView from '../views/iletisim/ServislerView.vue'
+import { canAccessRoute, getRouteAccess, isPublicRoute } from '@/services/authAccess'
+import { hasSessionToken } from '@/services/authSession'
 
 const routes = [
   {
@@ -127,6 +129,12 @@ const routes = [
     meta: { access: 'admin' }
   },
   {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: () => import('../views/admin/AdminUsersView.vue'),
+    meta: { access: 'admin' }
+  },
+  {
     path: '/:catchAll(.*)*',
     name: 'NotFound',
     component: NotFound
@@ -146,13 +154,13 @@ export function createAppRouter(options = {}) {
   })
 
   router.beforeEach(async (to) => {
-    const access = to.meta.access || 'public'
-    const token = sessionStorage.getItem('token')
+    const access = getRouteAccess(to)
+    const hasToken = hasSessionToken()
 
-    if (to.name === 'AdminLogin' && token) {
+    if (to.name === 'AdminLogin' && hasToken) {
       try {
         const { data: user } = await apiClient.get('/me')
-        if (user.role === 'admin') {
+        if (canAccessRoute(user, 'admin')) {
           return { name: 'AdminMachines' }
         }
       } catch {
@@ -160,11 +168,11 @@ export function createAppRouter(options = {}) {
       }
     }
 
-    if (access === 'public') {
+    if (isPublicRoute(to)) {
       return true
     }
 
-    if (!token) {
+    if (!hasToken) {
       appStore.dispatch('logout')
       return { name: 'bayi' }
     }
@@ -172,21 +180,9 @@ export function createAppRouter(options = {}) {
     try {
       const { data: user } = await apiClient.get('/me')
 
-      if (access === 'protected') {
-        if (user.role === 'dealer' || user.role === 'admin') {
-          return true
-        }
-
+      if (!canAccessRoute(user, access)) {
         appStore.dispatch('logout')
-        return { name: 'bayi' }
-      }
-
-      if (access === 'admin') {
-        if (user.role === 'admin') {
-          return true
-        }
-
-        return { name: 'home' }
+        return access === 'admin' ? { name: 'home' } : { name: 'bayi' }
       }
 
       return true

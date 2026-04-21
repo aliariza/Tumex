@@ -64,11 +64,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { toRef } from 'vue'
 import { useRoute } from 'vue-router'
 import ChevronDown from '../icons/ChevronDown.vue'
 import ChevronRight from '../icons/ChevronRight.vue'
 import DropdownCell from './DropdownCell.vue'
+import { useMachineSpecsTable } from '../../composables/useMachineSpecsTable.js'
 
 defineOptions({ name: 'TheTable' })
 
@@ -84,124 +85,23 @@ const props = defineProps({
 })
 
 const route = useRoute()
+const productType = toRef(route.params, 'productType')
 
-const isStandart = ref(true)
-const isOption = ref(false)
-const DEFAULT_DROPDOWN_VALUE = 'SEÇİNİZ'
-const dropdowns = ref({})
-
-const productType = computed(() => route.params.productType)
-
-const dropdownRowKeys = computed(() =>
-  props.tableData.filter(row => row.options).map(row => row.key)
-)
-
-const primaryRowKey = computed(() => dropdownRowKeys.value[0] || '')
-const secondaryRowKey = computed(() => dropdownRowKeys.value[1] || '')
-
-const selectedPrimaryValue = computed(() =>
-  dropdowns.value[primaryRowKey.value]?.selected ?? DEFAULT_DROPDOWN_VALUE
-)
-
-function createDropdownState(tableData) {
-  const state = {}
-
-  for (const row of tableData) {
-    if (row.options) {
-      state[row.key] = {
-        selected: DEFAULT_DROPDOWN_VALUE,
-        open: false
-      }
-    }
-  }
-
-  return state
-}
-
-function initDropdowns() {
-  dropdowns.value = createDropdownState(props.tableData)
-}
-
-watch(
-  () => props.tableData,
-  () => {
-    initDropdowns()
-  },
-  { immediate: true, deep: true }
-)
-
-function toggleDropdown(key) {
-  for (const k of Object.keys(dropdowns.value)) {
-    dropdowns.value[k].open = k === key ? !dropdowns.value[k].open : false
-  }
-}
-
-function selectOption(key, value) {
-  if (!dropdowns.value[key]) return
-
-  dropdowns.value[key].selected = value
-  dropdowns.value[key].open = false
-
-  if (
-    key === primaryRowKey.value &&
-    secondaryRowKey.value &&
-    dropdowns.value[secondaryRowKey.value]
-  ) {
-    dropdowns.value[secondaryRowKey.value].selected = DEFAULT_DROPDOWN_VALUE
-    dropdowns.value[secondaryRowKey.value].open = false
-  }
-}
-
-function outsideClickListener() {
-  for (const k of Object.keys(dropdowns.value)) {
-    dropdowns.value[k].open = false
-  }
-}
-
-onMounted(() => document.addEventListener('click', outsideClickListener))
-onBeforeUnmount(() => document.removeEventListener('click', outsideClickListener))
-
-function getSelectedDropdownValues(state) {
-  const keys = Object.keys(state)
-
-  return {
-    primary: state[keys[0]]?.selected,
-    secondary: state[keys[1]]?.selected
-  }
-}
-
-function resolveModelData() {
-  if (!props.machines || typeof props.machines !== 'object') {
-    return null
-  }
-
-  if (props.machines[productType.value]) {
-    return props.machines[productType.value]
-  }
-
-  return props.machines
-}
-
-function getSelectedModelDetails(modelData, selections) {
-  if (!modelData) return []
-
-  const { primary, secondary } = selections
-
-  if (!primary || primary === DEFAULT_DROPDOWN_VALUE) return []
-
-  const primaryData = modelData[primary]
-  if (!primaryData) return []
-
-  if (!secondary || secondary === DEFAULT_DROPDOWN_VALUE) return []
-
-  const details = primaryData[secondary]
-  return Array.isArray(details) ? details : []
-}
-
-const selectedDetails = computed(() => {
-  const modelData = resolveModelData()
-  const selections = getSelectedDropdownValues(dropdowns.value)
-  return getSelectedModelDetails(modelData, selections)
+const {
+  DEFAULT_DROPDOWN_VALUE,
+  dropdowns,
+  getOptionsForRow,
+  isOption,
+  isStandart,
+  selectedDetails,
+  selectOption,
+  showOption,
+  showStandard,
+  toggleDropdown
+} = useMachineSpecsTable({
+  tableData: toRef(props, 'tableData'),
+  machines: toRef(props, 'machines'),
+  productType
 })
 
 function getDetailValue(detail) {
@@ -217,52 +117,9 @@ function getDetailValue(detail) {
 
   return ''
 }
-
-function getSecondaryOptions() {
-  const modelData = resolveModelData()
-  const primary = selectedPrimaryValue.value
-
-  if (!modelData || !primary || primary === DEFAULT_DROPDOWN_VALUE) {
-    return []
-  }
-
-  const primaryData = modelData[primary]
-  if (!primaryData || typeof primaryData !== 'object') {
-    return []
-  }
-
-  return Object.keys(primaryData)
-    .map(Number)
-    .filter(Number.isFinite)
-    .sort((a, b) => a - b)
-    .map(String)
-}
-
-function getOptionsForRow(rowKey, fallbackOptions = []) {
-  if (rowKey === secondaryRowKey.value) {
-    return getSecondaryOptions()
-  }
-
-  return fallbackOptions
-}
-
 const headerStyle = {
   backgroundColor: 'var(--c-background-table-header)',
   borderTop: '1px solid var(--c-main)'
-}
-
-function showStandard() {
-  if (!isStandart.value) {
-    isStandart.value = true
-    isOption.value = false
-  }
-}
-
-function showOption() {
-  if (!isOption.value) {
-    isStandart.value = false
-    isOption.value = true
-  }
 }
 </script>
 

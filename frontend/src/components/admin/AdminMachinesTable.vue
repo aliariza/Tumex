@@ -103,40 +103,33 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 import { Pencil, Trash2 } from 'lucide-vue-next'
 
-export default {
-  name: 'AdminMachinesTable',
-  components: {
-    Pencil,
-    Trash2
+defineOptions({ name: 'AdminMachinesTable' })
+
+defineEmits(['edit', 'delete', 'sort', 'toggle-publish'])
+
+const props = defineProps({
+  machines: {
+    type: Array,
+    required: true
   },
-  props: {
-    machines: {
-      type: Array,
-      required: true
-    },
-    sortKey: {
-      type: String,
-      default: 'title'
-    },
-    sortDirection: {
-      type: String,
-      default: 'asc'
-    }
+  sortKey: {
+    type: String,
+    default: 'title'
   },
-  emits: ['edit', 'delete', 'sort', 'toggle-publish'],
-  computed: {
-    sortArrow() {
-      return this.sortDirection === 'asc' ? '↑' : '↓'
-    }
-  },
-  methods: {
-    formatPrice(price) {
-      return new Intl.NumberFormat('tr-TR').format(price || 0)
-    }
+  sortDirection: {
+    type: String,
+    default: 'asc'
   }
+})
+
+const sortArrow = computed(() => (props.sortDirection === 'asc' ? '↑' : '↓'))
+
+function formatPrice(price) {
+  return new Intl.NumberFormat('tr-TR').format(price || 0)
 }
 </script>
 

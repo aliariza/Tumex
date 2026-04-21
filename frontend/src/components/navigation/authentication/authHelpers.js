@@ -43,6 +43,14 @@ export function validateMinLengthField(errors, fieldName, value, requiredMessage
   return true
 }
 
+export function runValidationChecks(errors, checks = []) {
+  checks.forEach((check) => {
+    check()
+  })
+
+  return Object.keys(errors).length === 0
+}
+
 export function showRequestErrorToast(toast, error, messages = {}) {
   if (!error.response) {
     toast.error(messages.network || 'Sunucuya baglanilamadi', TOAST_OPTIONS)

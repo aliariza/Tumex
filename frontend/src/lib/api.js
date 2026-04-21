@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { clearAuthSession, getSessionToken } from '@/services/authSession'
 
 const baseURL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000').replace(/\/$/, '')
 
@@ -7,7 +8,7 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('token')
+  const token = getSessionToken()
 
   if (token) {
     config.headers = config.headers || {}
@@ -21,9 +22,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      sessionStorage.removeItem('isAuthenticated')
-      sessionStorage.removeItem('token')
-      sessionStorage.removeItem('role')
+      clearAuthSession()
       window.dispatchEvent(new Event('auth:unauthorized'))
     }
 

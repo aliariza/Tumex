@@ -16,8 +16,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { AUTH_MODAL_NAMES } from './authModalNames'
 import AuthActionButton from './AuthActionButton.vue'
+import { useAuthModals } from '@/composables/useAuthModals'
 
 defineEmits(['focus-login'])
 defineProps({
@@ -28,11 +28,16 @@ defineProps({
 })
 
 const store = useStore()
+const { openLoginModal, openLogoutModal } = useAuthModals()
 const isAuthenticated = computed(() => store.getters.isAuthenticated)
 const buttonLabel = computed(() => (isAuthenticated.value ? 'ÇIKIŞ' : 'GİRİŞ'))
 
 function handleButtonClick() {
-  const modalName = isAuthenticated.value ? AUTH_MODAL_NAMES.logout : AUTH_MODAL_NAMES.login
-  store.dispatch('openAuthModal', modalName)
+  if (isAuthenticated.value) {
+    openLogoutModal()
+    return
+  }
+
+  openLoginModal()
 }
 </script>

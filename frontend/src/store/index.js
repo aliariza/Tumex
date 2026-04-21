@@ -1,26 +1,16 @@
 import { createStore } from 'vuex'
 import api from '../lib/api'
 import { AUTH_MODAL_NAMES } from '@/components/navigation/authentication/authModalNames'
-
-const SESSION_AUTH_KEY = 'isAuthenticated'
-const SESSION_TOKEN_KEY = 'token'
-
-function syncAuthSession(isAuthenticated, token) {
-  sessionStorage.setItem(SESSION_AUTH_KEY, isAuthenticated)
-  sessionStorage.setItem(SESSION_TOKEN_KEY, token)
-}
-
-function clearAuthSession() {
-  sessionStorage.removeItem(SESSION_AUTH_KEY)
-  sessionStorage.removeItem(SESSION_TOKEN_KEY)
-}
+import { clearAuthSession, getStoredAuthState, setAuthSession } from '@/services/authSession'
 
 export function createAppStore(apiClient = api) {
+  const authState = getStoredAuthState()
+
   return createStore({
     state: {
       activeAuthModal: null,
-      isAuthenticated: sessionStorage.getItem(SESSION_AUTH_KEY) === 'true',
-      token: sessionStorage.getItem(SESSION_TOKEN_KEY) || null
+      isAuthenticated: authState.isAuthenticated,
+      token: authState.token
     },
     mutations: {
       setActiveAuthModal(state, modalName) {
@@ -29,7 +19,7 @@ export function createAppStore(apiClient = api) {
       setAuthentication(state, { isAuthenticated, token }) {
         state.isAuthenticated = isAuthenticated
         state.token = token
-        syncAuthSession(isAuthenticated, token)
+        setAuthSession({ isAuthenticated, token })
       },
       clearAuthentication(state) {
         state.isAuthenticated = false
@@ -60,24 +50,6 @@ export function createAppStore(apiClient = api) {
       },
       closeAuthModal({ commit }) {
         commit('setActiveAuthModal', null)
-      },
-      openLoginModal({ dispatch }) {
-        dispatch('openAuthModal', AUTH_MODAL_NAMES.login)
-      },
-      closeLoginModal({ dispatch }) {
-        dispatch('closeAuthModal')
-      },
-      openLogoutModal({ dispatch }) {
-        dispatch('openAuthModal', AUTH_MODAL_NAMES.logout)
-      },
-      closeLogoutModal({ dispatch }) {
-        dispatch('closeAuthModal')
-      },
-      openRegisterModal({ dispatch }) {
-        dispatch('openAuthModal', AUTH_MODAL_NAMES.register)
-      },
-      closeRegisterModal({ dispatch }) {
-        dispatch('closeAuthModal')
       },
       setAuthentication({ commit }, value) {
         commit('setAuthentication', value)

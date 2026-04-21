@@ -5,8 +5,7 @@ import VueLazyLoad from 'vue3-lazyload'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import Toast from 'vue-toastification'
-import 'vue-toastification/dist/index.css'
+import { isRestrictedRoute } from './services/authAccess'
 
 const app = createApp(App)
 
@@ -17,12 +16,11 @@ app.use(VueLazyLoad, {
 
 app.use(store)
 app.use(router)
-app.use(Toast)
 
 window.addEventListener('auth:unauthorized', async () => {
   store.dispatch('logout')
 
-  if (router.currentRoute.value.matched.some((record) => record.meta.requiresAuth)) {
+  if (router.currentRoute.value.matched.some((record) => isRestrictedRoute(record))) {
     await router.push('/iletisim/bayi')
   }
 })

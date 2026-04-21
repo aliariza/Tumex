@@ -26,17 +26,17 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import Modal from './Modal.vue'
 import AuthActionButton from './AuthActionButton.vue'
+import { useAuthModals } from '@/composables/useAuthModals'
 
 const store = useStore()
 const router = useRouter()
 
-const showLogoutModal = computed(() => store.getters.showLogoutModal)
-const closeLogoutModal = () => store.dispatch('closeLogoutModal')
+const { showLogoutModal, closeLogoutModal } = useAuthModals()
 const logout = () => store.dispatch('logout')
 const activeButton = ref('cancel')
 

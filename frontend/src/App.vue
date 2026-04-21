@@ -6,6 +6,7 @@
     <iletisim-navigation v-if="activeMenu === 'iletisim'" />
     <carrier-navigation v-if="activeMenu === 'carrier'" />
     <login-modal />
+    <register-modal />
     <logout-modal />
   </div>
   <div class="mobile">
@@ -36,6 +37,7 @@ import IletisimNavigation from './components/navigation/IletisimNavigation.vue'
 import CarrierNavigation from './components/navigation/CarrierNavigation.vue'
 import TheWhatsapp from './components/icons/TheWhatsapp.vue'
 import LoginModal from './components/navigation/authentication/LoginModal.vue'
+import RegisterModal from './components/navigation/authentication/RegisterModal.vue'
 import LogoutModal from './components/navigation/authentication/LogoutModal.vue'
 
 defineOptions({ name: 'App' })

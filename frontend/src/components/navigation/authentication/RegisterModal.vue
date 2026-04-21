@@ -1,4 +1,9 @@
 <template>
+  <AppToast
+    :show="toast.show"
+    :message="toast.message"
+    :type="toast.type"
+  />
   <Modal :visible="showRegisterModal" @close="closeRegisterModal">
     <h2>Kayıt</h2>
     <form autocomplete="off" @submit.prevent="handleRegister">
@@ -80,12 +85,13 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useStore } from 'vuex'
 import Modal from './Modal.vue'
-import { useToast } from 'vue-toastification'
+import AppToast from '@/components/ui/AppToast.vue'
 import api from '@/lib/api'
+import { useAppToast } from '@/composables/useAppToast'
+import { useAuthModals } from '@/composables/useAuthModals'
 import {
+  runValidationChecks,
   showRequestErrorToast,
   TOAST_OPTIONS,
   validateEmailField,
@@ -103,36 +109,34 @@ const createRegisterForm = () => ({
   address: '',
   errors: {}
 })
-
-const store = useStore()
-const toast = useToast()
-const showRegisterModal = computed(() => store.getters.showRegisterModal)
+const { toast, toastApi } = useAppToast()
+const { showRegisterModal, closeRegisterModal } = useAuthModals()
 const { form, submitForm } = useAuthForm(createRegisterForm, showRegisterModal)
-const closeRegisterModal = () => store.dispatch('closeRegisterModal')
 
 function validateForm() {
   form.errors = {}
 
-  validateRequiredField(form.errors, 'username', form.username, 'Kullanıcı adı gerekli')
-  validateEmailField(form.errors, 'email', form.email, 'E-posta gerekli', 'Geçerli e-posta gerekli')
-  validateRequiredField(form.errors, 'companyname', form.companyname, 'Şirket adı gerekli')
-  validateMinLengthField(
-    form.errors,
-    'password',
-    form.password,
-    'Şifre gerekli',
-    6,
-    'Şifre minimum 6 hane olmalıdır'
-  )
-  validateRequiredField(form.errors, 'telephone', form.telephone, 'Telefon no. gerekli')
-  validateRequiredField(form.errors, 'address', form.address, 'Adres gerekli')
-
-  return Object.keys(form.errors).length === 0
+  return runValidationChecks(form.errors, [
+    () => validateRequiredField(form.errors, 'username', form.username, 'Kullanıcı adı gerekli'),
+    () => validateEmailField(form.errors, 'email', form.email, 'E-posta gerekli', 'Geçerli e-posta gerekli'),
+    () => validateRequiredField(form.errors, 'companyname', form.companyname, 'Şirket adı gerekli'),
+    () => validateMinLengthField(
+      form.errors,
+      'password',
+      form.password,
+      'Şifre gerekli',
+      6,
+      'Şifre minimum 6 hane olmalıdır'
+    ),
+    () => validateRequiredField(form.errors, 'telephone', form.telephone, 'Telefon no. gerekli'),
+    () => validateRequiredField(form.errors, 'address', form.address, 'Adres gerekli')
+  ])
 }
 
 async function handleRegister() {
-  await submitForm(validateForm, async () => {
-    try {
+  await submitForm(
+    validateForm,
+    async () => {
       const response = await api.post('/register', {
         username: form.username,
         email: form.email,
@@ -143,16 +147,17 @@ async function handleRegister() {
       })
 
       if (response.status === 201) {
-        toast.success(response.data.message, TOAST_OPTIONS)
+        toastApi.success(response.data.message, TOAST_OPTIONS)
         await closeRegisterModal()
       }
-    } catch (error) {
-      showRequestErrorToast(toast, error, {
+    },
+    (error) => {
+      showRequestErrorToast(toastApi, error, {
         400: error.response?.data?.message || 'Gecersiz kayit bilgileri',
         500: 'Sunucu hatasi, lutfen daha sonra tekrar deneyin'
       })
     }
-  })
+  )
 }
 </script>
 <style scoped src="./auth-form.css"></style>

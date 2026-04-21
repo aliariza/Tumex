@@ -3,23 +3,14 @@ import { createStore } from 'vuex'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import LoginModal from './LoginModal.vue'
 
-const { push, success, error, apiPost } = vi.hoisted(() => ({
+const { push, apiPost } = vi.hoisted(() => ({
   push: vi.fn(),
-  success: vi.fn(),
-  error: vi.fn(),
   apiPost: vi.fn()
 }))
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push
-  })
-}))
-
-vi.mock('vue-toastification', () => ({
-  useToast: () => ({
-    success,
-    error
   })
 }))
 
@@ -45,8 +36,6 @@ describe('LoginModal', () => {
   beforeEach(() => {
     apiPost.mockReset()
     push.mockReset()
-    success.mockReset()
-    error.mockReset()
   })
 
   it('shows validation errors when the form is submitted empty', async () => {
@@ -88,12 +77,17 @@ describe('LoginModal', () => {
       email: 'dealer@example.com',
       password: 'secret123'
     })
-    expect(success).toHaveBeenCalled()
+    expect(wrapper.getComponent({ name: 'AppToast' }).props()).toMatchObject({
+      show: true,
+      message: 'Hosgeldiniz',
+      type: 'success'
+    })
     expect(store.dispatch).toHaveBeenCalledWith('setAuthentication', {
       isAuthenticated: true,
-      token: 'fresh-token'
+      token: 'fresh-token',
+      role: undefined
     })
-    expect(store.dispatch).toHaveBeenCalledWith('closeLoginModal')
+    expect(store.dispatch).toHaveBeenCalledWith('closeAuthModal')
     expect(push).toHaveBeenCalledWith('/protected')
   })
 
@@ -116,14 +110,41 @@ describe('LoginModal', () => {
     await wrapper.find('form').trigger('submit.prevent')
     await flushPromises()
 
-    expect(error).toHaveBeenCalledWith(
-      'E-posta veya sifre hatali',
-      expect.objectContaining({ timeout: 3000 })
-    )
+    expect(wrapper.getComponent({ name: 'AppToast' }).props()).toMatchObject({
+      show: true,
+      message: 'E-posta veya sifre hatali',
+      type: 'error'
+    })
     expect(store.dispatch).not.toHaveBeenCalledWith(
       'setAuthentication',
       expect.anything()
     )
     expect(push).not.toHaveBeenCalled()
+  })
+
+  it('shows the pending approval toast when the dealer request is not approved yet', async () => {
+    apiPost.mockRejectedValue({
+      response: {
+        status: 403
+      }
+    })
+
+    const store = createTestStore()
+    const wrapper = mount(LoginModal, {
+      global: {
+        plugins: [store]
+      }
+    })
+
+    await wrapper.get('#email').setValue('dealer@example.com')
+    await wrapper.get('#password').setValue('secret123')
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    expect(wrapper.getComponent({ name: 'AppToast' }).props()).toMatchObject({
+      show: true,
+      message: 'Talebiniz alindi. Onay sonrasi bayi sayfalarina erisebilirsiniz.',
+      type: 'error'
+    })
   })
 })

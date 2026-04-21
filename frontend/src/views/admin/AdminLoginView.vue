@@ -28,58 +28,53 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../../lib/api'
+import { clearAuthSession, setAuthSession } from '../../services/authSession'
 
-export default {
-  name: 'AdminLoginView',
-  data() {
-    return {
-      loading: false,
-      error: '',
-      form: {
-        email: '',
-        password: ''
-      }
+defineOptions({ name: 'AdminLoginView' })
+
+const router = useRouter()
+const loading = ref(false)
+const error = ref('')
+const form = reactive({
+  email: '',
+  password: ''
+})
+
+async function handleLogin() {
+  loading.value = true
+  error.value = ''
+
+  clearAuthSession()
+
+  const payload = {
+    email: form.email.trim(),
+    password: form.password
+  }
+
+  try {
+    const { data } = await api.post('/login', payload)
+
+    if (data.role !== 'admin') {
+      error.value = 'Bu alan sadece admin içindir.'
+      clearAuthSession()
+      return
     }
-  },
-  methods: {
-    async handleLogin() {
-      this.loading = true
-      this.error = ''
 
-      sessionStorage.removeItem('token')
-      sessionStorage.removeItem('isAuthenticated')
-      sessionStorage.removeItem('role')
+    setAuthSession({
+      isAuthenticated: true,
+      token: data.token,
+      role: data.role
+    })
 
-
-      const payload = {
-        email: this.form.email.trim(),
-        password: this.form.password
-      }
-
-      try {
-        const { data } = await api.post('/login', payload)
-
-        sessionStorage.setItem('token', data.token)
-        sessionStorage.setItem('isAuthenticated', 'true')
-        sessionStorage.setItem('role', data.role)
-
-        if (data.role !== 'admin') {
-          this.error = 'Bu alan sadece admin içindir.'
-          sessionStorage.removeItem('token')
-          sessionStorage.removeItem('isAuthenticated')
-          sessionStorage.removeItem('role')
-          return
-        }
-
-        this.$router.replace({ name: 'AdminMachines' })
-      } catch (error) {
-        this.error = error.response?.data?.message || 'Giriş başarısız'
-      } finally {
-        this.loading = false
-      }
-    }
+    await router.replace({ name: 'AdminMachines' })
+  } catch (requestError) {
+    error.value = requestError.response?.data?.message || 'Giriş başarısız'
+  } finally {
+    loading.value = false
   }
 }
 </script>

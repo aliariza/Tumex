@@ -18,25 +18,25 @@
   </transition>
 </template>
 
-<script>
-export default {
-  name: 'ConfirmDialog',
-  props: {
-    show: {
-      type: Boolean,
-      default: false
-    },
-    title: {
-      type: String,
-      default: 'Onay'
-    },
-    message: {
-      type: String,
-      default: 'Bu işlemi yapmak istediğinize emin misiniz?'
-    }
+<script setup>
+defineOptions({ name: 'ConfirmDialog' })
+
+defineEmits(['confirm', 'cancel'])
+
+defineProps({
+  show: {
+    type: Boolean,
+    default: false
   },
-  emits: ['confirm', 'cancel']
-}
+  title: {
+    type: String,
+    default: 'Onay'
+  },
+  message: {
+    type: String,
+    default: 'Bu işlemi yapmak istediğinize emin misiniz?'
+  }
+})
 </script>
 
 <style scoped>
