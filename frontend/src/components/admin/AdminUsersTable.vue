@@ -95,31 +95,33 @@ const roleLabels = {
   width: 100%;
   border-collapse: collapse;
   min-width: 860px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .users-table th,
 .users-table td {
   padding: 14px 12px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
   text-align: left;
   vertical-align: top;
 }
 
 .users-table th {
-  color: #6b7280;
+  color: #627d98;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  font-weight: 700;
 }
 
 .user-name {
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: #102a43;
 }
 
 .user-email,
 .muted {
-  color: #6b7280;
+  color: #627d98;
   font-size: 13px;
   margin-top: 4px;
 }
@@ -144,8 +146,8 @@ const roleLabels = {
 }
 
 .role-admin {
-  background: #e5e7eb;
-  color: #111827;
+  background: #e8eef5;
+  color: #102a43;
 }
 
 .actions {
@@ -157,26 +159,41 @@ const roleLabels = {
 .ghost-btn,
 .primary-btn,
 .dark-btn {
-  border: none;
+  border: 1px solid transparent;
   padding: 9px 12px;
   font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   border-radius: 0;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .ghost-btn {
-  background: #f3f4f6;
-  color: #111827;
+  background: #f8fafc;
+  border-color: rgba(16, 42, 67, 0.1);
+  color: #102a43;
 }
 
 .primary-btn {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #e8f1fb;
+  border-color: rgba(0, 83, 156, 0.14);
+  color: #00539c;
 }
 
 .dark-btn {
-  background: #111827;
+  background: #102a43;
   color: #fff;
+}
+
+.ghost-btn:hover:not(:disabled),
+.primary-btn:hover:not(:disabled),
+.dark-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 button:disabled {
@@ -186,6 +203,6 @@ button:disabled {
 
 .empty-state {
   text-align: center;
-  color: #6b7280;
+  color: #627d98;
 }
 </style>
