@@ -173,6 +173,7 @@ const {
   border-radius: 50%;
   filter: blur(24px);
   opacity: 0.55;
+  pointer-events: none;
 }
 
 .admin-machines-page__glow--left {

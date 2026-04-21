@@ -88,6 +88,7 @@ function redirectToLogin() {
   border-radius: 50%;
   filter: blur(24px);
   opacity: 0.55;
+  pointer-events: none;
 }
 
 .protected-layout__glow--left {

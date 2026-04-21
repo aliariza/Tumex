@@ -114,6 +114,7 @@ async function handleLogin() {
   border-radius: 50%;
   filter: blur(24px);
   opacity: 0.55;
+  pointer-events: none;
 }
 
 .admin-login__glow--left {

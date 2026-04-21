@@ -65,6 +65,7 @@ const currentPath = computed(() => route.fullPath || '/')
   border-radius: 50%;
   filter: blur(24px);
   opacity: 0.55;
+  pointer-events: none;
 }
 
 .not-found__glow--left {
