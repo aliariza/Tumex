@@ -388,7 +388,12 @@ function createRegisterHandler({
 
       await newUser.save()
       try {
-        await accessRequestNotifier(newUser)
+        const notified = await accessRequestNotifier(newUser)
+        if (notified) {
+          console.info(`[/register notify] access request email sent for ${newUser.email}`)
+        } else {
+          console.info(`[/register notify] email skipped for ${newUser.email}`)
+        }
       } catch (notificationError) {
         console.error('[/register notify]', notificationError.message)
       }
@@ -450,7 +455,16 @@ function createAdminUpdateUserRoleHandler({
 
       if (existingUser.role !== nextRole) {
         try {
-          await roleChangeNotifier(updatedUser, existingUser.role, nextRole)
+          const notified = await roleChangeNotifier(updatedUser, existingUser.role, nextRole)
+          if (notified) {
+            console.info(
+              `[/admin/users/:id/role notify] role change email sent to ${updatedUser.email} (${existingUser.role} -> ${nextRole})`
+            )
+          } else {
+            console.info(
+              `[/admin/users/:id/role notify] email skipped for ${updatedUser.email} (${existingUser.role} -> ${nextRole})`
+            )
+          }
         } catch (notificationError) {
           console.error('[/admin/users/:id/role notify]', notificationError.message)
         }
