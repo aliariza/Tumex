@@ -7,6 +7,10 @@ const User = require('./models/User')
 const authenticateToken = require('./middleware/authMiddleware')
 const requireRole = require('./middleware/requireRole')
 const Machine = require('./models/Machine')
+const {
+  createAccessRequestNotifier,
+  createRoleChangeNotifier
+} = require('./services/accessRequestNotifier')
 
 require('dotenv').config()
 
@@ -113,7 +117,25 @@ function createApp(options = {}) {
     authMiddleware = authenticateToken,
     corsOrigin = process.env.FRONTEND_URL || 'http://localhost:5173',
     corsOriginRegex = process.env.FRONTEND_URL_REGEX || '',
-    tokenSecret = process.env.TOKEN_SECRET
+    tokenSecret = process.env.TOKEN_SECRET,
+    accessRequestNotifier = createAccessRequestNotifier({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: process.env.SMTP_SECURE,
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+      from: process.env.SMTP_FROM,
+      recipient: process.env.ACCESS_REQUEST_EMAIL || 'artumay@gmail.com'
+    }),
+    roleChangeNotifier = createRoleChangeNotifier({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: process.env.SMTP_SECURE,
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+      from: process.env.SMTP_FROM,
+      recipient: process.env.ACCESS_REQUEST_EMAIL || 'artumay@gmail.com'
+    })
   } = options
 
   if (!tokenSecret) {
@@ -129,7 +151,7 @@ function createApp(options = {}) {
   app.use(express.json())
 
   app.post('/login', createLoginHandler({ userModel, bcryptLib, jwtLib, tokenSecret }))
-  app.post('/register', createRegisterHandler({ userModel, bcryptLib }))
+  app.post('/register', createRegisterHandler({ userModel, bcryptLib, accessRequestNotifier }))
 
   app.get('/me', authMiddleware, async (req, res) => {
     try {
@@ -160,6 +182,15 @@ function createApp(options = {}) {
       return sendInternalServerError(res, '/admin/machines GET', error)
     }
   })
+
+  app.get('/admin/users', authMiddleware, requireRole('admin'), createAdminListUsersHandler({ userModel }))
+
+  app.patch(
+    '/admin/users/:id/role',
+    authMiddleware,
+    requireRole('admin'),
+    createAdminUpdateUserRoleHandler({ userModel, roleChangeNotifier })
+  )
 
   app.post('/admin/machines', authMiddleware, requireRole('admin'), async (req, res) => {
     try {
@@ -306,6 +337,12 @@ function createLoginHandler({
         return res.status(401).json({ message: 'Yanlış bilgi' })
       }
 
+      if (user.role === 'user') {
+        return res.status(403).json({
+          message: 'Erişim talebiniz alındı. Onay sonrası bayi sayfalarını kullanabilirsiniz.'
+        })
+      }
+
       const token = jwtLib.sign(
         {
           _id: user._id,
@@ -326,7 +363,11 @@ function createLoginHandler({
   }
 }
 
-function createRegisterHandler({ userModel = User, bcryptLib = bcrypt } = {}) {
+function createRegisterHandler({
+  userModel = User,
+  bcryptLib = bcrypt,
+  accessRequestNotifier = async () => false
+} = {}) {
   return async (req, res) => {
     try {
       const { username, email, password, companyname, telephone, address } = req.body
@@ -346,9 +387,84 @@ function createRegisterHandler({ userModel = User, bcryptLib = bcrypt } = {}) {
       const newUser = new userModel(createRegisterPayload(req.body, hashedPassword))
 
       await newUser.save()
-      return res.status(201).json({ message: 'Başarıyla kayıt yapıldı' })
+      try {
+        await accessRequestNotifier(newUser)
+      } catch (notificationError) {
+        console.error('[/register notify]', notificationError.message)
+      }
+
+      return res.status(201).json({
+        message: 'Talebiniz alındı. Onay sonrası bayi sayfalarına erişebilirsiniz.'
+      })
     } catch (error) {
       return sendInternalServerError(res, '/register', error)
+    }
+  }
+}
+
+function createAdminListUsersHandler({ userModel = User } = {}) {
+  return async (_req, res) => {
+    try {
+      const users = await userModel.find({}, '-password').sort({ createdAt: -1 })
+      return res.status(200).json(users)
+    } catch (error) {
+      return sendInternalServerError(res, '/admin/users GET', error)
+    }
+  }
+}
+
+function createAdminUpdateUserRoleHandler({
+  userModel = User,
+  roleChangeNotifier = async () => false
+} = {}) {
+  return async (req, res) => {
+    try {
+      const nextRole = trimValue(req.body?.role || '')
+      const allowedRoles = ['user', 'dealer', 'admin']
+
+      if (!allowedRoles.includes(nextRole)) {
+        return res.status(400).json({ message: 'Geçersiz rol' })
+      }
+
+      if (String(req.user?._id) === String(req.params.id) && nextRole !== 'admin') {
+        return res.status(400).json({ message: 'Kendi admin yetkinizi kaldıramazsınız' })
+      }
+
+      const existingUser = await userModel.findById(req.params.id)
+      if (!existingUser) {
+        return res.status(404).json({ message: 'Kullanıcı bulunamadı' })
+      }
+
+      const updatedUser = await userModel.findByIdAndUpdate(
+        req.params.id,
+        { role: nextRole },
+        {
+          new: true,
+          runValidators: true
+        }
+      )
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Kullanıcı bulunamadı' })
+      }
+
+      if (existingUser.role !== nextRole) {
+        try {
+          await roleChangeNotifier(updatedUser, existingUser.role, nextRole)
+        } catch (notificationError) {
+          console.error('[/admin/users/:id/role notify]', notificationError.message)
+        }
+      }
+
+      const safeUser = typeof updatedUser.toObject === 'function'
+        ? updatedUser.toObject()
+        : { ...updatedUser }
+
+      delete safeUser.password
+
+      return res.status(200).json(safeUser)
+    } catch (error) {
+      return sendInternalServerError(res, '/admin/users/:id/role PATCH', error)
     }
   }
 }
@@ -383,6 +499,8 @@ if (require.main === module) {
 
 module.exports = {
   createApp,
+  createAdminListUsersHandler,
+  createAdminUpdateUserRoleHandler,
   createCorsOriginMatcher,
   createLoginHandler,
   createRegisterHandler,
