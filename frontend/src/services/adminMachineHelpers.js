@@ -1,6 +1,11 @@
-export function createEmptyMachineForm() {
+export const ADMIN_MACHINE_CATEGORIES = [
+  { value: 'abkant', label: 'Abkant', metricLabel: 'Tonaj', secondaryMetricLabel: 'Bukme Uzunlugu' },
+  { value: 'laser-cutting', label: 'Lazer Kesim', metricLabel: 'Lazer Gucu', secondaryMetricLabel: 'Ebat' }
+]
+
+export function createEmptyMachineForm(category = 'abkant') {
   return {
-    category: 'abkant',
+    category,
     brand: '',
     family: '',
     series: '',
@@ -10,6 +15,8 @@ export function createEmptyMachineForm() {
     price: 0,
     pressForceTon: null,
     bendingLengthMm: null,
+    powerKw: null,
+    workingAreaCode: '',
     image: '',
     gallery: [],
     specs: [],
@@ -30,7 +37,7 @@ export function normalizeMachineSpecs(specs = []) {
 
 export function machineToForm(machine = {}) {
   return {
-    ...createEmptyMachineForm(),
+    ...createEmptyMachineForm(machine.category || 'abkant'),
     category: machine.category || 'abkant',
     brand: machine.brand || '',
     family: machine.family || '',
@@ -41,6 +48,8 @@ export function machineToForm(machine = {}) {
     price: machine.price || 0,
     pressForceTon: machine.pressForceTon ?? null,
     bendingLengthMm: machine.bendingLengthMm ?? null,
+    powerKw: machine.powerKw ?? null,
+    workingAreaCode: machine.workingAreaCode || '',
     image: machine.image || '',
     gallery: Array.isArray(machine.gallery) ? machine.gallery : [],
     specs: Array.isArray(machine.specs) ? machine.specs : [],
@@ -50,7 +59,7 @@ export function machineToForm(machine = {}) {
 
 export function formToMachinePayload(form = {}, overrides = {}) {
   return {
-    ...createEmptyMachineForm(),
+    ...createEmptyMachineForm(form.category || 'abkant'),
     ...form,
     gallery: Array.isArray(form.gallery) ? form.gallery : [],
     specs: normalizeMachineSpecs(form.specs),
@@ -60,21 +69,23 @@ export function formToMachinePayload(form = {}, overrides = {}) {
 }
 
 export function buildMachineTitle(form = {}) {
-  const parts = []
+  const familyOrSeries = form.family?.trim() || form.series?.trim() || ''
 
-  if (form.family?.trim()) {
-    parts.push(form.family.trim())
+  if (!familyOrSeries) {
+    return ''
   }
 
-  if (form.pressForceTon != null && form.pressForceTon !== '') {
-    parts.push(`${form.pressForceTon} Ton`)
+  if (form.category === 'abkant') {
+    const ton = form.pressForceTon != null && form.pressForceTon !== '' ? `${form.pressForceTon}T` : ''
+    const length = form.bendingLengthMm != null && form.bendingLengthMm !== '' ? `${form.bendingLengthMm}` : ''
+
+    return [familyOrSeries, ton, length].filter(Boolean).join('-').concat(' Abkant tezgah').trim()
   }
 
-  if (form.bendingLengthMm != null && form.bendingLengthMm !== '') {
-    parts.push(`${form.bendingLengthMm} mm`)
-  }
+  const power = form.powerKw != null && form.powerKw !== '' ? `${form.powerKw}KW` : ''
+  const size = form.workingAreaCode?.trim() || ''
 
-  return parts.join(' ').trim()
+  return [familyOrSeries, power, size].filter(Boolean).join('-').concat(' Lazer tezgah').trim()
 }
 
 export function validateMachineForm(form = {}) {
@@ -108,12 +119,22 @@ export function validateMachineForm(form = {}) {
     errors.price = 'Fiyat 0 veya daha büyük olmalıdır.'
   }
 
-  if (form.pressForceTon != null && form.pressForceTon < 0) {
-    errors.pressForceTon = 'Tonaj 0 veya daha büyük olmalıdır.'
-  }
+  if (form.category === 'abkant') {
+    if (form.pressForceTon != null && form.pressForceTon < 0) {
+      errors.pressForceTon = 'Tonaj 0 veya daha büyük olmalıdır.'
+    }
 
-  if (form.bendingLengthMm != null && form.bendingLengthMm < 0) {
-    errors.bendingLengthMm = 'Bükme uzunluğu 0 veya daha büyük olmalıdır.'
+    if (form.bendingLengthMm != null && form.bendingLengthMm < 0) {
+      errors.bendingLengthMm = 'Bükme uzunluğu 0 veya daha büyük olmalıdır.'
+    }
+  } else {
+    if (form.powerKw != null && form.powerKw < 0) {
+      errors.powerKw = 'Lazer gücü 0 veya daha büyük olmalıdır.'
+    }
+
+    if (!form.workingAreaCode?.trim()) {
+      errors.workingAreaCode = 'Ebat zorunludur.'
+    }
   }
 
   if (form.image?.trim()) {

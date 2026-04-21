@@ -1,4 +1,4 @@
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   createAdminMachine,
   deleteAdminMachine,
@@ -6,6 +6,7 @@ import {
   updateAdminMachine
 } from '@/services/adminMachineService'
 import {
+  ADMIN_MACHINE_CATEGORIES,
   buildMachineTitle,
   createEmptyMachineForm,
   formToMachinePayload,
@@ -20,11 +21,13 @@ export function useAdminMachines() {
   const error = ref('')
   const editingId = ref(null)
   const searchTerm = ref('')
-  const selectedCategory = ref('all')
+  const selectedCategory = ref('abkant')
   const selectedStatus = ref('all')
   const sortKey = ref('title')
   const sortDirection = ref('asc')
-  const form = ref(createEmptyMachineForm())
+  const itemsPerPage = ref(5)
+  const currentPage = ref(1)
+  const form = ref(createEmptyMachineForm(selectedCategory.value))
   const toast = ref({
     show: false,
     message: '',
@@ -39,9 +42,7 @@ export function useAdminMachines() {
 
   const filteredMachines = computed(() => {
     const filtered = machines.value.filter((machine) => {
-      const matchesCategory =
-        selectedCategory.value === 'all' ||
-        machine.category === selectedCategory.value
+      const matchesCategory = machine.category === selectedCategory.value
 
       const matchesStatus =
         selectedStatus.value === 'all' ||
@@ -79,6 +80,13 @@ export function useAdminMachines() {
     })
   })
 
+  const totalPages = computed(() => Math.max(1, Math.ceil(filteredMachines.value.length / itemsPerPage.value)))
+
+  const paginatedMachines = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage.value
+    return filteredMachines.value.slice(start, start + itemsPerPage.value)
+  })
+
   function showToast(message, type = 'success') {
     toast.value = {
       show: true,
@@ -109,15 +117,30 @@ export function useAdminMachines() {
   function startEdit(machine) {
     error.value = ''
     formErrors.value = {}
+    selectedCategory.value = machine.category
     editingId.value = machine._id
     form.value = machineToForm(machine)
   }
 
-  function resetForm() {
+  function resetForm(category = selectedCategory.value) {
     editingId.value = null
     error.value = ''
     formErrors.value = {}
-    form.value = createEmptyMachineForm()
+    form.value = createEmptyMachineForm(category)
+  }
+
+  function setCategory(category) {
+    selectedCategory.value = category
+    resetForm(category)
+  }
+
+  function setCurrentPage(page) {
+    currentPage.value = Math.min(Math.max(page, 1), totalPages.value)
+  }
+
+  function setItemsPerPage(value) {
+    itemsPerPage.value = Number(value) || 5
+    currentPage.value = 1
   }
 
   function validateForm() {
@@ -145,7 +168,9 @@ export function useAdminMachines() {
     const watchedFieldsChanged =
       nextForm.family !== form.value.family ||
       nextForm.pressForceTon !== form.value.pressForceTon ||
-      nextForm.bendingLengthMm !== form.value.bendingLengthMm
+      nextForm.bendingLengthMm !== form.value.bendingLengthMm ||
+      nextForm.powerKw !== form.value.powerKw ||
+      nextForm.workingAreaCode !== form.value.workingAreaCode
 
     form.value = nextForm
 
@@ -265,11 +290,21 @@ export function useAdminMachines() {
   }
 
   onMounted(fetchMachines)
+  watch([selectedCategory, selectedStatus, searchTerm, itemsPerPage], () => {
+    currentPage.value = 1
+  })
+  watch(totalPages, (value) => {
+    if (currentPage.value > value) {
+      currentPage.value = value
+    }
+  })
   onBeforeUnmount(() => {
     clearTimeout(toastTimeout)
   })
 
   return {
+    allMachines: machines,
+    categories: ADMIN_MACHINE_CATEGORIES,
     confirmDelete,
     confirmDialog,
     clearFieldError,
@@ -282,10 +317,16 @@ export function useAdminMachines() {
     handleCreate,
     handleDelete,
     handleFormUpdate,
+    itemsPerPage,
     loading,
+    paginatedMachines,
     resetForm,
     saving,
+    setCurrentPage,
     searchTerm,
+    setCategory,
+    setItemsPerPage,
+    currentPage,
     selectedCategory,
     selectedStatus,
     setSort,
@@ -293,6 +334,7 @@ export function useAdminMachines() {
     sortKey,
     startEdit,
     toast,
+    totalPages,
     togglePublish
   }
 }

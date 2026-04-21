@@ -37,7 +37,7 @@ describe('ProtectedLayout', () => {
 
     expect(wrapper.text()).toContain('Protected Title')
     expect(wrapper.text()).toContain('Protected description')
-    expect(wrapper.text()).not.toContain('Erisim reddedildi')
+    expect(wrapper.text()).not.toContain('Erişim reddedildi')
   })
 
   it('shows the denial state and redirects to login when prompted', async () => {
@@ -51,8 +51,8 @@ describe('ProtectedLayout', () => {
       }
     })
 
-    expect(wrapper.text()).toContain('Erisim reddedildi')
-    expect(wrapper.text()).toContain('Bayi Girisine Don')
+    expect(wrapper.text()).toContain('Erişim reddedildi')
+    expect(wrapper.text()).toContain('Bayi Girişine Dön')
 
     await wrapper.get('button').trigger('click')
 

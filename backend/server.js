@@ -88,6 +88,10 @@ function buildMachinePayload(body = {}) {
     bendingLengthMm: body.bendingLengthMm === '' || body.bendingLengthMm == null
       ? null
       : Number(body.bendingLengthMm),
+    powerKw: body.powerKw === '' || body.powerKw == null
+      ? null
+      : Number(body.powerKw),
+    workingAreaCode: trimValue(body.workingAreaCode || ''),
     image: trimValue(body.image || ''),
     gallery: Array.isArray(body.gallery) ? body.gallery : [],
     specs: Array.isArray(body.specs)

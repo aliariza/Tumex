@@ -20,6 +20,8 @@ describe('adminMachineHelpers', () => {
       price: 0,
       pressForceTon: null,
       bendingLengthMm: null,
+      powerKw: null,
+      workingAreaCode: '',
       image: '',
       gallery: [],
       specs: [],
@@ -66,10 +68,11 @@ describe('adminMachineHelpers', () => {
 
   it('builds a title from the machine form fields', () => {
     expect(buildMachineTitle({
+      category: 'abkant',
       family: 'WC67K',
       pressForceTon: 100,
       bendingLengthMm: 3200
-    })).toBe('WC67K 100 Ton 3200 mm')
+    })).toBe('WC67K-100T-3200 Abkant tezgah')
   })
 
   it('returns validation errors for invalid form data', () => {

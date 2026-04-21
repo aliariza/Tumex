@@ -30,22 +30,21 @@
             </button>
           </th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', 'pressForceTon')">
-              Tonaj {{ sortKey === 'pressForceTon' ? sortArrow : '' }}
+            <button class="sort-btn" type="button" @click="$emit('sort', primaryMetricKey)">
+              {{ primaryMetricLabel }} {{ sortKey === primaryMetricKey ? sortArrow : '' }}
             </button>
           </th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', 'bendingLengthMm')">
-              Bükme Uzunluğu {{ sortKey === 'bendingLengthMm' ? sortArrow : '' }}
-            </button>
-          </th>
-          <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', 'price')">
-              Fiyat {{ sortKey === 'price' ? sortArrow : '' }}
+            <button class="sort-btn" type="button" @click="$emit('sort', secondaryMetricKey)">
+              <span class="sort-btn__multiline">
+                <span>{{ secondaryMetricLabelLine1 }}</span>
+                <span>{{ secondaryMetricLabelLine2 }}</span>
+              </span>
+              {{ sortKey === secondaryMetricKey ? sortArrow : '' }}
             </button>
           </th>
           <th>Durum</th>
-          <th>İşlem</th>
+          <th class="actions-header">İşlem</th>
         </tr>
       </thead>
 
@@ -66,9 +65,8 @@
           <td>{{ machine.family || '-' }}</td>
           <td>{{ machine.series || '-' }}</td>
           <td>{{ machine.model || '-' }}</td>
-          <td>{{ machine.pressForceTon ?? '-' }}</td>
-          <td>{{ machine.bendingLengthMm ?? '-' }}</td>
-          <td>{{ formatPrice(machine.price) }}</td>
+          <td>{{ formatMetric(machine, primaryMetricKey, primaryMetricSuffix) }}</td>
+          <td>{{ formatMetric(machine, secondaryMetricKey, secondaryMetricSuffix) }}</td>
 
           <td>
             <span :class="['status-badge', machine.isPublished ? 'published' : 'draft']">
@@ -83,11 +81,13 @@
               </button>
 
               <button
-                class="status-btn"
+                :class="['status-btn', machine.isPublished ? 'status-btn--published' : 'status-btn--draft']"
                 type="button"
                 @click="$emit('toggle-publish', machine)"
+                :title="machine.isPublished ? 'Pasife al' : 'Yayına al'"
               >
-                {{ machine.isPublished ? 'Pasife Al' : 'Yayına Al' }}
+                <Eye v-if="machine.isPublished" class="btn-icon" :size="16" />
+                <EyeOff v-else class="btn-icon" :size="16" />
               </button>
 
               <button class="danger-btn" type="button" @click="$emit('delete', machine._id)">
@@ -105,7 +105,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Pencil, Trash2 } from 'lucide-vue-next'
+import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-vue-next'
 
 defineOptions({ name: 'AdminMachinesTable' })
 
@@ -115,6 +115,10 @@ const props = defineProps({
   machines: {
     type: Array,
     required: true
+  },
+  category: {
+    type: String,
+    default: 'abkant'
   },
   sortKey: {
     type: String,
@@ -127,9 +131,48 @@ const props = defineProps({
 })
 
 const sortArrow = computed(() => (props.sortDirection === 'asc' ? '↑' : '↓'))
+const isAbkantCategory = computed(() => props.category === 'abkant')
+const primaryMetricKey = computed(() => (isAbkantCategory.value ? 'pressForceTon' : 'powerKw'))
+const secondaryMetricKey = computed(() => (isAbkantCategory.value ? 'bendingLengthMm' : 'workingAreaCode'))
+const primaryMetricLabel = computed(() => (isAbkantCategory.value ? 'Tonaj' : 'Lazer Gücü'))
+const secondaryMetricLabelLine1 = computed(() => (isAbkantCategory.value ? 'Bükme' : 'Ebat'))
+const secondaryMetricLabelLine2 = computed(() => (isAbkantCategory.value ? 'Uzunluğu' : ''))
+const primaryMetricSuffix = computed(() => (isAbkantCategory.value ? ' Ton' : ' kW'))
+const secondaryMetricSuffix = computed(() => (isAbkantCategory.value ? ' mm' : ''))
 
-function formatPrice(price) {
-  return new Intl.NumberFormat('tr-TR').format(price || 0)
+function formatMetric(machine, key, suffix = '') {
+  const value = resolveMetricValue(machine, key)
+
+  if (value == null || value === '') {
+    return '-'
+  }
+
+  return `${value}${suffix}`
+}
+
+function resolveMetricValue(machine, key) {
+  const directValue = machine?.[key]
+  if (directValue != null && directValue !== '') {
+    return directValue
+  }
+
+  const specs = Array.isArray(machine?.specs) ? machine.specs : []
+
+  if (key === 'powerKw') {
+    return specs.find((spec) =>
+      ['power', 'power_kw', 'laser_power', 'powerkw'].includes(String(spec?.key || '').toLowerCase()) ||
+      /g[uü]c|power|kw/i.test(String(spec?.label || ''))
+    )?.value || ''
+  }
+
+  if (key === 'workingAreaCode') {
+    return specs.find((spec) =>
+      ['size', 'working_area', 'working_area_code', 'ebat'].includes(String(spec?.key || '').toLowerCase()) ||
+      /ebat|size|area|alan/i.test(String(spec?.label || ''))
+    )?.value || ''
+  }
+
+  return directValue
 }
 </script>
 
@@ -146,7 +189,7 @@ function formatPrice(price) {
 .machines-table th,
 .machines-table td {
   border-bottom: 1px solid #e5e7eb;
-  padding: 14px 12px;
+  padding: 16px 12px;
   text-align: left;
   vertical-align: middle;
   white-space: nowrap;
@@ -155,16 +198,35 @@ function formatPrice(price) {
 .machines-table th {
   font-size: 13px;
   color: #6b7280;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: none;
   border: none;
   padding: 0;
   font: inherit;
   color: inherit;
   cursor: pointer;
+}
+
+.sort-btn__multiline {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
+.actions-header {
+  text-align: center !important;
+}
+
+.machines-table td {
+  font-size: 14px;
+  color: #243b53;
 }
 
 .thumb {
@@ -177,14 +239,15 @@ function formatPrice(price) {
 
 .no-image {
   color: #9ca3af;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .status-badge {
   display: inline-block;
   border-radius: 999px;
-  padding: 6px 10px;
-  font-size: 12px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .status-badge.published {
@@ -204,12 +267,16 @@ function formatPrice(price) {
 }
 
 .secondary-btn,
+.status-btn,
 .danger-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   border: none;
   border-radius: 0;
+  min-width: 42px;
+  min-height: 38px;
   padding: 8px 12px;
   font-size: 13px;
   cursor: pointer;
@@ -229,14 +296,14 @@ function formatPrice(price) {
   color: #991b1b;
 }
 
-.status-btn {
-  border: none;
-  border-radius: 0;
-  padding: 8px 12px;
-  font-size: 13px;
-  cursor: pointer;
-  background: #dbeafe;
-  color: #1d4ed8;
+.status-btn--published {
+  background: #ecfdf5;
+  color: #15803d;
+}
+
+.status-btn--draft {
+  background: #fff1f2;
+  color: #b91c1c;
 }
 
 .empty-state {

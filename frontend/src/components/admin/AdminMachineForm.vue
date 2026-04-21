@@ -2,15 +2,6 @@
   <form class="machine-form" novalidate @submit.prevent="$emit('submit')">
     <div class="field-grid">
       <div class="field-group">
-        <select :value="form.category" @change="updateField('category', $event.target.value)">
-          <option value="abkant">Abkant</option>
-          <option value="laser-cutting">Lazer Kesim</option>
-          <option value="laser-welding">Lazer Kaynak</option>
-        </select>
-        <p v-if="errors.category" class="field-error">{{ errors.category }}</p>
-      </div>
-
-      <div class="field-group">
         <input :value="form.brand" @input="updateField('brand', $event.target.value)" type="text" placeholder="Marka" />
         <p v-if="errors.brand" class="field-error">{{ errors.brand }}</p>
       </div>
@@ -35,7 +26,7 @@
         <p v-if="errors.title" class="field-error">{{ errors.title }}</p>
       </div>
 
-      <div class="field-group">
+      <div v-if="isAbkantCategory" class="field-group">
         <input
           :value="form.pressForceTon ?? ''"
           @input="updateField('pressForceTon', $event.target.value === '' ? null : Number($event.target.value))"
@@ -46,7 +37,7 @@
         <p v-if="errors.pressForceTon" class="field-error">{{ errors.pressForceTon }}</p>
       </div>
 
-      <div class="field-group">
+      <div v-if="isAbkantCategory" class="field-group">
         <input
           :value="form.bendingLengthMm ?? ''"
           @input="updateField('bendingLengthMm', $event.target.value === '' ? null : Number($event.target.value))"
@@ -55,6 +46,28 @@
           placeholder="Bükme Uzunluğu (mm)"
         />
         <p v-if="errors.bendingLengthMm" class="field-error">{{ errors.bendingLengthMm }}</p>
+      </div>
+
+      <div v-if="!isAbkantCategory" class="field-group">
+        <input
+          :value="form.powerKw ?? ''"
+          @input="updateField('powerKw', $event.target.value === '' ? null : Number($event.target.value))"
+          type="number"
+          min="0"
+          step="0.1"
+          placeholder="Lazer Gücü (kW)"
+        />
+        <p v-if="errors.powerKw" class="field-error">{{ errors.powerKw }}</p>
+      </div>
+
+      <div v-if="!isAbkantCategory" class="field-group">
+        <input
+          :value="form.workingAreaCode"
+          @input="updateField('workingAreaCode', $event.target.value)"
+          type="text"
+          placeholder="Ebat (örn: 3000x1500)"
+        />
+        <p v-if="errors.workingAreaCode" class="field-error">{{ errors.workingAreaCode }}</p>
       </div>
 
       <div class="field-group">
@@ -152,6 +165,8 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
 defineOptions({ name: 'AdminMachineForm' })
 
 const props = defineProps({
@@ -170,10 +185,15 @@ const props = defineProps({
   errors: {
     type: Object,
     default: () => ({})
+  },
+  activeCategory: {
+    type: String,
+    default: 'abkant'
   }
 })
 
 const emit = defineEmits(['update:form', 'submit', 'cancel', 'clear-error'])
+const isAbkantCategory = computed(() => props.activeCategory === 'abkant')
 
 function updateField(field, value) {
   emit('clear-error', field)

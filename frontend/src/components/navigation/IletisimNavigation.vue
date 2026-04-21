@@ -8,7 +8,7 @@
       </li>
       <li :class="{ active: activeMenu === 'bayi' }">
         <router-link to="/iletisim/bayi">
-          <h4>Bayi Giris</h4>
+          <h4>Bayi Giriş</h4>
         </router-link>
       </li>
     </ul>
