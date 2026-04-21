@@ -109,8 +109,8 @@ onMounted(() => {
 .admin-users-page {
   position: relative;
   max-width: 1280px;
-  margin: 0 auto;
-  padding: 6rem 2rem 8rem;
+  margin: 2.4rem auto 0;
+  padding: 0 2rem 8rem;
   display: grid;
   gap: 2rem;
   overflow: hidden;
@@ -316,6 +316,7 @@ onMounted(() => {
 @media (max-width: 700px) {
   .admin-users-page {
     min-height: calc(100vh - 16rem);
+    margin-top: 1.6rem;
     padding-inline: 1.6rem;
   }
 
