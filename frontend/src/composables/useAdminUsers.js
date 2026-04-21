@@ -1,5 +1,5 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { getAdminUsers, updateAdminUserRole } from '@/services/adminUserService'
+import { deleteAdminUser, getAdminUsers, updateAdminUserRole } from '@/services/adminUserService'
 
 const ROLE_LABELS = {
   user: 'Public',
@@ -14,6 +14,11 @@ export function useAdminUsers() {
   const savingId = ref(null)
   const searchTerm = ref('')
   const selectedRole = ref('all')
+  const confirmDialog = ref({
+    show: false,
+    userId: null,
+    userEmail: ''
+  })
   const toast = ref({
     show: false,
     message: '',
@@ -85,14 +90,56 @@ export function useAdminUsers() {
     }
   }
 
+  function handleDelete(user) {
+    confirmDialog.value = {
+      show: true,
+      userId: user._id,
+      userEmail: user.email || ''
+    }
+  }
+
+  function closeDeleteDialog() {
+    confirmDialog.value = {
+      show: false,
+      userId: null,
+      userEmail: ''
+    }
+  }
+
+  async function confirmDelete() {
+    const id = confirmDialog.value.userId
+    if (!id) return
+
+    savingId.value = id
+    error.value = ''
+
+    try {
+      await deleteAdminUser(id)
+      users.value = users.value.filter((user) => user._id !== id)
+      showToast('Kullanıcı silindi.')
+      closeDeleteDialog()
+    } catch (requestError) {
+      const message = requestError.response?.data?.message || 'Kullanıcı silinemedi'
+      error.value = message
+      showToast(message, 'error')
+      closeDeleteDialog()
+    } finally {
+      savingId.value = null
+    }
+  }
+
   onBeforeUnmount(() => {
     clearTimeout(toastTimeout)
   })
 
   return {
+    closeDeleteDialog,
+    confirmDelete,
+    confirmDialog,
     error,
     fetchUsers,
     filteredUsers,
+    handleDelete,
     loading,
     savingId,
     searchTerm,

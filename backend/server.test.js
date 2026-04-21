@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import serverModule from './server'
 
 const {
+  createAdminDeleteUserHandler,
   createAdminListUsersHandler,
   createAdminUpdateUserRoleHandler,
   createCorsOriginMatcher,
@@ -23,6 +24,7 @@ function createUserModel() {
   UserModel.find = vi.fn()
   UserModel.findById = vi.fn()
   UserModel.findByIdAndUpdate = vi.fn()
+  UserModel.findByIdAndDelete = vi.fn()
 
   return UserModel
 }
@@ -304,6 +306,41 @@ describe('backend routes', () => {
     expect(UserModel.findById).not.toHaveBeenCalled()
     expect(UserModel.findByIdAndUpdate).not.toHaveBeenCalled()
     expect(roleChangeNotifier).not.toHaveBeenCalled()
+  })
+
+  it('deletes a user from the admin user management screen', async () => {
+    UserModel.findByIdAndDelete.mockResolvedValue({
+      _id: 'user-3',
+      email: 'remove-me@example.com'
+    })
+
+    const handler = createAdminDeleteUserHandler({ userModel: UserModel })
+    const req = {
+      params: { id: 'user-3' },
+      user: { _id: 'admin-1', role: 'admin' }
+    }
+    const res = createResponse()
+
+    await handler(req, res)
+
+    expect(UserModel.findByIdAndDelete).toHaveBeenCalledWith('user-3')
+    expect(res.statusCode).toBe(200)
+    expect(res.body).toEqual({ message: 'Kullanıcı silindi' })
+  })
+
+  it('prevents an admin from deleting their own account', async () => {
+    const handler = createAdminDeleteUserHandler({ userModel: UserModel })
+    const req = {
+      params: { id: 'admin-1' },
+      user: { _id: 'admin-1', role: 'admin' }
+    }
+    const res = createResponse()
+
+    await handler(req, res)
+
+    expect(res.statusCode).toBe(400)
+    expect(res.body.message).toBe('Kendi admin hesabınızı silemezsiniz')
+    expect(UserModel.findByIdAndDelete).not.toHaveBeenCalled()
   })
 
   it('allows configured frontend origins for CORS', () => {

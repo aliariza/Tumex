@@ -192,6 +192,13 @@ function createApp(options = {}) {
     createAdminUpdateUserRoleHandler({ userModel, roleChangeNotifier })
   )
 
+  app.delete(
+    '/admin/users/:id',
+    authMiddleware,
+    requireRole('admin'),
+    createAdminDeleteUserHandler({ userModel })
+  )
+
   app.post('/admin/machines', authMiddleware, requireRole('admin'), async (req, res) => {
     try {
       const machine = new Machine(buildMachinePayload(req.body))
@@ -483,6 +490,26 @@ function createAdminUpdateUserRoleHandler({
   }
 }
 
+function createAdminDeleteUserHandler({ userModel = User } = {}) {
+  return async (req, res) => {
+    try {
+      if (String(req.user?._id) === String(req.params.id)) {
+        return res.status(400).json({ message: 'Kendi admin hesabınızı silemezsiniz' })
+      }
+
+      const deletedUser = await userModel.findByIdAndDelete(req.params.id)
+
+      if (!deletedUser) {
+        return res.status(404).json({ message: 'Kullanıcı bulunamadı' })
+      }
+
+      return res.status(200).json({ message: 'Kullanıcı silindi' })
+    } catch (error) {
+      return sendInternalServerError(res, '/admin/users/:id DELETE', error)
+    }
+  }
+}
+
 async function connectToDatabase(uri = MONGO_URI) {
   await mongoose.connect(uri)
   console.log('MongoDB bağlandı')
@@ -513,6 +540,7 @@ if (require.main === module) {
 
 module.exports = {
   createApp,
+  createAdminDeleteUserHandler,
   createAdminListUsersHandler,
   createAdminUpdateUserRoleHandler,
   createCorsOriginMatcher,

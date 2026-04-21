@@ -8,6 +8,15 @@
       :message="toast.message"
       :type="toast.type"
     />
+    <ConfirmDialog
+      :show="confirmDialog.show"
+      title="Kullanıcıyı Sil"
+      :message="`${
+        confirmDialog.userEmail || 'Bu kullanıcıyı'
+      } silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`"
+      @confirm="confirmDelete"
+      @cancel="closeDeleteDialog"
+    />
 
     <header class="page-header card card--hero">
       <div class="page-header__copy">
@@ -58,6 +67,7 @@
         v-if="!loading"
         :users="filteredUsers"
         :saving-id="savingId"
+        @delete="handleDelete"
         @set-role="setUserRole"
       />
     </section>
@@ -69,14 +79,19 @@ import { onMounted } from 'vue'
 import AdminPanelNav from '../../components/admin/AdminPanelNav.vue'
 import AdminUsersTable from '../../components/admin/AdminUsersTable.vue'
 import AppToast from '../../components/ui/AppToast.vue'
+import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
 import { useAdminUsers } from '../../composables/useAdminUsers'
 
 defineOptions({ name: 'AdminUsersView' })
 
 const {
+  closeDeleteDialog,
+  confirmDelete,
+  confirmDialog,
   error,
   fetchUsers,
   filteredUsers,
+  handleDelete,
   loading,
   savingId,
   searchTerm,

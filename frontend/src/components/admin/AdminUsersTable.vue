@@ -52,6 +52,14 @@
               >
                 Admin
               </button>
+              <button
+                type="button"
+                class="danger-btn"
+                :disabled="savingId === user._id"
+                @click="$emit('delete', user)"
+              >
+                <Trash2 :size="16" />
+              </button>
             </div>
           </td>
         </tr>
@@ -64,9 +72,11 @@
 </template>
 
 <script setup>
+import { Trash2 } from 'lucide-vue-next'
+
 defineOptions({ name: 'AdminUsersTable' })
 
-defineEmits(['set-role'])
+defineEmits(['set-role', 'delete'])
 
 defineProps({
   users: {
@@ -158,7 +168,8 @@ const roleLabels = {
 
 .ghost-btn,
 .primary-btn,
-.dark-btn {
+.dark-btn,
+.danger-btn {
   border: 1px solid transparent;
   padding: 9px 12px;
   font-size: 13px;
@@ -190,9 +201,20 @@ const roleLabels = {
   color: #fff;
 }
 
+.danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4rem;
+  background: #fff1f2;
+  border-color: rgba(185, 28, 28, 0.12);
+  color: #b91c1c;
+}
+
 .ghost-btn:hover:not(:disabled),
 .primary-btn:hover:not(:disabled),
-.dark-btn:hover:not(:disabled) {
+.dark-btn:hover:not(:disabled),
+.danger-btn:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
