@@ -23,12 +23,18 @@ const items = [
 
 <style scoped>
 .admin-panel-nav {
+  position: relative;
+  z-index: 3;
+  isolation: isolate;
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
 .nav-link {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;

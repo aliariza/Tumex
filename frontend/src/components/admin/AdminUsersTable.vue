@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { Trash2, User } from 'lucide-vue-next'
+import { Building2, ShieldCheck, Trash2, User } from 'lucide-vue-next'
 import { ADMIN_USER_ROLE_ICONS, ADMIN_USER_ROLE_LABELS } from '@/services/adminUserMeta'
 
 defineOptions({ name: 'AdminUsersTable' })
