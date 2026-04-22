@@ -84,7 +84,8 @@
 </template>
 
 <script setup>
-import { Building2, ShieldCheck, Trash2, User } from 'lucide-vue-next'
+import { Trash2, User } from 'lucide-vue-next'
+import { ADMIN_USER_ROLE_ICONS, ADMIN_USER_ROLE_LABELS } from '@/services/adminUserMeta'
 
 defineOptions({ name: 'AdminUsersTable' })
 
@@ -101,17 +102,8 @@ defineProps({
   }
 })
 
-const roleLabels = {
-  user: 'Genel',
-  dealer: 'Bayi',
-  admin: 'Admin'
-}
-
-const roleIcons = {
-  user: User,
-  dealer: Building2,
-  admin: ShieldCheck
-}
+const roleLabels = ADMIN_USER_ROLE_LABELS
+const roleIcons = ADMIN_USER_ROLE_ICONS
 </script>
 
 <style scoped>

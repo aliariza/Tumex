@@ -56,6 +56,18 @@ function createMailTransport(config = {}) {
   })
 }
 
+function createNotifierConfig(config = {}) {
+  return {
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    user: config.user,
+    pass: config.pass,
+    from: config.from,
+    recipient: config.recipient
+  }
+}
+
 function createAccessRequestNotifier(config = {}) {
   if (!isMailConfigured(config)) {
     return async () => false
@@ -97,6 +109,7 @@ function createRoleChangeNotifier(config = {}) {
 module.exports = {
   buildNotificationText,
   buildRoleChangeText,
+  createNotifierConfig,
   createAccessRequestNotifier,
   createRoleChangeNotifier
 }

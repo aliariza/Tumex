@@ -90,6 +90,70 @@ export function buildMachineTitle(form = {}) {
   return [series, power, size].filter(Boolean).join('-').concat(' Lazer tezgah').trim()
 }
 
+export function resolveMachineMetricValue(machine = {}, key) {
+  const directValue = machine?.[key]
+  if (directValue != null && directValue !== '') {
+    return directValue
+  }
+
+  const specs = Array.isArray(machine?.specs) ? machine.specs : []
+
+  if (key === 'powerKw') {
+    const specValue = specs.find((spec) =>
+      ['power', 'power_kw', 'laser_power', 'powerkw'].includes(String(spec?.key || '').toLowerCase()) ||
+      /g[uü]c|power|kw/i.test(String(spec?.label || ''))
+    )?.value
+
+    if (specValue) {
+      const match = String(specValue).match(/(\d+(?:[.,]\d+)?)\s*(?:KW|W)/i)
+      if (match) {
+        const parsed = Number(match[1].replace(',', '.'))
+        if (Number.isFinite(parsed)) {
+          return /W/i.test(String(specValue)) && !/KW/i.test(String(specValue)) ? parsed / 1000 : parsed
+        }
+      }
+
+      return specValue
+    }
+
+    const modelOrTitle = `${machine?.model || ''} ${machine?.title || ''}`
+    const match = modelOrTitle.match(/(?:^|[-\s])(\d+(?:[.,]\d+)?)\s*KW(?:$|[-\s])/i)
+    if (match) {
+      const parsed = Number(match[1].replace(',', '.'))
+      return Number.isFinite(parsed) ? parsed : ''
+    }
+
+    const wattMatch = modelOrTitle.match(/(?:^|[-\s])(\d{4,5})\s*W(?:$|[-\s])/i)
+    if (wattMatch) {
+      const parsed = Number(wattMatch[1])
+      return Number.isFinite(parsed) ? parsed / 1000 : ''
+    }
+
+    return ''
+  }
+
+  if (key === 'workingAreaCode') {
+    const specValue = specs.find((spec) =>
+      ['size', 'working_area', 'working_area_code', 'ebat'].includes(String(spec?.key || '').toLowerCase()) ||
+      /ebat|size|area|alan/i.test(String(spec?.label || ''))
+    )?.value
+
+    if (specValue) {
+      return specValue
+    }
+
+    const modelOrTitle = `${machine?.model || ''} ${machine?.title || ''}`
+    const match = modelOrTitle.match(/(?:^|[-\s])(\d{4})(?:$|[-\s])/)
+    if (match) {
+      return match[1]
+    }
+
+    return ''
+  }
+
+  return directValue
+}
+
 export function validateMachineForm(form = {}) {
   const errors = {}
 

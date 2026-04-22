@@ -1,11 +1,7 @@
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { deleteAdminUser, getAdminUsers, updateAdminUserRole } from '@/services/adminUserService'
-
-const ROLE_LABELS = {
-  user: 'Genel',
-  dealer: 'Bayi',
-  admin: 'Admin'
-}
+import { useAppToast } from '@/composables/useAppToast'
+import { ADMIN_USER_ROLE_LABELS } from '@/services/adminUserMeta'
 
 export function useAdminUsers() {
   const users = ref([])
@@ -19,12 +15,7 @@ export function useAdminUsers() {
     userId: null,
     userEmail: ''
   })
-  const toast = ref({
-    show: false,
-    message: '',
-    type: 'success'
-  })
-  let toastTimeout = null
+  const { toast, toastApi } = useAppToast()
 
   const filteredUsers = computed(() => {
     const keyword = searchTerm.value.trim().toLowerCase()
@@ -43,19 +34,6 @@ export function useAdminUsers() {
       return matchesRole && matchesKeyword
     })
   })
-
-  function showToast(message, type = 'success') {
-    toast.value = {
-      show: true,
-      message,
-      type
-    }
-
-    clearTimeout(toastTimeout)
-    toastTimeout = setTimeout(() => {
-      toast.value.show = false
-    }, 2500)
-  }
 
   async function fetchUsers() {
     loading.value = true
@@ -80,11 +58,11 @@ export function useAdminUsers() {
       users.value = users.value.map((currentUser) =>
         currentUser._id === data._id ? data : currentUser
       )
-      showToast(`${data.email} kullanıcısının rolü ${ROLE_LABELS[role]} olarak güncellendi.`)
+      toastApi.success(`${data.email} kullanıcısının rolü ${ADMIN_USER_ROLE_LABELS[role]} olarak güncellendi.`)
     } catch (requestError) {
       const message = requestError.response?.data?.message || 'Rol güncellenemedi'
       error.value = message
-      showToast(message, 'error')
+      toastApi.error(message)
     } finally {
       savingId.value = null
     }
@@ -116,21 +94,17 @@ export function useAdminUsers() {
     try {
       await deleteAdminUser(id)
       users.value = users.value.filter((user) => user._id !== id)
-      showToast('Kullanıcı silindi.')
+      toastApi.success('Kullanıcı silindi.')
       closeDeleteDialog()
     } catch (requestError) {
       const message = requestError.response?.data?.message || 'Kullanıcı silinemedi'
       error.value = message
-      showToast(message, 'error')
+      toastApi.error(message)
       closeDeleteDialog()
     } finally {
       savingId.value = null
     }
   }
-
-  onBeforeUnmount(() => {
-    clearTimeout(toastTimeout)
-  })
 
   return {
     closeDeleteDialog,

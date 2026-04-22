@@ -8,6 +8,7 @@ const authenticateToken = require('./middleware/authMiddleware')
 const requireRole = require('./middleware/requireRole')
 const Machine = require('./models/Machine')
 const {
+  createNotifierConfig,
   createAccessRequestNotifier,
   createRoleChangeNotifier
 } = require('./services/accessRequestNotifier')
@@ -114,6 +115,16 @@ function sendInternalServerError(res, scope, error) {
 }
 
 function createApp(options = {}) {
+  const notifierConfig = createNotifierConfig({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_SECURE,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+    from: process.env.SMTP_FROM,
+    recipient: process.env.ACCESS_REQUEST_EMAIL || 'artumay@gmail.com'
+  })
+
   const {
     userModel = User,
     bcryptLib = bcrypt,
@@ -122,24 +133,8 @@ function createApp(options = {}) {
     corsOrigin = process.env.FRONTEND_URL || 'http://localhost:5173',
     corsOriginRegex = process.env.FRONTEND_URL_REGEX || '',
     tokenSecret = process.env.TOKEN_SECRET,
-    accessRequestNotifier = createAccessRequestNotifier({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: process.env.SMTP_SECURE,
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-      from: process.env.SMTP_FROM,
-      recipient: process.env.ACCESS_REQUEST_EMAIL || 'artumay@gmail.com'
-    }),
-    roleChangeNotifier = createRoleChangeNotifier({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: process.env.SMTP_SECURE,
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-      from: process.env.SMTP_FROM,
-      recipient: process.env.ACCESS_REQUEST_EMAIL || 'artumay@gmail.com'
-    })
+    accessRequestNotifier = createAccessRequestNotifier(notifierConfig),
+    roleChangeNotifier = createRoleChangeNotifier(notifierConfig)
   } = options
 
   if (!tokenSecret) {
