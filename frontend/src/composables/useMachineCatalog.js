@@ -2,6 +2,20 @@ import { computed, ref, toValue, watch } from 'vue'
 import machinesData from '@/data/machinesData.js'
 import { fetchMachines } from '@/api/machines.js'
 
+function isUsablePublicImagePath(value) {
+  const image = String(value || '').trim()
+
+  if (!image) return false
+
+  return (
+    image.startsWith('http://') ||
+    image.startsWith('https://') ||
+    image.startsWith('/assets/') ||
+    image.startsWith('/images/') ||
+    image.startsWith('/')
+  )
+}
+
 function getCatalogEntry(machineType) {
   return machinesData[machineType] || {}
 }
@@ -84,7 +98,7 @@ function buildSeriesCards(machineType, machines) {
     )
     .map(([series, seriesMachines]) => {
       const firstWithImage = seriesMachines.find((machine) =>
-        String(machine?.image || '').trim()
+        isUsablePublicImagePath(machine?.image)
       )
 
       return {
