@@ -71,17 +71,6 @@
       </div>
 
       <div class="field-group">
-        <input
-          :value="form.price"
-          @input="updateField('price', $event.target.value === '' ? 0 : Number($event.target.value))"
-          type="number"
-          min="0"
-          placeholder="Fiyat"
-        />
-        <p v-if="errors.price" class="field-error">{{ errors.price }}</p>
-      </div>
-
-      <div class="field-group">
         <input :value="form.description" @input="updateField('description', $event.target.value)" type="text" placeholder="Açıklama" />
       </div>
 

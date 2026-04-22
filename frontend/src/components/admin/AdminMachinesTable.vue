@@ -60,7 +60,7 @@
             <span v-else class="no-image">Yok</span>
           </td>
 
-          <td>{{ machine.title || '-' }}</td>
+          <td>{{ displayTitle(machine) }}</td>
           <td>{{ machine.brand || '-' }}</td>
           <td>{{ machine.family || '-' }}</td>
           <td>{{ machine.series || '-' }}</td>
@@ -106,6 +106,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-vue-next'
+import { buildMachineTitle } from '@/services/adminMachineHelpers'
 
 defineOptions({ name: 'AdminMachinesTable' })
 
@@ -159,20 +160,63 @@ function resolveMetricValue(machine, key) {
   const specs = Array.isArray(machine?.specs) ? machine.specs : []
 
   if (key === 'powerKw') {
-    return specs.find((spec) =>
+    const specValue = specs.find((spec) =>
       ['power', 'power_kw', 'laser_power', 'powerkw'].includes(String(spec?.key || '').toLowerCase()) ||
       /g[uü]c|power|kw/i.test(String(spec?.label || ''))
-    )?.value || ''
+    )?.value
+
+    if (specValue) {
+      const match = String(specValue).match(/(\d+(?:[.,]\d+)?)\s*(?:KW|W)/i)
+      if (match) {
+        const parsed = Number(match[1].replace(',', '.'))
+        if (Number.isFinite(parsed)) {
+          return /W/i.test(String(specValue)) && !/KW/i.test(String(specValue)) ? parsed / 1000 : parsed
+        }
+      }
+
+      return specValue
+    }
+
+    const modelOrTitle = `${machine?.model || ''} ${machine?.title || ''}`
+    const match = modelOrTitle.match(/(?:^|[-\s])(\d+(?:[.,]\d+)?)\s*KW(?:$|[-\s])/i)
+    if (match) {
+      const parsed = Number(match[1].replace(',', '.'))
+      return Number.isFinite(parsed) ? parsed : ''
+    }
+
+    const wattMatch = modelOrTitle.match(/(?:^|[-\s])(\d{4,5})\s*W(?:$|[-\s])/i)
+    if (wattMatch) {
+      const parsed = Number(wattMatch[1])
+      return Number.isFinite(parsed) ? parsed / 1000 : ''
+    }
+
+    return ''
   }
 
   if (key === 'workingAreaCode') {
-    return specs.find((spec) =>
+    const specValue = specs.find((spec) =>
       ['size', 'working_area', 'working_area_code', 'ebat'].includes(String(spec?.key || '').toLowerCase()) ||
       /ebat|size|area|alan/i.test(String(spec?.label || ''))
-    )?.value || ''
+    )?.value
+
+    if (specValue) {
+      return specValue
+    }
+
+    const modelOrTitle = `${machine?.model || ''} ${machine?.title || ''}`
+    const match = modelOrTitle.match(/(?:^|[-\s])(\d{4})(?:$|[-\s])/)
+    if (match) {
+      return match[1]
+    }
+
+    return ''
   }
 
   return directValue
+}
+
+function displayTitle(machine) {
+  return buildMachineTitle(machine) || machine?.title || '-'
 }
 </script>
 

@@ -166,6 +166,7 @@ export function useAdminMachines() {
 
   function handleFormUpdate(nextForm) {
     const watchedFieldsChanged =
+      nextForm.series !== form.value.series ||
       nextForm.family !== form.value.family ||
       nextForm.pressForceTon !== form.value.pressForceTon ||
       nextForm.bendingLengthMm !== form.value.bendingLengthMm ||

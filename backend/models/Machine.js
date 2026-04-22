@@ -28,7 +28,7 @@ const machineSchema = new mongoose.Schema(
   {
     category: {
       type: String,
-      enum: ['abkant', 'laser-cutting', 'laser-welding'],
+      enum: ['abkant', 'laser-cutting'],
       required: true,
       index: true
     },

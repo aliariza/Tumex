@@ -36,6 +36,8 @@ export function normalizeMachineSpecs(specs = []) {
 }
 
 export function machineToForm(machine = {}) {
+  const normalizedTitle = buildMachineTitle(machine) || machine.title || ''
+
   return {
     ...createEmptyMachineForm(machine.category || 'abkant'),
     category: machine.category || 'abkant',
@@ -43,7 +45,7 @@ export function machineToForm(machine = {}) {
     family: machine.family || '',
     series: machine.series || '',
     model: machine.model || '',
-    title: machine.title || '',
+    title: normalizedTitle,
     description: machine.description || '',
     price: machine.price || 0,
     pressForceTon: machine.pressForceTon ?? null,
@@ -69,9 +71,9 @@ export function formToMachinePayload(form = {}, overrides = {}) {
 }
 
 export function buildMachineTitle(form = {}) {
-  const familyOrSeries = form.family?.trim() || form.series?.trim() || ''
+  const series = form.series?.trim() || form.family?.trim() || ''
 
-  if (!familyOrSeries) {
+  if (!series) {
     return ''
   }
 
@@ -79,13 +81,13 @@ export function buildMachineTitle(form = {}) {
     const ton = form.pressForceTon != null && form.pressForceTon !== '' ? `${form.pressForceTon}T` : ''
     const length = form.bendingLengthMm != null && form.bendingLengthMm !== '' ? `${form.bendingLengthMm}` : ''
 
-    return [familyOrSeries, ton, length].filter(Boolean).join('-').concat(' Abkant tezgah').trim()
+    return [series, ton, length].filter(Boolean).join('-').concat(' Abkant tezgah').trim()
   }
 
   const power = form.powerKw != null && form.powerKw !== '' ? `${form.powerKw}KW` : ''
   const size = form.workingAreaCode?.trim() || ''
 
-  return [familyOrSeries, power, size].filter(Boolean).join('-').concat(' Lazer tezgah').trim()
+  return [series, power, size].filter(Boolean).join('-').concat(' Lazer tezgah').trim()
 }
 
 export function validateMachineForm(form = {}) {

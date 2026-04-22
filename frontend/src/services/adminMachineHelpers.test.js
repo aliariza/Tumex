@@ -69,10 +69,21 @@ describe('adminMachineHelpers', () => {
   it('builds a title from the machine form fields', () => {
     expect(buildMachineTitle({
       category: 'abkant',
-      family: 'WC67K',
+      family: 'Abkant',
+      series: 'WC67K',
       pressForceTon: 100,
       bendingLengthMm: 3200
     })).toBe('WC67K-100T-3200 Abkant tezgah')
+  })
+
+  it('builds the expected laser title from series, power and size', () => {
+    expect(buildMachineTitle({
+      category: 'laser-cutting',
+      family: 'Lazer',
+      series: 'DLC',
+      powerKw: 6,
+      workingAreaCode: '8025'
+    })).toBe('DLC-6KW-8025 Lazer tezgah')
   })
 
   it('returns validation errors for invalid form data', () => {
