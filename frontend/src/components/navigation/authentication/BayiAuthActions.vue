@@ -1,6 +1,6 @@
 <template>
   <section class="dealer-auth">
-    <p class="dealer-auth__eyebrow">Bayi Alanı</p>
+    <p class="dealer-auth__eyebrow">BAYİ ALANI</p>
     <h1>Bayi girişine hoş geldiniz</h1>
     <p class="dealer-auth__message">
       Hesabınız onaylandığında bayi fiyatları, korunaklı sayfalar ve özel içeriklere erişebilirsiniz.

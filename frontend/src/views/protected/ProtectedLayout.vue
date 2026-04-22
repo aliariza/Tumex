@@ -5,7 +5,7 @@
 
     <div class="protected-layout__card">
       <template v-if="isAuthenticated">
-        <p class="protected-layout__eyebrow">Bayi Alanı • Erişim Açık</p>
+        <p class="protected-layout__eyebrow">BAYİ ALANI • ERİŞİM AÇIK</p>
         <div class="protected-layout__copy">
           <h1>{{ title }}</h1>
           <p class="protected-layout__description">{{ description }}</p>
