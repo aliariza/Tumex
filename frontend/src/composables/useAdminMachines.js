@@ -40,6 +40,82 @@ export function useAdminMachines() {
   const formErrors = ref({})
   let toastTimeout = null
 
+  function resolveMetricValue(machine, key) {
+    const directValue = machine?.[key]
+    if (directValue != null && directValue !== '') {
+      return directValue
+    }
+
+    const specs = Array.isArray(machine?.specs) ? machine.specs : []
+
+    if (key === 'powerKw') {
+      const specValue = specs.find((spec) =>
+        ['power', 'power_kw', 'laser_power', 'powerkw'].includes(String(spec?.key || '').toLowerCase()) ||
+        /g[uü]c|power|kw/i.test(String(spec?.label || ''))
+      )?.value
+
+      if (specValue) {
+        const match = String(specValue).match(/(\d+(?:[.,]\d+)?)\s*(?:KW|W)/i)
+        if (match) {
+          const parsed = Number(match[1].replace(',', '.'))
+          if (Number.isFinite(parsed)) {
+            return /W/i.test(String(specValue)) && !/KW/i.test(String(specValue)) ? parsed / 1000 : parsed
+          }
+        }
+
+        return specValue
+      }
+
+      const modelOrTitle = `${machine?.model || ''} ${machine?.title || ''}`
+      const match = modelOrTitle.match(/(?:^|[-\s])(\d+(?:[.,]\d+)?)\s*KW(?:$|[-\s])/i)
+      if (match) {
+        const parsed = Number(match[1].replace(',', '.'))
+        return Number.isFinite(parsed) ? parsed : ''
+      }
+
+      const wattMatch = modelOrTitle.match(/(?:^|[-\s])(\d{4,5})\s*W(?:$|[-\s])/i)
+      if (wattMatch) {
+        const parsed = Number(wattMatch[1])
+        return Number.isFinite(parsed) ? parsed / 1000 : ''
+      }
+
+      return ''
+    }
+
+    if (key === 'workingAreaCode') {
+      const specValue = specs.find((spec) =>
+        ['size', 'working_area', 'working_area_code', 'ebat'].includes(String(spec?.key || '').toLowerCase()) ||
+        /ebat|size|area|alan/i.test(String(spec?.label || ''))
+      )?.value
+
+      if (specValue) {
+        return specValue
+      }
+
+      const modelOrTitle = `${machine?.model || ''} ${machine?.title || ''}`
+      const match = modelOrTitle.match(/(?:^|[-\s])(\d{4})(?:$|[-\s])/)
+      if (match) {
+        return match[1]
+      }
+
+      return ''
+    }
+
+    return directValue
+  }
+
+  function resolveSortValue(machine, key) {
+    if (key === 'title') {
+      return buildMachineTitle(machine) || machine?.title || ''
+    }
+
+    if (key === 'powerKw' || key === 'workingAreaCode') {
+      return resolveMetricValue(machine, key)
+    }
+
+    return machine?.[key]
+  }
+
   const filteredMachines = computed(() => {
     const filtered = machines.value.filter((machine) => {
       const matchesCategory = machine.category === selectedCategory.value
@@ -64,19 +140,28 @@ export function useAdminMachines() {
     })
 
     return [...filtered].sort((a, b) => {
-      const aValue = a[sortKey.value]
-      const bValue = b[sortKey.value]
+      const aValue = resolveSortValue(a, sortKey.value)
+      const bValue = resolveSortValue(b, sortKey.value)
 
       if (typeof aValue === 'number' && typeof bValue === 'number') {
         return sortDirection.value === 'asc' ? aValue - bValue : bValue - aValue
       }
 
+      const aNumber = Number(aValue)
+      const bNumber = Number(bValue)
+      if (Number.isFinite(aNumber) && Number.isFinite(bNumber) && aValue !== '' && bValue !== '') {
+        return sortDirection.value === 'asc' ? aNumber - bNumber : bNumber - aNumber
+      }
+
       const aText = String(aValue || '').toLowerCase()
       const bText = String(bValue || '').toLowerCase()
 
-      if (aText < bText) return sortDirection.value === 'asc' ? -1 : 1
-      if (aText > bText) return sortDirection.value === 'asc' ? 1 : -1
-      return 0
+      const comparison = aText.localeCompare(bText, undefined, {
+        numeric: true,
+        sensitivity: 'base'
+      })
+
+      return sortDirection.value === 'asc' ? comparison : -comparison
     })
   })
 

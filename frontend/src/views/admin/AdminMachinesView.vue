@@ -17,7 +17,7 @@
     />
     <header class="page-header card card--hero">
       <div class="page-header__copy">
-        <p class="page-header__eyebrow">Yönetim Paneli • Makine Yönetimi</p>
+        <p class="page-header__eyebrow">YÖNETİM PANELİ • MAKİNE YÖNETİMİ</p>
         <h1>Makine Yönetimi</h1>
         <p>{{ activeCategoryDescription }}</p>
       </div>
@@ -106,17 +106,19 @@
           :placeholder="`${activeCategoryLabel} ara...`"
         />
 
-        <select v-model="selectedStatus" class="filter-select">
-          <option value="all">Tüm Durumlar</option>
-          <option value="published">Yayında</option>
-          <option value="passive">Pasif</option>
-        </select>
+        <AppSelect
+          v-model="selectedStatus"
+          class="filter-select"
+          :options="statusOptions"
+        />
 
-        <select :value="itemsPerPage" class="filter-select filter-select--compact" @change="setItemsPerPage($event.target.value)">
-          <option :value="5">5 / sayfa</option>
-          <option :value="10">10 / sayfa</option>
-          <option :value="20">20 / sayfa</option>
-        </select>
+        <AppSelect
+          :model-value="itemsPerPage"
+          class="filter-select filter-select--compact"
+          compact
+          :options="pageSizeOptions"
+          @update:model-value="setItemsPerPage"
+        />
       </div>
       <p v-if="loading" class="info-text">Yükleniyor...</p>
       <p v-if="error" class="error">{{ error }}</p>
@@ -158,6 +160,7 @@ import AdminMachinesTable from '../../components/admin/AdminMachinesTable.vue'
 import AdminMachineForm from '../../components/admin/AdminMachineForm.vue'
 import AdminPanelNav from '../../components/admin/AdminPanelNav.vue'
 import AppToast from '../../components/ui/AppToast.vue'
+import AppSelect from '../../components/ui/AppSelect.vue'
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
 import { useAdminMachines } from '../../composables/useAdminMachines'
 
@@ -221,6 +224,16 @@ const formDescription = computed(() => activeCategory.value.form)
 const tableDescription = computed(() => activeCategory.value.table)
 const pageRangeStart = computed(() => (filteredMachines.value.length ? (currentPage.value - 1) * itemsPerPage.value + 1 : 0))
 const pageRangeEnd = computed(() => Math.min(currentPage.value * itemsPerPage.value, filteredMachines.value.length))
+const statusOptions = [
+  { value: 'all', label: 'Tüm Durumlar' },
+  { value: 'published', label: 'Yayında' },
+  { value: 'passive', label: 'Pasif' }
+]
+const pageSizeOptions = [
+  { value: 5, label: '5 / sayfa' },
+  { value: 10, label: '10 / sayfa' },
+  { value: 20, label: '20 / sayfa' }
+]
 
 function getMachineCount(category) {
   return allMachines.value.filter((machine) => machine.category === category).length
@@ -472,14 +485,13 @@ function getMachineCount(category) {
   flex-wrap: wrap;
 }
 
-.search-input,
-.filter-select {
+.search-input {
   min-height: 4.8rem;
   padding: 1.2rem 1.4rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #7da6d8;
   border-radius: 0;
   font-size: 1.4rem;
-  background: rgba(244, 247, 251, 0.95);
+  background: #fff;
   color: #102a43;
   transition:
     border-color 0.2s ease,
@@ -487,12 +499,11 @@ function getMachineCount(category) {
     background-color 0.2s ease;
 }
 
-.search-input:focus,
-.filter-select:focus {
+.search-input:focus {
   outline: none;
   border-color: #00539c;
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(0, 83, 156, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 83, 156, 0.18);
 }
 
 .search-input {

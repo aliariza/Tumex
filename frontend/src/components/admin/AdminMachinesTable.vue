@@ -3,48 +3,54 @@
     <table v-if="machines.length" class="machines-table">
       <thead>
         <tr>
-          <th>Görsel</th>
+          <th>GÖRSEL</th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', 'title')">
-              Başlık {{ sortKey === 'title' ? sortArrow : '' }}
+            <button :class="['sort-btn', { 'is-active': isSorted('title') }]" type="button" @click="$emit('sort', 'title')">
+              <span>BAŞLIK</span>
+              <span v-if="isSorted('title')" class="sort-indicator">{{ sortArrow }}</span>
             </button>
           </th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', 'brand')">
-              Marka {{ sortKey === 'brand' ? sortArrow : '' }}
+            <button :class="['sort-btn', { 'is-active': isSorted('brand') }]" type="button" @click="$emit('sort', 'brand')">
+              <span>MARKA</span>
+              <span v-if="isSorted('brand')" class="sort-indicator">{{ sortArrow }}</span>
             </button>
           </th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', 'family')">
-              Aile {{ sortKey === 'family' ? sortArrow : '' }}
+            <button :class="['sort-btn', { 'is-active': isSorted('family') }]" type="button" @click="$emit('sort', 'family')">
+              <span>AİLE</span>
+              <span v-if="isSorted('family')" class="sort-indicator">{{ sortArrow }}</span>
             </button>
           </th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', 'series')">
-              Seri {{ sortKey === 'series' ? sortArrow : '' }}
+            <button :class="['sort-btn', { 'is-active': isSorted('series') }]" type="button" @click="$emit('sort', 'series')">
+              <span>SERİ</span>
+              <span v-if="isSorted('series')" class="sort-indicator">{{ sortArrow }}</span>
             </button>
           </th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', 'model')">
-              Model {{ sortKey === 'model' ? sortArrow : '' }}
+            <button :class="['sort-btn', { 'is-active': isSorted('model') }]" type="button" @click="$emit('sort', 'model')">
+              <span>MODEL</span>
+              <span v-if="isSorted('model')" class="sort-indicator">{{ sortArrow }}</span>
             </button>
           </th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', primaryMetricKey)">
-              {{ primaryMetricLabel }} {{ sortKey === primaryMetricKey ? sortArrow : '' }}
+            <button :class="['sort-btn', { 'is-active': isSorted(primaryMetricKey) }]" type="button" @click="$emit('sort', primaryMetricKey)">
+              <span>{{ primaryMetricLabel }}</span>
+              <span v-if="isSorted(primaryMetricKey)" class="sort-indicator">{{ sortArrow }}</span>
             </button>
           </th>
           <th>
-            <button class="sort-btn" type="button" @click="$emit('sort', secondaryMetricKey)">
+            <button :class="['sort-btn', { 'is-active': isSorted(secondaryMetricKey) }]" type="button" @click="$emit('sort', secondaryMetricKey)">
               <span class="sort-btn__multiline">
                 <span>{{ secondaryMetricLabelLine1 }}</span>
                 <span>{{ secondaryMetricLabelLine2 }}</span>
               </span>
-              {{ sortKey === secondaryMetricKey ? sortArrow : '' }}
+              <span v-if="isSorted(secondaryMetricKey)" class="sort-indicator">{{ sortArrow }}</span>
             </button>
           </th>
-          <th>Durum</th>
-          <th class="actions-header">İşlem</th>
+          <th>DURUM</th>
+          <th class="actions-header">İŞLEMLER</th>
         </tr>
       </thead>
 
@@ -135,9 +141,9 @@ const sortArrow = computed(() => (props.sortDirection === 'asc' ? '↑' : '↓')
 const isAbkantCategory = computed(() => props.category === 'abkant')
 const primaryMetricKey = computed(() => (isAbkantCategory.value ? 'pressForceTon' : 'powerKw'))
 const secondaryMetricKey = computed(() => (isAbkantCategory.value ? 'bendingLengthMm' : 'workingAreaCode'))
-const primaryMetricLabel = computed(() => (isAbkantCategory.value ? 'Tonaj' : 'Lazer Gücü'))
-const secondaryMetricLabelLine1 = computed(() => (isAbkantCategory.value ? 'Bükme' : 'Ebat'))
-const secondaryMetricLabelLine2 = computed(() => (isAbkantCategory.value ? 'Uzunluğu' : ''))
+const primaryMetricLabel = computed(() => (isAbkantCategory.value ? 'TONAJ' : 'LAZER GÜCÜ'))
+const secondaryMetricLabelLine1 = computed(() => (isAbkantCategory.value ? 'BÜKME' : 'Ebat'))
+const secondaryMetricLabelLine2 = computed(() => (isAbkantCategory.value ? 'UZUNLUĞU' : ''))
 const primaryMetricSuffix = computed(() => (isAbkantCategory.value ? ' Ton' : ' kW'))
 const secondaryMetricSuffix = computed(() => (isAbkantCategory.value ? ' mm' : ''))
 
@@ -218,6 +224,10 @@ function resolveMetricValue(machine, key) {
 function displayTitle(machine) {
   return buildMachineTitle(machine) || machine?.title || '-'
 }
+
+function isSorted(key) {
+  return props.sortKey === key
+}
 </script>
 
 <style scoped>
@@ -243,11 +253,13 @@ function displayTitle(machine) {
   font-size: 13px;
   color: #6b7280;
   font-weight: 700;
+  text-align: center;
 }
 
 .sort-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background: none;
   border: none;
@@ -255,13 +267,39 @@ function displayTitle(machine) {
   font: inherit;
   color: inherit;
   cursor: pointer;
+  width: 100%;
+  min-height: 32px;
+  border-radius: 8px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.sort-btn:hover {
+  color: #1d4ed8;
+}
+
+.sort-btn.is-active {
+  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.08);
 }
 
 .sort-btn__multiline {
   display: inline-flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   line-height: 1.1;
+}
+
+.sort-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .actions-header {

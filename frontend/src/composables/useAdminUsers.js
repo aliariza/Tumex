@@ -2,7 +2,7 @@ import { computed, onBeforeUnmount, ref } from 'vue'
 import { deleteAdminUser, getAdminUsers, updateAdminUserRole } from '@/services/adminUserService'
 
 const ROLE_LABELS = {
-  user: 'Public',
+  user: 'Genel',
   dealer: 'Bayi',
   admin: 'Admin'
 }

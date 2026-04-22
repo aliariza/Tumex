@@ -20,9 +20,9 @@
 
     <header class="page-header card card--hero">
       <div class="page-header__copy">
-        <p class="page-header__eyebrow">Yönetim Paneli • Kullanıcı Yönetimi</p>
+        <p class="page-header__eyebrow">YÖNETİM PANELİ • KULLANICI YÖNETİMİ</p>
         <h1>Kullanıcı Yönetimi</h1>
-        <p>Public, bayi ve admin erişimlerini buradan yönetebilirsiniz.</p>
+        <p>Genel, bayi ve admin erişimlerini buradan yönetebilirsiniz.</p>
       </div>
 
       <div class="page-header__summary">
@@ -38,7 +38,7 @@
         <div>
           <h2 class="section-title">Kullanıcı Listesi</h2>
           <p class="section-description">
-            Public kullanıcılar kayıt olmuş ama henüz bayi erişimi için onaylanmamış kişilerdir.
+            Genel kullanıcılar kayıt olmuş ama henüz bayi erişimi için onaylanmamış kişilerdir.
           </p>
         </div>
         <span class="count-badge">{{ filteredUsers.length }}</span>
@@ -52,12 +52,11 @@
           placeholder="Kullanıcı ara..."
         />
 
-        <select v-model="selectedRole" class="filter-select">
-          <option value="all">Tüm Roller</option>
-          <option value="user">Public</option>
-          <option value="dealer">Bayi</option>
-          <option value="admin">Admin</option>
-        </select>
+        <AppSelect
+          v-model="selectedRole"
+          class="filter-select"
+          :options="roleOptions"
+        />
       </div>
 
       <p v-if="loading" class="info-text">Yükleniyor...</p>
@@ -78,6 +77,7 @@
 import { onMounted } from 'vue'
 import AdminPanelNav from '../../components/admin/AdminPanelNav.vue'
 import AdminUsersTable from '../../components/admin/AdminUsersTable.vue'
+import AppSelect from '../../components/ui/AppSelect.vue'
 import AppToast from '../../components/ui/AppToast.vue'
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue'
 import { useAdminUsers } from '../../composables/useAdminUsers'
@@ -99,6 +99,13 @@ const {
   setUserRole,
   toast
 } = useAdminUsers()
+
+const roleOptions = [
+  { value: 'all', label: 'Tüm Roller' },
+  { value: 'user', label: 'Genel' },
+  { value: 'dealer', label: 'Bayi' },
+  { value: 'admin', label: 'Admin' }
+]
 
 onMounted(() => {
   fetchUsers()
@@ -266,14 +273,13 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-.search-input,
-.filter-select {
+.search-input {
   min-height: 4.8rem;
   padding: 1.2rem 1.4rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #7da6d8;
   border-radius: 0;
   font-size: 1.4rem;
-  background: rgba(244, 247, 251, 0.95);
+  background: #fff;
   color: #102a43;
   transition:
     border-color 0.2s ease,
@@ -281,12 +287,11 @@ onMounted(() => {
     background-color 0.2s ease;
 }
 
-.search-input:focus,
-.filter-select:focus {
+.search-input:focus {
   outline: none;
   border-color: #00539c;
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(0, 83, 156, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 83, 156, 0.18);
 }
 
 .search-input {

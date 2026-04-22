@@ -3,11 +3,11 @@
     <table class="users-table">
       <thead>
         <tr>
-          <th>Kullanıcı</th>
-          <th>Şirket</th>
-          <th>İletişim</th>
-          <th>Rol</th>
-          <th>İşlemler</th>
+          <th>KULLANICI</th>
+          <th>ŞİRKET</th>
+          <th>İLETİŞİM</th>
+          <th>ROL</th>
+          <th>İŞLEMLER</th>
         </tr>
       </thead>
       <tbody>
@@ -23,6 +23,7 @@
           </td>
           <td>
             <span class="role-badge" :class="`role-${user.role}`">
+              <component :is="roleIcons[user.role] || User" :size="14" />
               {{ roleLabels[user.role] || user.role }}
             </span>
           </td>
@@ -33,30 +34,41 @@
                 class="ghost-btn"
                 :disabled="savingId === user._id || user.role === 'user'"
                 @click="$emit('set-role', user, 'user')"
+                title="Genel"
+                aria-label="Kullanıcıyı Genel rolüne geçir"
               >
-                Public
+                <User :size="16" />
+                <span class="sr-only">Genel</span>
               </button>
               <button
                 type="button"
                 class="primary-btn"
                 :disabled="savingId === user._id || user.role === 'dealer'"
                 @click="$emit('set-role', user, 'dealer')"
+                title="Bayi"
+                aria-label="Kullanıcıyı Bayi rolüne geçir"
               >
-                Bayi
+                <Building2 :size="16" />
+                <span class="sr-only">Bayi</span>
               </button>
               <button
                 type="button"
                 class="dark-btn"
                 :disabled="savingId === user._id || user.role === 'admin'"
                 @click="$emit('set-role', user, 'admin')"
+                title="Admin"
+                aria-label="Kullanıcıyı Admin rolüne geçir"
               >
-                Admin
+                <ShieldCheck :size="16" />
+                <span class="sr-only">Admin</span>
               </button>
               <button
                 type="button"
                 class="danger-btn"
                 :disabled="savingId === user._id"
                 @click="$emit('delete', user)"
+                title="Kullanıcıyı sil"
+                aria-label="Kullanıcıyı sil"
               >
                 <Trash2 :size="16" />
               </button>
@@ -72,7 +84,7 @@
 </template>
 
 <script setup>
-import { Trash2 } from 'lucide-vue-next'
+import { Building2, ShieldCheck, Trash2, User } from 'lucide-vue-next'
 
 defineOptions({ name: 'AdminUsersTable' })
 
@@ -90,9 +102,15 @@ defineProps({
 })
 
 const roleLabels = {
-  user: 'Public',
+  user: 'Genel',
   dealer: 'Bayi',
   admin: 'Admin'
+}
+
+const roleIcons = {
+  user: User,
+  dealer: Building2,
+  admin: ShieldCheck
 }
 </script>
 
@@ -110,7 +128,7 @@ const roleLabels = {
 
 .users-table th,
 .users-table td {
-  padding: 14px 12px;
+  padding: 16px 12px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.22);
   text-align: left;
   vertical-align: top;
@@ -118,30 +136,39 @@ const roleLabels = {
 
 .users-table th {
   color: #627d98;
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   font-weight: 700;
+}
+
+.users-table td {
+  font-size: 14px;
+  color: #243b53;
 }
 
 .user-name {
   font-weight: 700;
   color: #102a43;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .user-email,
 .muted {
   color: #627d98;
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.45;
   margin-top: 4px;
 }
 
 .role-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px 10px;
+  gap: 6px;
+  padding: 7px 12px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -170,9 +197,14 @@ const roleLabels = {
 .primary-btn,
 .dark-btn,
 .danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid transparent;
+  min-width: 4.2rem;
+  min-height: 4rem;
   padding: 9px 12px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   border-radius: 0;
@@ -202,9 +234,6 @@ const roleLabels = {
 }
 
 .danger-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   min-width: 4rem;
   background: #fff1f2;
   border-color: rgba(185, 28, 28, 0.12);
@@ -226,5 +255,17 @@ button:disabled {
 .empty-state {
   text-align: center;
   color: #627d98;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>
