@@ -1,5 +1,14 @@
 <template>
-  <div class="hero" :class="$attrs.class" :style="{ backgroundImage: `url(${item.picture})` }">
+  <div class="hero" :class="$attrs.class">
+    <img
+      v-if="item.picture"
+      class="hero-image"
+      :src="item.picture"
+      :alt="item.imageAlt || ''"
+      fetchpriority="high"
+      loading="eager"
+      decoding="async"
+    />
     <div class="overlay"></div>
     <div class="hero-inside">
       <div class="hero-header">
@@ -38,6 +47,15 @@ $color-white-mute: white;
     position: relative;
     z-index: 1;
     overflow-x: hidden;
+
+    .hero-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
 
     .overlay {
       position: absolute;
@@ -95,15 +113,22 @@ $color-white-mute: white;
 
 .laser-cutting {
   .hero {
-    background-position: 0% 40%;
+    .hero-image {
+      object-position: 0% 40%;
+    }
+
     @media only screen and (max-width: 800px) {
-      background-position: 100% 40%;
+      .hero-image {
+        object-position: 100% 40%;
+      }
     }
   }
 }
 .abkant {
   .hero {
-    background-position: 75% 80%;
+    .hero-image {
+      object-position: 75% 80%;
+    }
   }
 }
 
@@ -112,8 +137,11 @@ $color-white-mute: white;
 .hakkinda {
   .hero {
     height: 50rem;
-    background-position: 75% 60%;
     color: white;
+
+    .hero-image {
+      object-position: 75% 60%;
+    }
 
     .hero-header {
       background-color: rgba(0, 83, 156, 0.7);
