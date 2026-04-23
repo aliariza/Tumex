@@ -50,7 +50,7 @@ export const MODEL_DATA = {
   PSH4: {
     title: 'PSH4 serisi',
     subtitle: 'Bir büküm ötesi kalite',
-    picture: '/assets/images/WCK.webp',
+    picture: '/assets/images/PSH.webp',
     text: '4 eksen kontrollu hassas abkant çözümü',
     altTitle: 'PSH4: Esnek ve kontrollu büküm performansı',
     altSubtitle: 'Daha fazla eksen, daha yüksek hassasiyet',
@@ -62,7 +62,7 @@ export const MODEL_DATA = {
   DGE: {
     title: 'DGE serisi',
     subtitle: 'Bir büküm ötesi kalite',
-    picture: '/assets/images/WCK.webp',
+    picture: '/assets/images/Durmark-Abkant.webp',
     text: '6 eksen kontrollu profesyonel abkant performansı',
     altTitle: 'DGE: İleri seviye büküm kontrolü',
     altSubtitle: 'Zorlu üretimler için güçlü ve akıllı çözüm',

@@ -20,15 +20,66 @@ function getCatalogEntry(machineType) {
   return machinesData[machineType] || {}
 }
 
-function buildSeriesSummary(machineType, series, seriesMachines) {
-  const machineWithDescription = seriesMachines.find(
-    (machine) => String(machine?.description || '').trim()
-  )
+function normalizeRangeNumber(value) {
+  const number = Number(value)
+  return Number.isFinite(number) && number > 0 ? number : null
+}
 
-  if (machineWithDescription?.description) {
-    return machineWithDescription.description
+function resolveLaserPower(machine = {}) {
+  const directPower = normalizeRangeNumber(machine.powerKw)
+  if (directPower != null) {
+    return directPower
   }
 
+  const modelOrTitle = `${machine.model || ''} ${machine.title || ''}`
+  const kwMatch = modelOrTitle.match(/(?:^|[-\s])(\d+(?:[.,]\d+)?)\s*KW(?:$|[-\s])/i)
+  if (kwMatch) {
+    return normalizeRangeNumber(kwMatch[1].replace(',', '.'))
+  }
+
+  return null
+}
+
+function normalizeAreaCode(value, { strict = false } = {}) {
+  const area = String(value || '').trim()
+
+  if (!area || area === '-' || area === '.') {
+    return ''
+  }
+
+  const compactCode = area.match(/^W?(\d{4})$/i)
+  if (compactCode) {
+    return compactCode[1]
+  }
+
+  const modelCode = area.match(/(?:^|[-\s])W?(\d{4})(?:$|[-\s])/i)
+  if (modelCode) {
+    return modelCode[1]
+  }
+
+  const dimension = area.match(/(\d{4})\s*x\s*(\d{4})/i)
+  if (dimension) {
+    return `${dimension[1]} x ${dimension[2]}`
+  }
+
+  return strict ? '' : area
+}
+
+function resolveLaserArea(machine = {}) {
+  const directArea = normalizeAreaCode(machine.workingAreaCode)
+  if (directArea) {
+    return directArea
+  }
+
+  const modelArea = normalizeAreaCode(machine.model, { strict: true })
+  if (modelArea) {
+    return modelArea
+  }
+
+  return normalizeAreaCode(machine.title, { strict: true })
+}
+
+export function buildSeriesSummary(machineType, series, seriesMachines) {
   if (machineType === 'abkant') {
     const tonValues = seriesMachines
       .map((machine) => machine.pressForceTon)
@@ -54,13 +105,14 @@ function buildSeriesSummary(machineType, series, seriesMachines) {
 
   if (machineType === 'laser-cutting') {
     const powerValues = seriesMachines
-      .map((machine) => machine.powerKw)
+      .map(resolveLaserPower)
       .filter((value) => value != null)
       .sort((a, b) => a - b)
 
     const areaValues = seriesMachines
-      .map((machine) => String(machine.workingAreaCode || '').trim())
+      .map(resolveLaserArea)
       .filter(Boolean)
+      .filter((value, index, values) => values.indexOf(value) === index)
       .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
 
     const minPower = powerValues[0]
@@ -73,6 +125,14 @@ function buildSeriesSummary(machineType, series, seriesMachines) {
     }
 
     return `${series} serisi lazer tezgahları.`
+  }
+
+  const machineWithDescription = seriesMachines.find(
+    (machine) => String(machine?.description || '').trim()
+  )
+
+  if (machineWithDescription?.description) {
+    return machineWithDescription.description
   }
 
   return `${series} serisi`
