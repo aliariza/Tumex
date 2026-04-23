@@ -4,6 +4,7 @@ import {
   createEmptyMachineForm,
   formToMachinePayload,
   machineToForm,
+  resolveMachineMetricValue,
   validateMachineForm
 } from './adminMachineHelpers'
 
@@ -43,6 +44,37 @@ describe('adminMachineHelpers', () => {
       specs: [],
       isPublished: true
     })
+  })
+
+  it('hydrates laser edit fields from legacy model values', () => {
+    expect(machineToForm({
+      category: 'laser-cutting',
+      brand: 'Durmark',
+      family: 'Fiber Lazer',
+      series: 'D-LC',
+      model: 'D-LC-30KW-W8025',
+      specs: [
+        { label: ' Lazer Kafası ', key: ' laser_head ', value: ' BOCI ' }
+      ],
+      isPublished: true
+    })).toMatchObject({
+      category: 'laser-cutting',
+      powerKw: 30,
+      workingAreaCode: '8025',
+      title: 'D-LC-30KW-8025 Lazer tezgah',
+      specs: [
+        {
+          label: 'Lazer Kafası',
+          key: 'laser_head',
+          value: 'BOCI',
+          order: 1
+        }
+      ]
+    })
+  })
+
+  it('resolves compact laser working area codes with a W prefix', () => {
+    expect(resolveMachineMetricValue({ model: 'D-LC-30KW-W8025' }, 'workingAreaCode')).toBe('8025')
   })
 
   it('normalizes payload specs and gallery before save', () => {

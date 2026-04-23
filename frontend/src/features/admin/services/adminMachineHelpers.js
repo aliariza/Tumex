@@ -36,7 +36,18 @@ export function normalizeMachineSpecs(specs = []) {
 }
 
 export function machineToForm(machine = {}) {
-  const normalizedTitle = buildMachineTitle(machine) || machine.title || ''
+  const powerKw = machine.category === 'laser-cutting'
+    ? resolveMachineMetricValue(machine, 'powerKw') || null
+    : machine.powerKw ?? null
+  const workingAreaCode = machine.category === 'laser-cutting'
+    ? String(resolveMachineMetricValue(machine, 'workingAreaCode') || '')
+    : machine.workingAreaCode || ''
+  const normalizedMachine = {
+    ...machine,
+    powerKw,
+    workingAreaCode
+  }
+  const normalizedTitle = buildMachineTitle(normalizedMachine) || machine.title || ''
 
   return {
     ...createEmptyMachineForm(machine.category || 'abkant'),
@@ -50,11 +61,11 @@ export function machineToForm(machine = {}) {
     price: machine.price || 0,
     pressForceTon: machine.pressForceTon ?? null,
     bendingLengthMm: machine.bendingLengthMm ?? null,
-    powerKw: machine.powerKw ?? null,
-    workingAreaCode: machine.workingAreaCode || '',
+    powerKw,
+    workingAreaCode,
     image: machine.image || '',
     gallery: Array.isArray(machine.gallery) ? machine.gallery : [],
-    specs: Array.isArray(machine.specs) ? machine.specs : [],
+    specs: normalizeMachineSpecs(machine.specs),
     isPublished: Boolean(machine.isPublished)
   }
 }
@@ -143,6 +154,16 @@ export function resolveMachineMetricValue(machine = {}, key) {
     }
 
     const modelOrTitle = `${machine?.model || ''} ${machine?.title || ''}`
+    const compactCodeMatch = modelOrTitle.match(/(?:^|[-\s])W?(\d{4})(?:$|[-\s])/i)
+    if (compactCodeMatch) {
+      return compactCodeMatch[1]
+    }
+
+    const dimensionMatch = modelOrTitle.match(/(\d{4})\s*x\s*(\d{4})/i)
+    if (dimensionMatch) {
+      return `${dimensionMatch[1]} x ${dimensionMatch[2]}`
+    }
+
     const match = modelOrTitle.match(/(?:^|[-\s])(\d{4})(?:$|[-\s])/)
     if (match) {
       return match[1]
