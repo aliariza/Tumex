@@ -66,10 +66,10 @@
 <script setup>
 import { toRef } from 'vue'
 import { useRoute } from 'vue-router'
-import ChevronDown from '../icons/ChevronDown.vue'
-import ChevronRight from '../icons/ChevronRight.vue'
+import ChevronDown from '@/shared/components/icons/ChevronDown.vue'
+import ChevronRight from '@/shared/components/icons/ChevronRight.vue'
 import DropdownCell from './DropdownCell.vue'
-import { useMachineSpecsTable } from '../../composables/useMachineSpecsTable.js'
+import { useMachineSpecsTable } from '@/features/machines/composables/useMachineSpecsTable.js'
 
 defineOptions({ name: 'TheTable' })
 

@@ -2,9 +2,9 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import VueLazyLoad from 'vue3-lazyload'
-import App from './App.vue'
-import router from './router'
-import store from './store'
+import App from './app/App.vue'
+import router from './app/router'
+import store from './app/store'
 import { isRestrictedRoute } from './services/authAccess'
 
 const app = createApp(App)

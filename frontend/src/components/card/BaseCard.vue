@@ -32,7 +32,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import TheLoading from '../TheLoading.vue'
+import TheLoading from '@/shared/components/common/TheLoading.vue'
 
 defineOptions({ name: 'BaseCard' })
 

@@ -30,7 +30,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import ChevronDown from '../icons/ChevronDown.vue'
+import ChevronDown from '@/shared/components/icons/ChevronDown.vue'
 
 defineOptions({ name: 'DropdownCell' })
 

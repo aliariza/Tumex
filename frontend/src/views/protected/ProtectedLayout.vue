@@ -39,7 +39,7 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import AuthActionButton from '@/components/navigation/authentication/AuthActionButton.vue'
+import AuthActionButton from '@/features/auth/components/AuthActionButton.vue'
 
 defineProps({
   title: {
