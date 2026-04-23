@@ -2,7 +2,7 @@ export const MODEL_DATA = {
   DLC: {
     title: 'DLC serisi',
     subtitle: 'Bir kesim ötesi kalite',
-    picture: '/assets/images/DLC_Serisi.webp',
+    picture: '/assets/images/DLC.webp',
     text: 'Tek tabla teknolojisiyle tanışın',
     altTitle: 'DLC: Hassasiyet ve Güç Bir Arada',
     altSubtitle: 'Çeşitli malzemeler için mükemmel kesim',
