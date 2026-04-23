@@ -2,6 +2,7 @@ import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import api from '@/shared/lib/api'
 import store from '@/app/store'
 import HomeView from '../../features/site/views/HomeView.vue'
+import SolutionsView from '../../features/site/views/SolutionsView.vue'
 import NotFound from '../../views/NotFound.vue'
 import HakkindaView from '../../features/site/views/hakkimizda/HakkindaView.vue'
 import TumexCalismaView from '../../features/site/views/kariyer/TumexCalismaView.vue'
@@ -19,7 +20,7 @@ const routes = [
   {
     path: '/solutions',
     name: 'solutions',
-    component: HomeView
+    component: SolutionsView
   },
   {
     path: '/laser-cutting',
