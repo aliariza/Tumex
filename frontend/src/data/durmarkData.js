@@ -25,7 +25,7 @@ export const items = [
     header: '2017',
     paragraph:
       'Lazer kesim makineleri üzerine çalışmalar başlatıldı. İlk lazer kesim makinesi piyasaya sürüldü.',
-    image: '/assets/images/DLC_Serisi.webp'
+    image: '/assets/images/DLC.webp'
   },
   {
     header: '2022',

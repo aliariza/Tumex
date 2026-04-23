@@ -35,6 +35,7 @@ $color-white-mute: white;
 
 .abkant,
 .laser-cutting,
+.solutions-page,
 .home,
 .tarihce,
 .hakkinda {
@@ -133,6 +134,7 @@ $color-white-mute: white;
 }
 
 .home,
+.solutions-page,
 .tarihce,
 .hakkinda {
   .hero {

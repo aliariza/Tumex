@@ -31,8 +31,9 @@ const activeMenu = computed(() => {
 
 <style lang="scss" scoped>
 .contact-nav {
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-  z-index: 5000;
+  position: relative;
+  z-index: 40;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.22);
 
   ul {
     background-color: var(--c-background-nav);

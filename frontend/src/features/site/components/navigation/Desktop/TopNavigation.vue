@@ -39,6 +39,7 @@ defineProps({
   justify-content: space-between;
   align-items: center;
   position: relative;
+  z-index: 100;
 
   .logo {
     height: 10rem;
@@ -50,6 +51,7 @@ defineProps({
     align-items: center;
     background-color: var(--c-white);
     padding: 3rem;
+    z-index: 101;
   }
 }
 

@@ -1,7 +1,7 @@
 <template>
   <section class="abkant-nav">
     <ul>
-      <li v-for="(item, index) in items" :key="index">
+      <li v-for="(item, index) in items" :key="index" :class="{ active: isActiveItem(item) }">
         <router-link :to="item.href">
           <h5>{{ item.title }}<br />Abkant</h5>
         </router-link>
@@ -11,23 +11,30 @@
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router'
 import { useMachineCatalog } from '@/features/machines/composables/useMachineCatalog.js'
 
 defineOptions({ name: 'AbkantNavigation' })
 
+const route = useRoute()
 const { machineItems: items } = useMachineCatalog('abkant')
+
+function isActiveItem(item) {
+  return route.path === item.href || route.params.productType === item.title
+}
 </script>
 
 <style lang="scss" scoped>
 .abkant-nav {
   width: 100vw;
+  position: relative;
+  z-index: 40;
   background-color: var(--c-white-mute);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.22);
   overflow-x: hidden;
 
   ul {
     width: 100vw;
-    box-shadow: 0 2px 0px rgba(0, 0, 0, 0.1);
-    z-index: 100;
     padding-inline: 1rem;
     height: 5rem;
     li {
@@ -35,13 +42,17 @@ const { machineItems: items } = useMachineCatalog('abkant')
       align-items: center;
       cursor: pointer;
       padding-right: 7%;
-      z-index: 5000;
-      box-shadow: 0 2px 0px rgba(0, 0, 0, 0.1);
 
       h5 {
         line-height: 2rem;
         color: var(--c-grey);
         &:hover {
+          color: var(--c-main);
+        }
+      }
+
+      &.active {
+        h5 {
           color: var(--c-main);
         }
       }

@@ -1,5 +1,9 @@
 <template>
-  <section class="durmark-item" v-for="item in items" :key="item.header">
+  <section
+    class="durmark-item"
+    v-for="(item, index) in items"
+    :key="`${item.header}-${index}`"
+  >
     <div class="durmark-item-inner">
       <div class="item-left">
         <TheLoading v-if="!imageLoaded" />

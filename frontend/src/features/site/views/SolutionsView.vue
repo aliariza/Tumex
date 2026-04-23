@@ -2,35 +2,40 @@
   <section class="solutions-page">
     <TheHero :item="heroItem" />
 
-    <div class="solutions-content">
-      <header class="solutions-header">
-        <p class="eyebrow">ÇÖZÜMLER</p>
-        <h1>İhtiyacınıza uygun makine grubunu seçin</h1>
-        <p>
-          Lazer kesim ve abkant çözümlerini ayrı akışlarda inceleyin; teknik
-          değerler, seriler ve ürün detayları seçtiğiniz gruba göre şekillenir.
-        </p>
-      </header>
+    <div class="solutions-carousel">
+      <transition name="fade">
+        <TheCarousel
+          v-if="showCarousel"
+          :item="currentItem"
+          @mouseover="pauseOnHover"
+          @mouseleave="resumeOnLeave"
+        />
+      </transition>
 
-      <div class="solution-grid">
-        <RouterLink
-          v-for="solution in solutions"
-          :key="solution.to"
-          class="solution-card"
-          :to="solution.to"
-        >
-          <span class="solution-kicker">{{ solution.kicker }}</span>
-          <h2>{{ solution.title }}</h2>
-          <p>{{ solution.description }}</p>
-          <span class="solution-action">İncele</span>
-        </RouterLink>
+      <div class="carousel-menu" aria-label="Öne çıkan çözüm slaytları">
+        <button
+          v-for="(carouselItem, index) in carouselItems"
+          :key="`solution-menu-${carouselItem.id || index}`"
+          class="menu-square"
+          :class="{ active: index === currentItemIndex }"
+          type="button"
+          :aria-label="`${index + 1}. slaytı göster`"
+          :aria-current="index === currentItemIndex ? 'true' : undefined"
+          @click="setCurrentItem(index)"
+        />
       </div>
     </div>
+
+    <TheBand :icerik="supportContent" />
   </section>
 </template>
 
 <script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import TheHero from '@/features/site/components/hero/TheHero.vue'
+import TheCarousel from '@/features/site/components/carousel/TheCarousel.vue'
+import TheBand from '@/features/site/components/band/TheBand.vue'
+import { carouselData } from '@/data/carousel.js'
 
 defineOptions({ name: 'SolutionsView' })
 
@@ -41,20 +46,58 @@ const heroItem = {
   imageAlt: 'Durmark lazer kesim makinesi'
 }
 
-const solutions = [
-  {
-    to: '/laser-cutting',
-    kicker: 'Lazer Kesim',
-    title: 'Lazer kesim tezgahları',
-    description: 'Lazer gücü ve ebat bilgilerine göre doğru lazer kesim serisini seçin.'
-  },
-  {
-    to: '/abkant',
-    kicker: 'Abkant',
-    title: 'Abkant pres tezgahları',
-    description: 'Tonaj ve bükme uzunluğu değerlerine göre abkant çözümlerini inceleyin.'
+const supportContent = {
+  title: 'Destek',
+  subtitle: 'Müşteri işbirliği & sofistike çözümler',
+  paragraf_1:
+    'Sac metal şekillendirme sektöründe sürekli bir deneyim kazanımı yaşanmaktadır. Değerli müşterilerimizle gerçekleştirdiğimiz işbirliği, başarımızın temelini oluşturmaktadır',
+  paragraf_2:
+    'Müşteri desteğimiz, sadece yardımcı olmakla kalmaz; birlikte en sofistike çözümleri geliştirmek için çalışırız.',
+  button: true,
+  image: '/assets/images/man-working-office.webp'
+}
+
+const carouselItems = carouselData
+const currentItemIndex = ref(0)
+const showCarousel = ref(true)
+let rotateInterval = null
+
+const currentItem = computed(() => carouselItems[currentItemIndex.value])
+
+function setCurrentItem(index) {
+  currentItemIndex.value = index
+}
+
+function nextItem() {
+  showCarousel.value = false
+  currentItemIndex.value = (currentItemIndex.value + 1) % carouselItems.length
+  setTimeout(() => {
+    showCarousel.value = true
+  }, 0)
+}
+
+function startAutoRotate() {
+  stopAutoRotate()
+  rotateInterval = setInterval(nextItem, 10000)
+}
+
+function stopAutoRotate() {
+  if (rotateInterval) {
+    clearInterval(rotateInterval)
+    rotateInterval = null
   }
-]
+}
+
+function pauseOnHover() {
+  stopAutoRotate()
+}
+
+function resumeOnLeave() {
+  startAutoRotate()
+}
+
+onMounted(() => startAutoRotate())
+onBeforeUnmount(() => stopAutoRotate())
 </script>
 
 <style scoped>
@@ -63,106 +106,63 @@ const solutions = [
   overflow-x: hidden;
 }
 
-.solutions-content {
-  max-width: 1120px;
-  margin: var(--section-gap) auto;
-  padding-inline: 1.5rem;
+.solutions-carousel {
+  margin-top: var(--section-gap);
 }
 
-.solutions-header {
-  max-width: 760px;
-  margin-bottom: 3rem;
-}
-
-.eyebrow {
-  margin: 0 0 0.75rem;
-  color: var(--c-main);
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: 0.22em;
-}
-
-.solutions-header h1 {
-  margin: 0;
-  color: var(--c-grey);
-  font-size: clamp(3.6rem, 6vw, 6.8rem);
-  line-height: 0.98;
-}
-
-.solutions-header p {
-  margin: 1.5rem 0 0;
-  color: #536b86;
-  font-size: 1.7rem;
-  line-height: 1.7;
-}
-
-.solution-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2rem;
-}
-
-.solution-card {
-  display: grid;
+.carousel-menu {
+  display: flex;
+  justify-content: center;
   gap: 1rem;
-  min-height: 23rem;
-  padding: 3rem;
-  color: var(--c-grey);
-  text-decoration: none;
-  border: 1px solid rgba(0, 83, 156, 0.18);
-  border-left: 8px solid var(--c-main);
-  background:
-    linear-gradient(135deg, rgba(0, 83, 156, 0.08), rgba(255, 255, 255, 0.95)),
-    #fff;
-  box-shadow: 0 24px 70px rgba(16, 42, 67, 0.08);
+  margin-top: 1rem;
+  margin-bottom: 5rem;
+}
+
+.menu-square {
+  width: 10rem;
+  height: 0.8rem;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  background-color: var(--c-triangle);
   transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    background-color 0.3s ease,
+    transform 0.2s ease;
 }
 
-.solution-card:hover,
-.solution-card:focus-visible {
-  transform: translateY(-4px);
-  border-color: rgba(0, 83, 156, 0.42);
-  box-shadow: 0 30px 90px rgba(16, 42, 67, 0.14);
+.menu-square:hover,
+.menu-square:focus-visible {
+  background-color: #9aa6b2;
+  outline: none;
+  transform: translateY(-1px);
 }
 
-.solution-kicker {
-  color: #5f7892;
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+.menu-square.active {
+  background-color: var(--c-main);
 }
 
-.solution-card h2 {
-  margin: 0;
-  font-size: 2.5rem;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s;
 }
 
-.solution-card p {
-  margin: 0;
-  color: #536b86;
-  font-size: 1.45rem;
-  line-height: 1.6;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
-.solution-action {
-  align-self: end;
-  color: var(--c-main);
-  font-size: 1.35rem;
-  font-weight: 800;
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
 
 @media (max-width: 800px) {
-  .solution-grid {
-    grid-template-columns: 1fr;
+  .carousel-menu {
+    margin-bottom: 3rem;
   }
 
-  .solution-card {
-    min-height: auto;
-    padding: 2.4rem;
+  .menu-square {
+    width: 6rem;
   }
 }
 </style>

@@ -6,8 +6,8 @@
       <h1 class="disp-4">Tumex Ltd. Şti.</h1>
       <div class="adres-bolumu">
         <div class="adres">
-          <p>Birlik Mahallesi 408. Sokak</p>
-          <p>No: 9 / 2 Çankaya</p>
+          <p>İvedik OSB Melih Gökçek Blv.</p>
+          <p>63/33 Yenimahalle</p>
           <p>Ankara / Türkiye</p>
         </div>
         <div class="ikon-bilgi">
@@ -15,8 +15,10 @@
           <div class="bilgi">+90 530 392 7259</div>
         </div>
         <div class="ikon-bilgi">
-          <div class="ikon"><envelope-icon /></div>
-          <div class="bilgi">satis@tum-ex.com</div>
+          <a href="mailto:info@tum-ex.com">
+            <div class="ikon"><envelope-icon /></div>
+            <div class="bilgi">info@tum-ex.com</div>
+          </a>
         </div>
         <div class="ikon-bilgi">
           <a href="https://www.tum-ex.com">
@@ -26,8 +28,9 @@
         </div>
         <div class="ikon-bilgi">
           <a
-            href="https://www.google.com/maps/place/Birlik,+408.+Sk.+No:9,+06610+%C3%87ankaya%2FAnkara/@39.8840806,32.8712578,20.13z/data=!4m9!1m2!10m1!1e1!3m5!1s0x14d34f8c099641d3:0x3ad651026b226c6d!8m2!3d39.8841227!4d32.8714836!16s%2Fg%2F11fswcb_bc?entry=ttu"
+            href="https://www.google.com/maps/search/?api=1&query=%C4%B0vedik%20OSB%20Melih%20G%C3%B6k%C3%A7ek%20Blv.%2063%2F33%20Yenimahalle%20Ankara"
             target="_blank"
+            rel="noopener noreferrer"
           >
             <div class="ikon"><location-icon /></div>
             <div class="bilgi">Google harita</div>

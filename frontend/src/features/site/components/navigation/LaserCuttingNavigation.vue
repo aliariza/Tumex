@@ -1,7 +1,7 @@
 <template>
   <section class="laser-cutting-nav">
     <ul>
-      <li v-for="(item, index) in items" :key="index">
+      <li v-for="(item, index) in items" :key="index" :class="{ active: isActiveItem(item) }">
         <router-link :to="item.href">
           <h5>{{ item.title }}<br />{{ item.tabla }}</h5>
         </router-link>
@@ -11,20 +11,27 @@
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router'
 import { useMachineCatalog } from '@/features/machines/composables/useMachineCatalog.js'
 
 defineOptions({ name: 'LaserCuttingNavigation' })
 
+const route = useRoute()
 const { machineItems: items } = useMachineCatalog('laser-cutting')
+
+function isActiveItem(item) {
+  return route.path === item.href || route.params.productType === item.title
+}
 </script>
 
 <style lang="scss" scoped>
 .laser-cutting-nav {
   width: 100vw;
+  position: relative;
+  z-index: 40;
   background-color: var(--c-white-mute);
   padding-inline: 1rem;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.22);
   padding-left: 21.7%;
   ul {
     li {
@@ -37,6 +44,12 @@ const { machineItems: items } = useMachineCatalog('laser-cutting')
         line-height: 2rem;
         color: var(--c-grey);
         &:hover {
+          color: var(--c-main);
+        }
+      }
+
+      &.active {
+        h5 {
           color: var(--c-main);
         }
       }

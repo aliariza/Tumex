@@ -52,6 +52,7 @@ const imageLoaded = ref(false)
 
 <style scoped lang="scss">
 .card-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -59,26 +60,53 @@ const imageLoaded = ref(false)
   width: 100%;
   min-height: 100%;
   text-align: center;
-  padding: 2rem 1.8rem 2.2rem;
-  background: #fcfcfc;
-  border: 1px solid rgba(0, 83, 156, 0.12);
+  padding: 2.4rem 2.2rem 2.6rem;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 255, 0.94)),
+    #fff;
+  border: 1px solid rgba(0, 83, 156, 0.16);
   border-radius: 0px;
-  box-shadow: 0 6px 18px rgba(16, 42, 67, 0.05);
+  box-shadow: 0 1.8rem 5rem rgba(16, 42, 67, 0.08);
+  overflow: hidden;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.card-item::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0.6rem;
+  background: linear-gradient(180deg, #00539c 0%, #3a79b0 100%);
+  opacity: 0.88;
+}
+
+.card-item:hover,
+.card-item:focus-within {
+  transform: translateY(-4px);
+  border-color: rgba(0, 83, 156, 0.34);
+  box-shadow: 0 2.6rem 7rem rgba(16, 42, 67, 0.13);
 }
 
 .card-item-sol {
   width: 100%;
-  margin-bottom: 0.8rem;
+  margin-bottom: 1.4rem;
 }
 
 .img-container {
   width: 100%;
-  height: 20rem;
-  padding: 1rem 1.5rem 0.5rem;
+  height: 22rem;
+  padding: 1.4rem 1.8rem 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(0, 83, 156, 0.09), transparent 28rem),
+    linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  border: 1px solid rgba(0, 83, 156, 0.08);
 }
 
 .img-container img {
@@ -103,21 +131,23 @@ const imageLoaded = ref(false)
 }
 
 .title {
-  min-height: 5rem;
+  min-height: 5.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.8rem;
   color: var(--c-main);
 }
 
 .title h1 {
   margin: 0;
-  line-height: 1.2;
+  color: #2f79bb;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .text {
-  min-height: 6.5rem;
+  min-height: 7.2rem;
   max-width: 36rem;
   display: flex;
   align-items: flex-start;
@@ -126,31 +156,48 @@ const imageLoaded = ref(false)
 
 .text h3 {
   margin: 0;
-  line-height: 1.5;
-  font-weight: 400;
+  color: #102a43;
+  font-size: 1.55rem;
+  line-height: 1.58;
+  font-weight: 500;
 }
 
 .router {
-  margin-top: 1.2rem;
+  margin-top: 1.8rem;
   padding-top: 0;
 }
 
 .teknik-detaylar {
-  color: var(--c-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4rem;
+  padding: 0 1.8rem;
+  color: #00539c;
+  border: 1px solid rgba(0, 83, 156, 0.22);
+  background: rgba(0, 83, 156, 0.04);
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
 
   span {
-    font-weight: 400;
-    font-size: 1.7rem;
+    font-weight: 900;
+    font-size: 1.4rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   &:hover {
-    text-decoration: underline;
+    color: #fff;
+    background: #00539c;
+    border-color: #00539c;
   }
 }
 
 @media only screen and (max-width: 800px) {
  .img-container {
-  height: 18rem;
+  height: 18.5rem;
   padding: 0.8rem 1rem 0.4rem;
 }
 

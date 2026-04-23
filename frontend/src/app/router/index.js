@@ -23,6 +23,11 @@ const routes = [
     component: SolutionsView
   },
   {
+    path: '/site-haritasi',
+    name: 'siteMap',
+    component: () => import('../../features/site/views/SiteMapView.vue')
+  },
+  {
     path: '/laser-cutting',
     name: 'laserCutting',
     component: () => import('../../features/machines/views/MachineView.vue'),
