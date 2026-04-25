@@ -64,6 +64,7 @@ const inputDirectionThreshold = 8
 
 const activeMenu = computed(() => {
   const path = route.path
+  if (path.startsWith('/protected')) return 'dealer'
   if (path.startsWith('/kariyer')) return 'carrier'
   if (path.startsWith('/iletisim')) return 'iletisim'
   if (path === '/company' || path === '/hakkinda' || path === '/durmark-tarihce') return 'company'

@@ -10,6 +10,10 @@
           <h1>{{ title }}</h1>
           <p class="protected-layout__description">{{ description }}</p>
         </div>
+
+        <div v-if="$slots.default" class="protected-layout__content">
+          <slot />
+        </div>
       </template>
 
       <template v-else>
@@ -149,6 +153,12 @@ h1 {
   font-size: 1.8rem;
   line-height: 1.7;
   color: #486581;
+}
+
+.protected-layout__content {
+  margin-top: 3.2rem;
+  display: grid;
+  gap: 2rem;
 }
 
 .protected-layout__notice {

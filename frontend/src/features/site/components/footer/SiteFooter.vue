@@ -33,7 +33,9 @@
         <div class="footer-column">
           <h2>İletişim</h2>
           <RouterLink to="/iletisim/merkez-ofis">Merkez Ofis</RouterLink>
-          <RouterLink to="/iletisim/bayi">Bayi Girişi</RouterLink>
+          <RouterLink :to="isAuthenticated ? '/protected' : '/iletisim/bayi'">
+            {{ isAuthenticated ? 'Bayi Paneli' : 'Bayi Girişi' }}
+          </RouterLink>
           <a href="mailto:info@tum-ex.com">info@tum-ex.com</a>
         </div>
       </nav>
@@ -47,11 +49,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 import TumexBlue from '@/shared/components/icons/TumexBlue.vue'
 
 defineOptions({ name: 'SiteFooter' })
 
+const store = useStore()
 const currentYear = new Date().getFullYear()
+const isAuthenticated = computed(() => store.getters.isAuthenticated)
 </script>
 
 <style scoped>

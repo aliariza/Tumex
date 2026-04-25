@@ -53,17 +53,33 @@
         @toggle="toggleSection('iletisim')"
         @close-menu="closeMenu"
       />
+
+      <div
+        v-if="isAuthenticated"
+        class="dealer-panel-link"
+        :class="{ active: isDealerRoute }"
+      >
+        <router-link to="/protected" @click="closeMenu">
+          Bayi Paneline Dön
+        </router-link>
+      </div>
     </nav>
   </section>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import TumexBlue from '@/shared/components/icons/TumexBlue.vue'
 import MobileMenuSection from './MobileMenuSection.vue'
 
 const isMenuOpen = ref(false)
 const openSection = ref(null)
+const store = useStore()
+const route = useRoute()
+const isAuthenticated = computed(() => store.getters.isAuthenticated)
+const isDealerRoute = computed(() => route.path.startsWith('/protected'))
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
@@ -171,5 +187,26 @@ function toggleSection(name) {
   height: 5rem;
   display: flex;
   align-items: center;
+}
+
+.dealer-panel-link {
+  padding: 1rem;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 4.8rem;
+    background: #00539c;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+
+  &.active a {
+    box-shadow: inset 0 -4px 0 rgba(255, 255, 255, 0.32);
+  }
 }
 </style>

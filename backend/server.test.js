@@ -5,6 +5,7 @@ const {
   createAdminDeleteUserHandler,
   createAdminListUsersHandler,
   createAdminUpdateUserRoleHandler,
+  createDealerQuoteRequestHandler,
   createCorsOriginMatcher,
   createLoginHandler,
   createRegisterHandler
@@ -205,6 +206,57 @@ describe('backend routes', () => {
 
     expect(res.statusCode).toBe(400)
     expect(res.body.message).toBe('Bu e-posta zaten kayıtlı')
+  })
+
+  it('submits dealer quote requests with the logged-in dealer details', async () => {
+    UserModel.findById.mockReturnValue({
+      select: vi.fn().mockResolvedValue({
+        _id: 'dealer-1',
+        username: 'Ali Tumay',
+        email: 'artumay@gmail.com',
+        companyname: 'Tumex',
+        telephone: '+90 530 392 72 59'
+      })
+    })
+
+    const dealerQuoteRequestNotifier = vi.fn().mockResolvedValue(true)
+    const handler = createDealerQuoteRequestHandler({
+      userModel: UserModel,
+      dealerQuoteRequestNotifier
+    })
+    const req = {
+      user: { _id: 'dealer-1', role: 'dealer' },
+      body: {
+        productGroup: 'Abkant',
+        machineSeries: 'PSH',
+        customerName: 'Merve Demir',
+        customerCompany: 'Demir Metal',
+        contactEmail: 'Merve@Example.com',
+        contactPhone: '0555 000 0000',
+        timeline: '2 hafta',
+        requirementSummary: '160 ton ve 3100 mm bir çözüm gerekiyor.'
+      }
+    }
+    const res = createResponse()
+
+    await handler(req, res)
+
+    expect(dealerQuoteRequestNotifier).toHaveBeenCalledWith({
+      productGroup: 'Abkant',
+      machineSeries: 'PSH',
+      customerName: 'Merve Demir',
+      customerCompany: 'Demir Metal',
+      contactEmail: 'merve@example.com',
+      contactPhone: '0555 000 0000',
+      timeline: '2 hafta',
+      requirementSummary: '160 ton ve 3100 mm bir çözüm gerekiyor.',
+      dealerName: 'Ali Tumay',
+      dealerEmail: 'artumay@gmail.com',
+      dealerCompany: 'Tumex',
+      dealerTelephone: '+90 530 392 72 59'
+    })
+    expect(res.statusCode).toBe(201)
+    expect(res.body.message).toContain('Teklif talebiniz alındı')
   })
 
   it('lists users for the admin user management screen', async () => {

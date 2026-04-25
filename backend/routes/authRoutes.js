@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const requireRole = require('../middleware/requireRole')
 const { createLoginHandler, createRegisterHandler } = require('../controllers/authController')
+const { createDealerQuoteRequestHandler } = require('../controllers/dealerRequestController')
 const { sendInternalServerError } = require('../utils/http')
 
 function registerAuthRoutes(app, {
@@ -9,7 +10,8 @@ function registerAuthRoutes(app, {
   jwtLib,
   tokenSecret,
   authMiddleware,
-  accessRequestNotifier
+  accessRequestNotifier,
+  dealerQuoteRequestNotifier
 } = {}) {
   app.post('/login', createLoginHandler({ userModel, bcryptLib, jwtLib, tokenSecret }))
   app.post('/register', createRegisterHandler({ userModel, bcryptLib, accessRequestNotifier }))
@@ -30,6 +32,13 @@ function registerAuthRoutes(app, {
   app.get('/protected', authMiddleware, requireRole('dealer', 'admin'), (_req, res) => {
     res.json({ message: 'Korunaklı bölgeye erişildi' })
   })
+
+  app.post(
+    '/protected/quote-request',
+    authMiddleware,
+    requireRole('dealer', 'admin'),
+    createDealerQuoteRequestHandler({ userModel, dealerQuoteRequestNotifier })
+  )
 }
 
 module.exports = { registerAuthRoutes }

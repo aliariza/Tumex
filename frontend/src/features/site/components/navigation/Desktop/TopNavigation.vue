@@ -10,6 +10,9 @@
       <li :class="{ active: activeMenu === 'iletisim' }">
         <router-link to="/iletisim"><h4>İletişim</h4></router-link>
       </li>
+      <li v-if="isAuthenticated" :class="{ active: activeMenu === 'dealer' }">
+        <router-link to="/protected"><h4>Bayi Paneli</h4></router-link>
+      </li>
     </ul>
     <router-link to="/">
       <div class="logo">
@@ -20,6 +23,8 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 import TumexBlue from '@/shared/components/icons/TumexBlue.vue'
 
 defineOptions({ name: 'TopNavigation' })
@@ -29,6 +34,9 @@ defineProps({
     default: null
   }
 })
+
+const store = useStore()
+const isAuthenticated = computed(() => store.getters.isAuthenticated)
 </script>
 
 <style scoped lang="scss">

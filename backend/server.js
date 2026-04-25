@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const { createApp } = require('./app')
 const JobPosition = require('./models/JobPosition')
 const { createLoginHandler, createRegisterHandler } = require('./controllers/authController')
+const { createDealerQuoteRequestHandler } = require('./controllers/dealerRequestController')
 const {
   createAdminDeleteUserHandler,
   createAdminListUsersHandler,
@@ -49,6 +50,7 @@ module.exports = {
   createAdminDeleteUserHandler,
   createAdminListUsersHandler,
   createAdminUpdateUserRoleHandler,
+  createDealerQuoteRequestHandler,
   createCorsOriginMatcher,
   createLoginHandler,
   createRegisterHandler,

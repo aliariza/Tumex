@@ -14,6 +14,7 @@ const { createCorsOriginMatcher } = require('./utils/http')
 const {
   createNotifierConfig,
   createAccessRequestNotifier,
+  createDealerQuoteRequestNotifier,
   createRoleChangeNotifier
 } = require('./services/accessRequestNotifier')
 
@@ -39,6 +40,7 @@ function createApp(options = {}) {
     corsOriginRegex = process.env.FRONTEND_URL_REGEX || '',
     tokenSecret = process.env.TOKEN_SECRET,
     accessRequestNotifier = createAccessRequestNotifier(notifierConfig),
+    dealerQuoteRequestNotifier = createDealerQuoteRequestNotifier(notifierConfig),
     roleChangeNotifier = createRoleChangeNotifier(notifierConfig)
   } = options
 
@@ -60,7 +62,8 @@ function createApp(options = {}) {
     jwtLib,
     tokenSecret,
     authMiddleware,
-    accessRequestNotifier
+    accessRequestNotifier,
+    dealerQuoteRequestNotifier
   })
 
   registerAdminRoutes(app, {

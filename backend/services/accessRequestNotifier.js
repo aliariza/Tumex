@@ -44,6 +44,30 @@ function buildRoleChangeText(user = {}, previousRole, nextRole) {
   ].join('\n')
 }
 
+function buildDealerQuoteRequestText(payload = {}) {
+  return [
+    'A dealer quote request was submitted from the protected Tumex area.',
+    '',
+    'Request details:',
+    `Product group: ${payload.productGroup || '-'}`,
+    `Series or model: ${payload.machineSeries || '-'}`,
+    `Customer name: ${payload.customerName || '-'}`,
+    `Customer company: ${payload.customerCompany || '-'}`,
+    `Customer email: ${payload.contactEmail || '-'}`,
+    `Customer phone: ${payload.contactPhone || '-'}`,
+    `Timeline: ${payload.timeline || '-'}`,
+    '',
+    'Need summary:',
+    payload.requirementSummary || '-',
+    '',
+    'Dealer account:',
+    `Name: ${payload.dealerName || '-'}`,
+    `Email: ${payload.dealerEmail || '-'}`,
+    `Company: ${payload.dealerCompany || '-'}`,
+    `Telephone: ${payload.dealerTelephone || '-'}`
+  ].join('\n')
+}
+
 function createMailTransport(config = {}) {
   return nodemailer.createTransport({
     host: config.host,
@@ -106,10 +130,31 @@ function createRoleChangeNotifier(config = {}) {
   }
 }
 
+function createDealerQuoteRequestNotifier(config = {}) {
+  if (!isMailConfigured(config)) {
+    return async () => false
+  }
+
+  const transporter = createMailTransport(config)
+
+  return async (payload) => {
+    await transporter.sendMail({
+      from: config.from || config.user,
+      to: config.recipient,
+      subject: `Tumex dealer quote request - ${payload.productGroup || 'General'}`,
+      text: buildDealerQuoteRequestText(payload)
+    })
+
+    return true
+  }
+}
+
 module.exports = {
   buildNotificationText,
+  buildDealerQuoteRequestText,
   buildRoleChangeText,
   createNotifierConfig,
   createAccessRequestNotifier,
+  createDealerQuoteRequestNotifier,
   createRoleChangeNotifier
 }
