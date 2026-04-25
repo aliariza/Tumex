@@ -135,6 +135,12 @@ const routes = [
     meta: { access: 'admin' }
   },
   {
+    path: '/admin/job-positions',
+    name: 'AdminJobPositions',
+    component: () => import('../../features/admin/views/AdminJobPositionsView.vue'),
+    meta: { access: 'admin' }
+  },
+  {
     path: '/admin/users',
     name: 'AdminUsers',
     component: () => import('../../features/admin/views/AdminUsersView.vue'),

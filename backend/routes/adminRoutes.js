@@ -12,10 +12,17 @@ const {
   createAdminListMachinesHandler,
   createAdminUpdateMachineHandler
 } = require('../controllers/machineController')
+const {
+  createAdminCreateJobPositionHandler,
+  createAdminDeleteJobPositionHandler,
+  createAdminListJobPositionsHandler,
+  createAdminUpdateJobPositionHandler
+} = require('../controllers/jobPositionController')
 
 function registerAdminRoutes(app, {
   userModel = User,
   machineModel = Machine,
+  jobPositionModel,
   authMiddleware,
   roleChangeNotifier
 } = {}) {
@@ -49,6 +56,34 @@ function registerAdminRoutes(app, {
     authMiddleware,
     requireRole('admin'),
     createAdminDeleteMachineHandler({ machineModel })
+  )
+
+  app.get(
+    '/admin/job-positions',
+    authMiddleware,
+    requireRole('admin'),
+    createAdminListJobPositionsHandler({ jobPositionModel })
+  )
+
+  app.post(
+    '/admin/job-positions',
+    authMiddleware,
+    requireRole('admin'),
+    createAdminCreateJobPositionHandler({ jobPositionModel })
+  )
+
+  app.put(
+    '/admin/job-positions/:id',
+    authMiddleware,
+    requireRole('admin'),
+    createAdminUpdateJobPositionHandler({ jobPositionModel })
+  )
+
+  app.delete(
+    '/admin/job-positions/:id',
+    authMiddleware,
+    requireRole('admin'),
+    createAdminDeleteJobPositionHandler({ jobPositionModel })
   )
 
   app.get(

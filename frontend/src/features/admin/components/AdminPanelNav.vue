@@ -17,6 +17,7 @@ defineOptions({ name: 'AdminPanelNav' })
 
 const items = [
   { label: 'Makine Yönetimi', to: '/admin/machines' },
+  { label: 'Pozisyon Yönetimi', to: '/admin/job-positions' },
   { label: 'Kullanıcı Yönetimi', to: '/admin/users' }
 ]
 </script>

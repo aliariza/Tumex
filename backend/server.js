@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const { createApp } = require('./app')
+const JobPosition = require('./models/JobPosition')
 const { createLoginHandler, createRegisterHandler } = require('./controllers/authController')
 const {
   createAdminDeleteUserHandler,
@@ -7,6 +8,7 @@ const {
   createAdminUpdateUserRoleHandler
 } = require('./controllers/adminUserController')
 const { createCorsOriginMatcher } = require('./utils/http')
+const { ensureDefaultJobPositions } = require('./services/jobPositionSeed')
 
 require('dotenv').config()
 
@@ -24,6 +26,7 @@ async function startServer(options = {}) {
 
   try {
     await connectToDatabase(mongoUri)
+    await ensureDefaultJobPositions({ jobPositionModel: JobPosition })
   } catch (err) {
     console.error('MongoDB bağlantı hatası:', err.message)
     process.exit(1)

@@ -90,6 +90,23 @@ function buildMachinePayload(body = {}) {
   }
 }
 
+function buildJobPositionPayload(body = {}) {
+  return {
+    title: trimValue(body.title || ''),
+    department: trimValue(body.department || ''),
+    locationType: trimValue(body.locationType || ''),
+    employmentType: trimValue(body.employmentType || ''),
+    summary: trimValue(body.summary || ''),
+    highlights: Array.isArray(body.highlights)
+      ? body.highlights.map((item) => trimValue(item || '')).filter(Boolean)
+      : [],
+    applicationEmail: trimValue(body.applicationEmail || 'info@tum-ex.com'),
+    applicationSubject: trimValue(body.applicationSubject || ''),
+    sortOrder: Number(body.sortOrder || 0),
+    isPublished: typeof body.isPublished === 'boolean' ? body.isPublished : false
+  }
+}
+
 function sendInternalServerError(res, scope, error) {
   console.error(`[${scope}]`, error.message)
   return res.status(500).json({ message: INTERNAL_SERVER_MESSAGE })
@@ -97,6 +114,7 @@ function sendInternalServerError(res, scope, error) {
 
 module.exports = {
   INTERNAL_SERVER_MESSAGE,
+  buildJobPositionPayload,
   buildMachinePayload,
   createCorsOriginMatcher,
   createRegisterPayload,

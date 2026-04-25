@@ -4,10 +4,12 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const User = require('./models/User')
 const Machine = require('./models/Machine')
+const JobPosition = require('./models/JobPosition')
 const authenticateToken = require('./middleware/authMiddleware')
 const { registerAuthRoutes } = require('./routes/authRoutes')
 const { registerAdminRoutes } = require('./routes/adminRoutes')
 const { registerMachineRoutes } = require('./routes/machineRoutes')
+const { registerJobPositionRoutes } = require('./routes/jobPositionRoutes')
 const { createCorsOriginMatcher } = require('./utils/http')
 const {
   createNotifierConfig,
@@ -29,6 +31,7 @@ function createApp(options = {}) {
   const {
     userModel = User,
     machineModel = Machine,
+    jobPositionModel = JobPosition,
     bcryptLib = bcrypt,
     jwtLib = jwt,
     authMiddleware = authenticateToken,
@@ -63,11 +66,13 @@ function createApp(options = {}) {
   registerAdminRoutes(app, {
     userModel,
     machineModel,
+    jobPositionModel,
     authMiddleware,
     roleChangeNotifier
   })
 
   registerMachineRoutes(app, { machineModel })
+  registerJobPositionRoutes(app, { jobPositionModel })
 
   app.get('/health', (_req, res) => {
     res.status(200).json({ ok: true })
