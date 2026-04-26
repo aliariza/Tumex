@@ -3,8 +3,8 @@ const path = require('path')
 const PDFDocument = require('pdfkit')
 
 const logoPath = path.join(__dirname, '..', 'assets', 'tumex-logo.png')
-const regularFontPath = '/System/Library/Fonts/Supplemental/Arial.ttf'
-const boldFontPath = '/System/Library/Fonts/Supplemental/Arial Bold.ttf'
+const regularFontPath = path.join(__dirname, '..', 'assets', 'fonts', 'NotoSans-Regular.ttf')
+const boldFontPath = path.join(__dirname, '..', 'assets', 'fonts', 'NotoSans-Bold.ttf')
 const brochureVersion = 'V-1.0'
 
 
