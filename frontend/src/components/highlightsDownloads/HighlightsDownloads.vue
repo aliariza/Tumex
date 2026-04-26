@@ -16,6 +16,7 @@
       <span class="section-tag">Hazır doküman</span>
       <h1 class="disp-2">İndirmeler</h1>
       <a
+        v-if="pdfPath"
         :href="brochureLink"
         target="_blank"
         rel="noopener noreferrer"
@@ -26,6 +27,9 @@
         <span class="download-card__copy">Tek sayfada seri özeti, kullanım odağı ve iletişim bilgileri.</span>
         <span class="download-card__cta">Broşürü indir</span>
       </a>
+      <p v-else class="download-empty">
+        Bu ürün için henüz PDF broşür eklenmedi.
+      </p>
     </div>
   </section>
 </template>
@@ -165,5 +169,12 @@ ul.square-bullets li::before {
   font-size: 1.4rem;
   font-weight: 800;
   letter-spacing: 0.05em;
+}
+
+.download-empty {
+  margin-top: 2rem;
+  color: #506b84;
+  font-size: 1.45rem;
+  line-height: 1.6;
 }
 </style>

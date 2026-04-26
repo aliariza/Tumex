@@ -1,7 +1,7 @@
 export const PRODUCT_BROCHURES = {
   DLC: {
     fileName: 'tumex-dlc-brochure.pdf',
-    badge: 'Lazer Kesim Serisi',
+    badge: 'LAZER KESİM SERİSİ',
     highlights: [
       'Tek tabla yerleşimi ile kompakt ve verimli kesim akışı',
       '3 kW ile 30 kW arası güç seçenekleri',
@@ -22,7 +22,7 @@ export const PRODUCT_BROCHURES = {
   },
   'D-DLC': {
     fileName: 'tumex-d-dlc-brochure.pdf',
-    badge: 'Lazer Kesim Serisi',
+    badge: 'LAZER KESİM SERİSİ',
     highlights: [
       'Çift tabla yapısı ile yükleme ve kesim aynı anda ilerler',
       'Kesintisiz akışa yakın üretim kurgusu',
@@ -43,7 +43,7 @@ export const PRODUCT_BROCHURES = {
   },
   'D-DLC-S': {
     fileName: 'tumex-d-dlc-s-brochure.pdf',
-    badge: 'Lazer Kesim Serisi',
+    badge: 'LAZER KESİM SERİSİ',
     highlights: [
       'Kapalı kasa ile daha kontrollü ve güvenli çalışma alanı',
       'Çift tabla sayesinde hızlı yükleme-boşaltma düzeni',
@@ -64,7 +64,7 @@ export const PRODUCT_BROCHURES = {
   },
   WC67K: {
     fileName: 'tumex-wc67k-brochure.pdf',
-    badge: 'Abkant Serisi',
+    badge: 'ABKANT SERİSİ',
     highlights: [
       '2 eksen kontrollü klasik abkant yapısı',
       'Günlük büküm operasyonları için güvenilir performans',
@@ -85,7 +85,7 @@ export const PRODUCT_BROCHURES = {
   },
   PSH4: {
     fileName: 'tumex-psh4-brochure.pdf',
-    badge: 'Abkant Serisi',
+    badge: 'ABKANT SERİSİ',
     highlights: [
       '4 eksen kontrollü yapı ile daha esnek büküm senaryoları',
       'Yüksek tekrar edilebilirlik isteyen operasyonlara uygun',
@@ -106,7 +106,7 @@ export const PRODUCT_BROCHURES = {
   },
   DGE: {
     fileName: 'tumex-dge-brochure.pdf',
-    badge: 'Abkant Serisi',
+    badge: 'ABKANT SERİSİ',
     highlights: [
       '6 eksen kontrollü profesyonel büküm kabiliyeti',
       'Karmaşık parçalarda doğru açı ve konum kontrolü',
@@ -127,7 +127,7 @@ export const PRODUCT_BROCHURES = {
   },
   PSH8: {
     fileName: 'tumex-psh8-brochure.pdf',
-    badge: 'Abkant Serisi',
+    badge: 'ABKANT SERİSİ',
     highlights: [
       '8 eksen kontrollü üst seviye büküm çözümleri',
       'Karmaşık geometrilerde yüksek hareket kabiliyeti',

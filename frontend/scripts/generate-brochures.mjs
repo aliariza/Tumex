@@ -17,20 +17,20 @@ const tumexLogoComponentPath = path.join(
 const contactDetails = {
   email: 'info@tum-ex.com',
   phone: '+90 530 392 72 59',
-  addressLine1: 'Ivedik OSB Melih Gokcek Blv.',
+  addressLine1: 'İvedik OSB Melih Gökçek Blv.',
   addressLine2: '63/33 Yenimahalle, Ankara / Turkiye',
   instagram: '@tumex.ltd'
 }
 
 const paletteByBadge = {
-  'Lazer Kesim Serisi': {
+  'LAZER KESİM SERİSİ': {
     primary: '#00539c',
     dark: '#112f47',
     accent: '#2d89c9',
     soft: '#eef6fc',
     border: '#cfe1ef'
   },
-  'Abkant Serisi': {
+  'ABKANT SERİSİ': {
     primary: '#0c6b58',
     dark: '#16382f',
     accent: '#4ea287',
