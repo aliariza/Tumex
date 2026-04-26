@@ -16,7 +16,7 @@
       <span class="section-tag">Hazır doküman</span>
       <h1 class="disp-2">İndirmeler</h1>
       <a
-        v-if="pdfPath"
+        v-if="brochureLink"
         :href="brochureLink"
         target="_blank"
         rel="noopener noreferrer"
@@ -52,7 +52,16 @@ const props = defineProps({
   }
 })
 
-const brochureLink = computed(() => `/assets/pdf/${props.pdfPath}`)
+const brochureLink = computed(() => {
+  if (!props.pdfPath) return ''
+
+  if (/^https?:\/\//i.test(props.pdfPath)) {
+    return props.pdfPath
+  }
+
+  return `/assets/pdf/${props.pdfPath}`
+})
+
 const normalizedHighlights = computed(() => props.highlights.filter(Boolean))
 </script>
 

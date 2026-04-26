@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { computed, toRef } from 'vue'
+import { computed, toRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ChevronDown from '@/shared/components/icons/ChevronDown.vue'
 import ChevronRight from '@/shared/components/icons/ChevronRight.vue'
@@ -98,7 +98,7 @@ const props = defineProps({
     default: () => []
   }
 })
-
+const emit = defineEmits(['machine-selected'])
 const route = useRoute()
 const productType = toRef(route.params, 'productType')
 
@@ -109,6 +109,7 @@ const {
   isOption,
   isStandart,
   selectedDetails,
+  selectedMachine,
   selectOption,
   showOption,
   showStandard,
@@ -118,7 +119,13 @@ const {
   machines: toRef(props, 'machines'),
   productType
 })
-
+watch(
+  selectedMachine,
+  (machine) => {
+    emit('machine-selected', machine || null)
+  },
+  { immediate: true }
+)
 const normalizedProductOptions = computed(() => props.productOptions.filter(Boolean))
 
 function getDetailValue(detail) {

@@ -26,22 +26,30 @@ function getSelectedDropdownValues(state) {
   }
 }
 
-function getSelectedModelDetails(modelData, selections) {
-  if (!modelData) return []
+function getSelectedMachine(modelData, selections) {
+  if (!modelData) return null
 
   const { primary, secondary } = selections
 
-  if (!primary || primary === DEFAULT_DROPDOWN_VALUE) return []
+  if (!primary || primary === DEFAULT_DROPDOWN_VALUE) return null
 
   const primaryData = modelData[primary]
-  if (!primaryData) return []
+  if (!primaryData) return null
 
-  if (!secondary || secondary === DEFAULT_DROPDOWN_VALUE) return []
+  if (!secondary || secondary === DEFAULT_DROPDOWN_VALUE) return null
 
-  const details = primaryData[secondary]
-  return Array.isArray(details) ? details : []
+  const selected = primaryData[secondary]
+
+  if (!selected) return null
+
+  if (Array.isArray(selected)) {
+    return {
+      specs: selected
+    }
+  }
+
+  return selected
 }
-
 function closeDropdowns(dropdowns) {
   for (const key of Object.keys(dropdowns.value)) {
     dropdowns.value[key].open = false
@@ -77,9 +85,13 @@ export function useMachineSpecsTable({ tableData, machines, productType }) {
     return machines.value
   })
 
-  const selectedDetails = computed(() => {
+  const selectedMachine = computed(() => {
     const selections = getSelectedDropdownValues(dropdowns.value)
-    return getSelectedModelDetails(resolvedModelData.value, selections)
+    return getSelectedMachine(resolvedModelData.value, selections)
+  })
+
+  const selectedDetails = computed(() => {
+    return selectedMachine.value?.specs || []
   })
 
   function initDropdowns() {
@@ -182,6 +194,7 @@ export function useMachineSpecsTable({ tableData, machines, productType }) {
     isOption,
     isStandart,
     selectedDetails,
+    selectedMachine,
     selectOption,
     showOption,
     showStandard,

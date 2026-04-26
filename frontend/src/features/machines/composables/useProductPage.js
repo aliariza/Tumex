@@ -29,7 +29,7 @@ function groupAbkantMachinesForTable(machines) {
       grouped[ton] = {}
     }
 
-    grouped[ton][length] = machine.specs || []
+    grouped[ton][length] = machine
   }
 
   return grouped
@@ -56,12 +56,11 @@ function groupLaserMachinesForTable(machines) {
       grouped[power] = {}
     }
 
-    grouped[power][size] = machine.specs || []
+    grouped[power][size] = machine
   }
 
   return grouped
 }
-
 export function useProductPage() {
   const route = useRoute()
   const abkantMachines = ref({})

@@ -26,11 +26,12 @@
         :tableData="currentTableData"
         :machines="machineData"
         :productOptions="productOptions"
+        @machine-selected="selectedMachine = $event"
       />
     </div>
 
     <HighlightsDownloads
-      :pdfPath="pdfPath"
+      :pdfPath="selectedMachineBrochurePath"
       :highlights="productHighlights"
       :productTitle="heroItem.title"
     />
@@ -38,6 +39,7 @@
 </template>
 
 <script setup>
+import { computed, ref } from 'vue'
 import ProductHero from '@/features/site/components/hero/ProductHero.vue'
 import TheTable from '@/components/table/TheTable.vue'
 import AltBolumler from '@/features/site/components/altbolumler/AltBolumler.vue'
@@ -59,6 +61,16 @@ const {
   productOptions,
   productType
 } = useProductPage()
+
+const selectedMachine = ref(null)
+
+const selectedMachineBrochurePath = computed(() => {
+  if (!selectedMachine.value?._id) {
+    return pdfPath.value
+  }
+
+  return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}/machines/${selectedMachine.value._id}/brochure.pdf`
+})
 </script>
 
 <style lang="scss" scoped>
