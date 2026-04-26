@@ -43,7 +43,26 @@ function resolvePublicAssetPath(assetPath) {
 
   const cleanPath = String(assetPath).replace(/^\/+/, '')
 
-  return path.join(__dirname, '..', '..', 'frontend', 'public', cleanPath)
+  const backendAssetPath = path.join(__dirname, '..', cleanPath)
+
+  if (fs.existsSync(backendAssetPath)) {
+    return backendAssetPath
+  }
+
+  const frontendAssetPath = path.join(
+    __dirname,
+    '..',
+    '..',
+    'frontend',
+    'public',
+    cleanPath
+  )
+
+  if (fs.existsSync(frontendAssetPath)) {
+    return frontendAssetPath
+  }
+
+  return null
 }
 
 function drawLogo(doc) {
