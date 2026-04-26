@@ -35,12 +35,12 @@ async function mountWithRoute(path) {
           template: '<div data-test="sections">{{ item.title }}</div>'
         },
         TheTable: {
-          props: ['tableData', 'machines'],
-          template: '<div data-test="table">{{ tableData[0]?.key }}</div>'
+          props: ['tableData', 'machines', 'productOptions'],
+          template: '<div data-test="table">{{ tableData[0]?.key }} | {{ productOptions.length }}</div>'
         },
         HighlightsDownloads: {
-          props: ['pdfPath'],
-          template: '<div data-test="downloads">{{ pdfPath }}</div>'
+          props: ['pdfPath', 'highlights', 'productTitle'],
+          template: '<div data-test="downloads">{{ pdfPath }} | {{ highlights.length }} | {{ productTitle }}</div>'
         }
       }
     }
@@ -82,8 +82,10 @@ describe('ProductView', () => {
     expect(wrapper.text()).toContain('DLC serisi')
     expect(wrapper.get('[data-test="hero"]').text()).toContain('DLC serisi')
     expect(wrapper.get('[data-test="sections"]').text()).toContain('DLC: Hassasiyet ve Güç Bir Arada')
-    expect(wrapper.get('[data-test="downloads"]').text()).toContain('Durmark_Laser.pdf')
+    expect(wrapper.get('[data-test="downloads"]').text()).toContain('tumex-dlc-brochure.pdf')
+    expect(wrapper.get('[data-test="downloads"]').text()).toContain('4')
     expect(wrapper.get('[data-test="table"]').text()).toContain('LAZER GÜCÜ')
+    expect(wrapper.get('[data-test="table"]').text()).toContain('4')
     expect(fetchMachines).toHaveBeenCalledWith({
       category: 'laser-cutting',
       series: 'DLC'
@@ -114,8 +116,9 @@ describe('ProductView', () => {
     const wrapper = await mountWithRoute('/abkant/WC67K')
 
     expect(wrapper.text()).toContain('WC67K serisi')
-    expect(wrapper.get('[data-test="downloads"]').text()).toContain('DurMarkAbkant.pdf')
+    expect(wrapper.get('[data-test="downloads"]').text()).toContain('tumex-wc67k-brochure.pdf')
     expect(wrapper.get('[data-test="table"]').text()).toContain('TONAJ SEÇİN (ton)')
+    expect(wrapper.get('[data-test="table"]').text()).toContain('4')
     expect(fetchMachines).toHaveBeenCalledWith({
       category: 'abkant',
       series: 'WC67K'

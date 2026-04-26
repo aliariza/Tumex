@@ -55,8 +55,19 @@
             </div>
           </td>
         </tr>
-        <tr v-show="isOption">
-          <td colspan="2">Henüz hazır değil.</td>
+        <tr
+          v-for="option in normalizedProductOptions"
+          :key="option"
+          v-show="isOption"
+        >
+          <td>{{ option }}</td>
+          <td>Opsiyonel</td>
+        </tr>
+        <tr
+          v-if="!normalizedProductOptions.length"
+          v-show="isOption"
+        >
+          <td colspan="2">Bu seri için opsiyon bilgisi yakında eklenecek.</td>
         </tr>
       </tbody>
     </table>
@@ -64,7 +75,7 @@
 </template>
 
 <script setup>
-import { toRef } from 'vue'
+import { computed, toRef } from 'vue'
 import { useRoute } from 'vue-router'
 import ChevronDown from '@/shared/components/icons/ChevronDown.vue'
 import ChevronRight from '@/shared/components/icons/ChevronRight.vue'
@@ -81,6 +92,10 @@ const props = defineProps({
   machines: {
     type: Object,
     required: true
+  },
+  productOptions: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -103,6 +118,8 @@ const {
   machines: toRef(props, 'machines'),
   productType
 })
+
+const normalizedProductOptions = computed(() => props.productOptions.filter(Boolean))
 
 function getDetailValue(detail) {
   if (!detail || typeof detail !== 'object') return ''

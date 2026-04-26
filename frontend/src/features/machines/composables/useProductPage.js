@@ -2,11 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { fetchMachines } from '@/features/machines/services/machineApi.js'
 import { MODEL_DATA } from '@/data/modelData.js'
-
-const PDF_BY_MACHINE_TYPE = {
-  'laser-cutting': 'Durmark_Laser.pdf',
-  abkant: 'DurMarkAbkant.pdf'
-}
+import { getProductBrochure } from '@/data/productBrochures.js'
 
 function getModelContent(productType) {
   return MODEL_DATA[productType] || {}
@@ -160,7 +156,10 @@ export function useProductPage() {
     return {}
   })
 
-  const pdfPath = computed(() => PDF_BY_MACHINE_TYPE[machineType.value] || '')
+  const brochure = computed(() => getProductBrochure(productType.value))
+  const pdfPath = computed(() => brochure.value?.fileName || '')
+  const productHighlights = computed(() => brochure.value?.highlights || [])
+  const productOptions = computed(() => brochure.value?.optionalFeatures || [])
 
   const heroItem = computed(() => {
     const data = getModelContent(productType.value)
@@ -238,7 +237,9 @@ export function useProductPage() {
     loading,
     machineData,
     machineType,
+    productOptions,
     pdfPath,
+    productHighlights,
     productType
   }
 }

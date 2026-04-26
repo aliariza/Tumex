@@ -97,7 +97,11 @@ async function mountTable() {
   return mount(TheTable, {
     props: {
       tableData: laserTableData,
-      machines: laserMachinesData
+      machines: laserMachinesData,
+      productOptions: [
+        'Otomatik nozzle temizleme ve kalibrasyon paketi',
+        'Otomatik yükleme-boşaltma sistemi entegrasyonu'
+      ]
     },
     global: {
       plugins: [router]
@@ -134,6 +138,7 @@ describe('TheTable', () => {
 
     await tbodies[1].trigger('click')
 
-    expect(wrapper.text()).toContain('Henüz hazır değil.')
+    expect(wrapper.text()).toContain('Otomatik nozzle temizleme ve kalibrasyon paketi')
+    expect(wrapper.text()).toContain('Opsiyonel')
   })
 })

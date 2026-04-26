@@ -150,11 +150,25 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 #whatsapp-button {
   position: fixed;
-  height: 10rem;
-  width: 10rem;
-  bottom: 20px;
-  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 7.2rem;
+  width: 7.2rem;
+  bottom: 2rem;
+  right: 2rem;
   z-index: 1000;
+  border-radius: 999px;
+}
+
+.whatsapp-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.whatsapp-icon :deep(svg) {
+  width: 100%;
+  height: 100%;
 }
 .desktop {
   display: block;
@@ -244,6 +258,15 @@ onBeforeUnmount(() => {
   display: none;
   @media only screen and (max-width: 1040px) {
     display: block;
+  }
+}
+
+@media only screen and (max-width: 1040px) {
+  #whatsapp-button {
+    height: 5.6rem;
+    width: 5.6rem;
+    right: 1.2rem;
+    bottom: 1.2rem;
   }
 }
 

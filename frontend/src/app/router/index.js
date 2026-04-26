@@ -162,7 +162,29 @@ export function createAppRouter(options = {}) {
 
   const router = createRouter({
     history,
-    routes
+    routes,
+    scrollBehavior(to, from, savedPosition) {
+      if (savedPosition) {
+        return savedPosition
+      }
+
+      if (to.hash) {
+        return {
+          el: to.hash,
+          top: 80,
+          behavior: 'smooth'
+        }
+      }
+
+      if (to.fullPath !== from.fullPath) {
+        return {
+          top: 0,
+          left: 0
+        }
+      }
+
+      return undefined
+    }
   })
 
   router.beforeEach(async (to) => {

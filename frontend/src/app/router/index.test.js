@@ -64,4 +64,23 @@ describe('router auth guard', () => {
     expect(appStore.dispatch).toHaveBeenCalledWith('logout')
     expect(router.currentRoute.value.name).toBe('bayi')
   })
+
+  it('resets scroll to the top on normal route navigation', async () => {
+    const router = createAppRouter({
+      apiClient,
+      appStore,
+      history: createMemoryHistory()
+    })
+
+    const scrollTarget = router.options.scrollBehavior(
+      { fullPath: '/site-haritasi', hash: '' },
+      { fullPath: '/hakkinda' },
+      null
+    )
+
+    expect(scrollTarget).toEqual({
+      top: 0,
+      left: 0
+    })
+  })
 })

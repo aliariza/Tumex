@@ -25,10 +25,15 @@
         v-else
         :tableData="currentTableData"
         :machines="machineData"
+        :productOptions="productOptions"
       />
     </div>
 
-    <HighlightsDownloads :pdfPath="pdfPath" />
+    <HighlightsDownloads
+      :pdfPath="pdfPath"
+      :highlights="productHighlights"
+      :productTitle="heroItem.title"
+    />
   </section>
 </template>
 
@@ -50,6 +55,8 @@ const {
   loading,
   machineData,
   pdfPath,
+  productHighlights,
+  productOptions,
   productType
 } = useProductPage()
 </script>

@@ -29,26 +29,41 @@ const activeMenu = computed(() =>
 
 <style lang="scss" scoped>
 .company-nav {
+  width: 100vw;
   position: relative;
   z-index: 40;
+  background-color: var(--c-background-nav);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.22);
 
   ul {
-    background-color: var(--c-background-nav);
-    padding-left: 2rem;
+    display: flex;
+    align-items: stretch;
+    gap: 3.2rem;
+    margin: 0;
+    padding: 0 2rem 0 11.2rem;
+    list-style: none;
 
     li {
       height: 6rem;
       position: relative;
       cursor: pointer;
       display: flex;
-      align-items: flex-end;
-      padding-bottom: 1rem;
-      width: 13%;
+      align-items: center;
+      flex: 0 0 auto;
+
+      a {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        text-decoration: none;
+      }
+
       h4 {
         color: var(--c-black);
         line-height: 2rem;
+        white-space: nowrap;
       }
+
       &:hover {
         cursor: pointer;
         h4 { color: var(--c-main); }
