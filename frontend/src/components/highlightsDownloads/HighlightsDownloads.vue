@@ -1,7 +1,7 @@
 <template>
   <section class="highlights-downloads">
     <div class="highlights">
-      <span class="section-tag">Seri avantajları</span>
+      <span class="section-tag">SERİ AVANTAJLARI</span>
       <h1 class="disp-2">Öne çıkanlar</h1>
       <ul class="square-bullets">
         <li
@@ -13,7 +13,7 @@
       </ul>
     </div>
     <div class="downloads">
-      <span class="section-tag">Hazır doküman</span>
+      <span class="section-tag">HAZIR DOKÜMAN</span>
       <h1 class="disp-2">İndirmeler</h1>
       <a
         v-if="brochureLink"
@@ -25,7 +25,7 @@
         <span class="download-card__eyebrow">PDF BROŞÜR</span>
         <strong class="download-card__title">{{ productTitle || 'Ürün broşürü' }}</strong>
         <span class="download-card__copy">Tek sayfada seri özeti, kullanım odağı ve iletişim bilgileri.</span>
-        <span class="download-card__cta">Broşürü indir</span>
+        <span class="download-card__cta">Broşür indir</span>
       </a>
       <p v-else class="download-empty">
         Bu ürün için henüz PDF broşür eklenmedi.

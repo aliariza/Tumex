@@ -14,7 +14,7 @@
         quote-subject="Abkant Bayi Teklif Talebi"
       />
       <DealerQuoteRequestForm
-        eyebrow="Abkant Talebi"
+        eyebrow="ABKANT TALEBİ"
         title="Abkant teklif talebi bırakın"
         description="Tonaj, bükme boyu ve müşteri notlarını girin. Talep bayi hesabınızla birlikte satış ekibine iletilsin."
         product-group="Abkant"
@@ -34,7 +34,7 @@
         </article>
 
         <article class="info-card info-card--dark">
-          <p class="info-card__eyebrow">Bayi Notu</p>
+          <p class="info-card__eyebrow">BAYİ NOTU</p>
           <ul>
             <li>Müşteri tonaj ihtiyacını netleştirin</li>
             <li>Bükme uzunluğunu seri aralığıyla eşleştirin</li>

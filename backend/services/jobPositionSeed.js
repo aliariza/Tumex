@@ -35,7 +35,7 @@ const defaultJobPositions = [
   },
   {
     title: 'Servis ve Devreye Alma Uzmanı',
-    department: 'Teknik Servis',
+    department: 'TEKNİK SERVİS',
     locationType: 'Saha odaklı',
     employmentType: 'Tam zamanlı',
     summary: 'Kurulum, devreye alma ve teknik destek süreçlerinde sahada aktif rol alacak, çözüm üretmeyi seven ekip arkadaşları arıyoruz.',
@@ -61,7 +61,7 @@ const defaultJobPositions = [
       'Detaylara dikkat ve hızlı geri dönüş alışkanlığı'
     ],
     applicationEmail: 'info@tum-ex.com',
-    applicationSubject: 'Operasyon ve Teklif Koordinatoru Basvurusu',
+    applicationSubject: 'Operasyon ve Teklif Koordinatörü Başvurusu',
     sortOrder: 40,
     isPublished: true
   }

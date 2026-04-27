@@ -6,7 +6,7 @@
     <section class="dealer-dashboard">
       <DealerSubnav />
       <DealerResourcePanel
-        eyebrow="Bayi Araçları"
+        eyebrow="BAYİ ARAÇLARI"
         title="Teklif ve içerik akışı"
         description="Bayi panelinden broşürlere ulaşabilir, hızlı teklif talebi başlatabilir ve satış akışını hızlandırabilirsiniz."
         brochure-label="Genel Lazer Broşürü"
@@ -14,7 +14,7 @@
         quote-subject="Genel Bayi Teklif Talebi"
       />
       <DealerQuoteRequestForm
-        eyebrow="Talep Merkezi"
+        eyebrow="TALEP MERKEZİ"
         title="Genel bayi talebi oluşturun"
         description="Hangi ürün grubuna ilerleyeceğiniz net değilse bile temel müşteri bilgisini bırakın, Tumex ekibi talebi uygun satış akışına yönlendirsin."
         product-group="Genel Bayi Talebi"
@@ -25,7 +25,7 @@
 
       <div class="dealer-dashboard__hero">
         <div class="dealer-dashboard__stat">
-          <span class="dealer-dashboard__stat-label">Hızlı Erişim</span>
+          <span class="dealer-dashboard__stat-label">HIZLI ERİŞİM</span>
           <strong>3 ana bayi akışı</strong>
         </div>
         <p>
@@ -42,7 +42,7 @@
         </RouterLink>
 
         <RouterLink to="/protected/laser" class="dealer-card">
-          <p class="dealer-card__eyebrow">Lazer Kesim</p>
+          <p class="dealer-card__eyebrow">LAZER KESİM</p>
           <h2>Lazer bayi bölümü</h2>
           <p>Güç ve ebat bazlı serileri görüntüleyin, teklif öncesi uygun aileyi hızlıca seçin.</p>
         </RouterLink>

@@ -7,7 +7,7 @@
       </div>
 
       <div class="field-group">
-        <input :value="form.family" @input="updateField('family', $event.target.value)" type="text" placeholder="Aile / Family (örn: WC67K)" />
+        <input :value="form.family" @input="updateField('family', $event.target.value)" type="text" placeholder="Aile (örn: WC67K)" />
         <p v-if="errors.family" class="field-error">{{ errors.family }}</p>
       </div>
 

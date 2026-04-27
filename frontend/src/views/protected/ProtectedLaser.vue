@@ -14,7 +14,7 @@
         quote-subject="Lazer Bayi Teklif Talebi"
       />
       <DealerQuoteRequestForm
-        eyebrow="Lazer Talebi"
+        eyebrow="LAZER TALEBİ"
         title="Lazer teklif talebi bırakın"
         description="Güç aralığı, ebat ve müşteri önceliklerini buraya bırakın. Talep direkt olarak Tumex satış akışına düşsün."
         product-group="Lazer Kesim"
@@ -34,7 +34,7 @@
         </article>
 
         <article class="info-card info-card--dark">
-          <p class="info-card__eyebrow">Bayi Notu</p>
+          <p class="info-card__eyebrow">BAYİ NOTU</p>
           <ul>
             <li>Önce güç aralığını belirleyin</li>
             <li>Çalışma alanı kodunu müşteri ihtiyacıyla eşleştirin</li>

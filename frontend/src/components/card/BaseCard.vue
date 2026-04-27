@@ -23,7 +23,7 @@
 
       <div class="router">
         <router-link :to="item.href" class="teknik-detaylar">
-          <span>Teknik detaylar</span>
+          <span>TEKNİK DETAYLAR</span>
         </router-link>
       </div>
     </div>

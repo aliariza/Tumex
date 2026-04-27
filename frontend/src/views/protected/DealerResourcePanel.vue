@@ -16,14 +16,14 @@
     </article>
 
     <article class="resource-card">
-      <p class="resource-card__eyebrow">Teklif Hazırlığı</p>
+      <p class="resource-card__eyebrow">TEKLİF Hazırlığı</p>
       <h3>Hızlı talep gönderin</h3>
       <p>Makine tipi, güç ya da tonaj ve müşteri notlarıyla ön talep iletin.</p>
       <a class="resource-card__button" :href="mailtoHref">Teklif Talebi Gönder</a>
     </article>
 
     <article class="resource-card">
-      <p class="resource-card__eyebrow">Hızlı İletişim</p>
+      <p class="resource-card__eyebrow">HIZLI İLETİŞİM</p>
       <h3>WhatsApp ve merkez ofis</h3>
       <p>Teknik ekip ya da satışla hızlı koordinasyon için iletişim kanallarını kullanın.</p>
       <div class="resource-card__actions">
