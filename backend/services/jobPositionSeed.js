@@ -13,7 +13,7 @@ const defaultJobPositions = [
       'Seyahat engeli olmayan çalışma düzeni'
     ],
     applicationEmail: 'info@tum-ex.com',
-    applicationSubject: 'Bolge Satis Sorumlusu Basvurusu',
+    applicationSubject: 'Bölge Satış Sorumlusu Başvurusu',
     sortOrder: 10,
     isPublished: true
   },
@@ -29,7 +29,7 @@ const defaultJobPositions = [
       'Gizlilik, takip ve düzen konusunda yüksek hassasiyet'
     ],
     applicationEmail: 'info@tum-ex.com',
-    applicationSubject: 'Genel Mudur Asistani Basvurusu',
+    applicationSubject: 'Genel Müdür Asistanı Başvurusu',
     sortOrder: 20,
     isPublished: true
   },
@@ -45,7 +45,7 @@ const defaultJobPositions = [
       'Planlı ve çözüm odaklı çalışma yaklaşımı'
     ],
     applicationEmail: 'info@tum-ex.com',
-    applicationSubject: 'Servis ve Devreye Alma Uzmani Basvurusu',
+    applicationSubject: 'Servis ve Devreye Alma Uzmanı Başvurusu',
     sortOrder: 30,
     isPublished: true
   },

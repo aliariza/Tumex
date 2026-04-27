@@ -31,7 +31,7 @@
         </div>
 
         <div class="footer-column">
-          <h2>İLETİŞİM</h2>
+          <h2>İletişim</h2>
           <RouterLink to="/iletisim/merkez-ofis">Merkez Ofis</RouterLink>
           <RouterLink :to="isAuthenticated ? '/protected' : '/iletisim/bayi'">
             {{ isAuthenticated ? 'Bayi Paneli' : 'Bayi Girişi' }}

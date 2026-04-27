@@ -2,7 +2,7 @@
   <section class="tumex-calisma">
     <section class="hero">
       <div class="hero__copy">
-        <p class="hero__eyebrow">Tumex Kariyer</p>
+        <p class="hero__eyebrow">TUMEX KARİYER</p>
         <h1 class="disp-1">Birlikte Daha Güçlü Üretelim</h1>
         <p class="hero__text">
           Satış, teknik destek, operasyon ve yönetim ekiplerimiz için yetenekli takım arkadaşlarıyla
@@ -13,7 +13,7 @@
       <aside class="hero__cta">
         <h2 class="disp-3">Hızlı Başvuru</h2>
         <p>CV'nizi ve kısa bir ön yazıyı aşağıdaki adrese iletebilirsiniz.</p>
-        <a href="mailto:info@tum-ex.com?subject=Kariyer%20Basvurusu">info@tum-ex.com</a>
+        <a href="mailto:info@tum-ex.com?subject=Kariyer%20Başvurusu">info@tum-ex.com</a>
         <small>Konu satırında ilgilendiğiniz rolü belirtmeniz değerlendirme sürecini hızlandırır.</small>
       </aside>
     </section>
@@ -26,13 +26,13 @@
       </article>
 
       <article class="highlight-card">
-        <p class="highlight-card__eyebrow">Bizim İçin Önemli</p>
+        <p class="highlight-card__eyebrow">BİZİM İÇİN ÖNEMLİ</p>
         <h3>Sorumluluk, iletişim ve öğrenme isteği</h3>
         <p>Teknik bilgi kadar ekip çalışmasına açıklık, düzenli takip ve müşteri odaklı yaklaşım da bizim için belirleyici.</p>
       </article>
 
       <article class="highlight-card">
-        <p class="highlight-card__eyebrow">Başvuru Şekli</p>
+        <p class="highlight-card__eyebrow">BAŞVURU ŞEKLİ</p>
         <h3>Açık başvuru kabul ediyoruz</h3>
         <p>Güncel ilan beklemeden özgeçmişinizi paylaşabilirsiniz. Uygun pozisyon açıldığında sizinle hızlıca iletişime geçebiliriz.</p>
       </article>

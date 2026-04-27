@@ -1,7 +1,7 @@
 <template>
   <main class="site-map-page">
     <section class="site-map-hero">
-      <p class="eyebrow">Site Haritası</p>
+      <p class="eyebrow">SİTE HARİTASI</p>
       <h1>Tumex sayfalarına hızlı erişim</h1>
       <p>
         Çözümler, ürün serileri, kurumsal bilgiler ve iletişim sayfalarını tek
@@ -36,7 +36,7 @@ const siteMapGroups = [
     ]
   },
   {
-    eyebrow: 'Makine grupları',
+    eyebrow: 'MAKİNE grupları',
     title: 'Çözümler',
     links: [
       { label: 'Lazer Kesim Makineleri', to: '/laser-cutting' },
@@ -68,7 +68,7 @@ const siteMapGroups = [
     ]
   },
   {
-    eyebrow: 'Girişler',
+    eyebrow: 'GİRİŞLER',
     title: 'Bayi ve Yönetim',
     links: [
       { label: 'Bayi Alanı', to: '/iletisim/bayi' },

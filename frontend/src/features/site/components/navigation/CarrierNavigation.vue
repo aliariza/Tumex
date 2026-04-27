@@ -36,6 +36,9 @@ const activeMenu = computed(() =>
   ul {
     background-color: var(--c-background-nav);
     padding-left: 2rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 4rem;
 
     li {
       height: 6rem;
@@ -44,10 +47,11 @@ const activeMenu = computed(() =>
       display: flex;
       align-items: flex-end;
       padding-bottom: 1rem;
-      width: 21%;
+      width: auto;
       h4 {
         color: var(--c-black);
         line-height: 2rem;
+        white-space: nowrap;
       }
       &:hover {
         cursor: pointer;

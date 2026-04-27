@@ -329,7 +329,7 @@ function drawSpecsTable(doc, specs = []) {
     doc.rect(tableX + labelW, y, valueW, 20).fillAndStroke('#f1f5f9', '#94a3b8')
 
     doc
-      .fontSize(10)
+      .fontSize(11)
       .font(boldFont())
       .fillColor('#111827')
       .text('Özellik', tableX + 10, y + 5, {
@@ -383,7 +383,7 @@ function startNewSpecsPage() {
 
     doc
       .font(regularFont())
-      .fontSize(7.8)
+      .fontSize(10.5)
       .fillColor('#111827')
       .text(label, tableX + 8, y + 5, {
         width: labelW - 16,
@@ -394,7 +394,7 @@ function startNewSpecsPage() {
 
     doc
       .font(regularFont())
-      .fontSize(7.8)
+      .fontSize(10.5)
       .fillColor('#374151')
       .text(value, tableX + labelW + 8, y + 5, {
         width: valueW - 16,
