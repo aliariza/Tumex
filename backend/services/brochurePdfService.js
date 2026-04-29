@@ -43,23 +43,21 @@ function resolvePublicAssetPath(assetPath) {
 
   const cleanPath = String(assetPath).replace(/^\/+/, '')
 
-  const backendAssetPath = path.join(__dirname, '..', cleanPath)
+  // PDFKit does not support WebP — prefer a PNG sibling if one exists
+  const pdfFriendlyPath = /\.webp$/i.test(cleanPath)
+    ? cleanPath.replace(/\.webp$/i, '.png')
+    : null
 
-  if (fs.existsSync(backendAssetPath)) {
-    return backendAssetPath
-  }
+  const candidates = pdfFriendlyPath
+    ? [pdfFriendlyPath, cleanPath]
+    : [cleanPath]
 
-  const frontendAssetPath = path.join(
-    __dirname,
-    '..',
-    '..',
-    'frontend',
-    'public',
-    cleanPath
-  )
+  for (const candidate of candidates) {
+    const backendPath = path.join(__dirname, '..', candidate)
+    if (fs.existsSync(backendPath)) return backendPath
 
-  if (fs.existsSync(frontendAssetPath)) {
-    return frontendAssetPath
+    const frontendPath = path.join(__dirname, '..', '..', 'frontend', 'public', candidate)
+    if (fs.existsSync(frontendPath)) return frontendPath
   }
 
   return null
