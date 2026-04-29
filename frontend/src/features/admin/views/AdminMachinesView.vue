@@ -3,18 +3,20 @@
     <div class="admin-page__glow admin-page__glow--left" aria-hidden="true"></div>
     <div class="admin-page__glow admin-page__glow--right" aria-hidden="true"></div>
 
-    <AppToast
-      :show="toast.show"
-      :message="toast.message"
-      :type="toast.type"
-    />
-    <ConfirmDialog
-      :show="confirmDialog.show"
-      title="Makineyi Sil"
-      message="Bu makineyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
-      @confirm="confirmDelete"
-      @cancel="closeDeleteDialog"
-    />
+    <Teleport to="body">
+      <AppToast
+        :show="toast.show"
+        :message="toast.message"
+        :type="toast.type"
+      />
+      <ConfirmDialog
+        :show="confirmDialog.show"
+        title="Makineyi Sil"
+        message="Bu makineyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+        @confirm="confirmDelete"
+        @cancel="closeDeleteDialog"
+      />
+    </Teleport>
     <header class="page-header card card--hero">
       <div class="page-header__copy">
         <p class="page-header__eyebrow">YÖNETİM PANELİ • MAKİNE YÖNETİMİ</p>

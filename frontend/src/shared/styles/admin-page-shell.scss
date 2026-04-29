@@ -6,6 +6,7 @@
   display: grid;
   gap: 2rem;
   overflow: hidden;
+  transform: translateZ(0);
   background:
     linear-gradient(180deg, rgba(240, 247, 255, 0.95) 0%, rgba(255, 255, 255, 1) 58%),
     repeating-linear-gradient(
