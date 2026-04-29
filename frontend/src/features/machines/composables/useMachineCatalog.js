@@ -208,7 +208,22 @@ export function useMachineCatalog(machineTypeSource) {
         category: machineType.value
       })
 
-      machineItems.value = buildSeriesCards(machineType.value, machines)
+      const cards = buildSeriesCards(machineType.value, machines)
+
+      // Honour the series display order defined in machinesData.js
+      const seriesOrder = catalogEntry.value.series || []
+      if (seriesOrder.length > 0) {
+        cards.sort((a, b) => {
+          const aIdx = seriesOrder.findIndex((s) => a.href === `/${machineType.value}/${s}`)
+          const bIdx = seriesOrder.findIndex((s) => b.href === `/${machineType.value}/${s}`)
+          if (aIdx === -1 && bIdx === -1) return 0
+          if (aIdx === -1) return 1
+          if (bIdx === -1) return -1
+          return aIdx - bIdx
+        })
+      }
+
+      machineItems.value = cards
     } catch (requestError) {
       console.error(requestError)
       if (machineItems.value.length === 0) machineItems.value = []
