@@ -55,11 +55,12 @@ const props = defineProps({
 const brochureLink = computed(() => {
   if (!props.pdfPath) return ''
 
-  if (/^https?:\/\//i.test(props.pdfPath)) {
-    return props.pdfPath
-  }
+  const base = /^https?:\/\//i.test(props.pdfPath)
+    ? props.pdfPath
+    : `/assets/pdf/${props.pdfPath}`
 
-  return `/assets/pdf/${props.pdfPath}`
+  // Append #view=FitH so browsers open the PDF inline instead of downloading it
+  return base.includes('#') ? base : `${base}#view=FitH`
 })
 
 const normalizedHighlights = computed(() => props.highlights.filter(Boolean))

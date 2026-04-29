@@ -29,7 +29,7 @@ function registerMachineRoutes(app, { machineModel = Machine } = {}) {
       res.setHeader('Content-Type', 'application/pdf')
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename="${safeFileName}_brosur.pdf"`
+        `inline; filename="${safeFileName}_brosur.pdf"`
       )
 
       createMachineBrochurePdf(machine, res)
