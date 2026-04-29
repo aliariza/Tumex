@@ -415,7 +415,6 @@ async function createBrochure(productKey, content, brochure) {
   const pageHeight = doc.page.height
   const margin = 42
   const innerWidth = pageWidth - margin * 2
-  const innerHeight = pageHeight - margin * 2
   const productImage = await imageBufferFromFile(resolveAsset(content.picture), {
     width: innerWidth - 36,
     height: 300,

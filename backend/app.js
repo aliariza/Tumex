@@ -85,8 +85,7 @@ function createApp(options = {}) {
     res.status(404).json({ message: 'Sayfa bulunamadı' })
   })
 
-  app.use((err, _req, res, next) => {
-    void next
+  app.use((err, _req, res, _next) => {
     console.error('[unhandled]', err.message)
     res.status(500).json({ message: 'Sunucu hatası' })
   })

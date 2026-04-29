@@ -14,10 +14,9 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['backend/**/*.js'],
+      files: ['scripts/**/*.mjs'],
       env: {
-        node: true,
-        commonjs: true
+        node: true
       }
     }
   ]
