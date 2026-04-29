@@ -171,6 +171,16 @@ function buildSeriesCards(machineType, machines) {
     })
 }
 
+function buildStaticNavItems(machineType, series) {
+  return series.map((s) => ({
+    title: `${s} - serisi`,
+    href: `/${machineType}/${s}`,
+    image: '/assets/images/no-image.png',
+    text: '',
+    altText: `${s} serisi görseli`
+  }))
+}
+
 export function useMachineCatalog(machineTypeSource) {
   const machineType = computed(() => toValue(machineTypeSource))
   const catalogEntry = computed(() => getCatalogEntry(machineType.value))
@@ -183,6 +193,13 @@ export function useMachineCatalog(machineTypeSource) {
   const altBolumler = computed(() => catalogEntry.value.altBolumler || {})
 
   async function loadMachineCatalog() {
+    // Pre-populate immediately from static data so nav renders at full height
+    // before the API response arrives — eliminates the 3-step visual flash
+    const staticSeries = catalogEntry.value.series || []
+    if (staticSeries.length > 0) {
+      machineItems.value = buildStaticNavItems(machineType.value, staticSeries)
+    }
+
     loading.value = true
     error.value = ''
 
@@ -194,7 +211,7 @@ export function useMachineCatalog(machineTypeSource) {
       machineItems.value = buildSeriesCards(machineType.value, machines)
     } catch (requestError) {
       console.error(requestError)
-      machineItems.value = []
+      if (machineItems.value.length === 0) machineItems.value = []
       error.value = 'Makine listesi alınamadı.'
     } finally {
       loading.value = false

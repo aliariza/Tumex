@@ -1,5 +1,6 @@
 export default {
   'laser-cutting': {
+    series: ['DLC', 'D-DLC', 'D-DLC-S'],
     item: {
       title: 'Durmark: Lazer tezgahında üstün kalite',
       subtitle: 'Lazer tezgahları',
@@ -15,6 +16,7 @@ export default {
     }
   },
   abkant: {
+    series: ['WC67K', 'PSH4', 'DGE'],
     item: {
       title: 'Durmark: Abkant tezgahında üstün kalite',
       subtitle: 'Metal bükme işlemleriniz için doğru destek',
