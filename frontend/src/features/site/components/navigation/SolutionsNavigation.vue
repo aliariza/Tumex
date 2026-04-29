@@ -78,9 +78,10 @@ const activeSeriesLabel = computed(() => {
   max-height: 6rem;
   opacity: 1;
   overflow: hidden;
+  will-change: max-height, opacity;
   transition:
-    max-height 0.85s ease,
-    opacity 0.65s ease;
+    max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.22s ease;
 
   &.is-hidden {
     max-height: 0;
@@ -140,9 +141,10 @@ const activeSeriesLabel = computed(() => {
   opacity: 0;
   overflow: hidden;
   pointer-events: none;
+  will-change: height, opacity;
   transition:
-    height 0.85s ease,
-    opacity 0.65s ease;
+    height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.22s ease;
 }
 
 .compact-series-nav.is-visible {
@@ -155,9 +157,10 @@ const activeSeriesLabel = computed(() => {
   max-height: 5rem;
   opacity: 1;
   overflow: hidden;
+  will-change: max-height, opacity;
   transition:
-    max-height 0.85s ease,
-    opacity 0.65s ease;
+    max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.22s ease;
 }
 
 .series-nav-shell.is-hidden {
@@ -185,4 +188,11 @@ const activeSeriesLabel = computed(() => {
   color: var(--c-main);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .solutions-nav,
+  .compact-series-nav,
+  .series-nav-shell {
+    transition: none;
+  }
+}
 </style>

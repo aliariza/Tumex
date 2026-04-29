@@ -176,7 +176,7 @@ onBeforeUnmount(() => {
   top: 0;
   z-index: 1000;
   background: var(--c-background-nav-top);
-  transition: box-shadow 0.7s ease;
+  transition: box-shadow 0.3s ease;
 
   @media only screen and (max-width: 1040px) {
     display: none;
@@ -203,20 +203,21 @@ onBeforeUnmount(() => {
 .desktop :deep(.contact-nav),
 .desktop :deep(.carrier-nav) {
   transition:
-    box-shadow 0.7s ease,
-    background-color 0.7s ease;
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
 }
 
 .desktop :deep(.top-nav .logo) {
   transform-origin: center right;
+  will-change: width, height;
   transition:
-    width 0.65s ease,
-    height 0.65s ease,
-    padding 0.65s ease;
+    width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .desktop :deep(.top-nav .logo svg) {
-  transition: height 0.65s ease;
+  transition: height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .desktop.has-compact-logo :deep(.top-nav .logo) {
@@ -276,6 +277,7 @@ onBeforeUnmount(() => {
 
 .page-transition-enter-active,
 .page-transition-leave-active {
+  will-change: opacity, transform;
   transition:
     opacity 0.45s ease,
     transform 0.45s ease;

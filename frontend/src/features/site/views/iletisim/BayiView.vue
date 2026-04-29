@@ -18,6 +18,7 @@ import BayiAuthActions from '@/features/auth/components/BayiAuthActions.vue'
   place-items: center;
   padding: 6rem 2rem 8rem;
   overflow: hidden;
+  transform: translateZ(0);
   background:
     linear-gradient(180deg, rgba(240, 247, 255, 0.95) 0%, rgba(255, 255, 255, 1) 58%),
     repeating-linear-gradient(

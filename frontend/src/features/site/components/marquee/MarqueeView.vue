@@ -25,6 +25,7 @@ $numberOfImages: 11;
   display: flex;
   width: calc(34rem * $numberOfImages * 1.75);
   animation: marqueeAnimation linear infinite;
+  will-change: transform;
 }
 
 .image-set {

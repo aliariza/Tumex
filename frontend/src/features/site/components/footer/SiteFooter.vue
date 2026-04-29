@@ -63,7 +63,7 @@ const isAuthenticated = computed(() => store.getters.isAuthenticated)
 <style scoped>
 .site-footer {
   position: relative;
-  width: 100vw;
+  width: 100%;
   margin-top: var(--section-gap);
   overflow: hidden;
   border-top: 1px solid rgba(0, 83, 156, 0.14);
