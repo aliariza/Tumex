@@ -7,7 +7,13 @@
         <h3 class="text">{{ item.text }}</h3>
       </div>
       <div class="product-img-container">
-        <img :src="item.picture" :alt="item.altText || 'Ürün Görseli'" />
+        <img
+          :src="item.picture"
+          :alt="item.altText || 'Ürün Görseli'"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
       </div>
     </div>
   </section>
@@ -31,6 +37,7 @@ defineProps({
 <style lang="scss" scoped>
 .product-hero {
   width: 100vw;
+  min-height: 44rem;
   height: fit-content;
   display: flex;
   align-items: center;
@@ -39,6 +46,7 @@ defineProps({
   padding-inline: 15rem;
 
   @media only screen and (max-width: 1000px) {
+    min-height: 0;
     height: fit-content;
     text-align: center;
     padding-inline: 5rem;
@@ -77,12 +85,15 @@ defineProps({
 }
 .product-img-container {
   max-width: 100%;
-  height: auto;
   justify-self: flex-end;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   img {
     width: 80%;
     height: auto;
-    object-fit: cover;
+    object-fit: contain;
   }
 }
 .text {
