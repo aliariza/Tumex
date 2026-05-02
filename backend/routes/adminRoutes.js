@@ -1,5 +1,3 @@
-const Machine = require('../models/Machine')
-const User = require('../models/User')
 const requireRole = require('../middleware/requireRole')
 const {
   createAdminDeleteUserHandler,
@@ -20,9 +18,6 @@ const {
 } = require('../controllers/jobPositionController')
 
 function registerAdminRoutes(app, {
-  userModel = User,
-  machineModel = Machine,
-  jobPositionModel,
   authMiddleware,
   roleChangeNotifier
 } = {}) {
@@ -34,77 +29,77 @@ function registerAdminRoutes(app, {
     '/admin/machines',
     authMiddleware,
     requireRole('admin'),
-    createAdminListMachinesHandler({ machineModel })
+    createAdminListMachinesHandler()
   )
 
   app.post(
     '/admin/machines',
     authMiddleware,
     requireRole('admin'),
-    createAdminCreateMachineHandler({ machineModel })
+    createAdminCreateMachineHandler()
   )
 
   app.put(
     '/admin/machines/:id',
     authMiddleware,
     requireRole('admin'),
-    createAdminUpdateMachineHandler({ machineModel })
+    createAdminUpdateMachineHandler()
   )
 
   app.delete(
     '/admin/machines/:id',
     authMiddleware,
     requireRole('admin'),
-    createAdminDeleteMachineHandler({ machineModel })
+    createAdminDeleteMachineHandler()
   )
 
   app.get(
     '/admin/job-positions',
     authMiddleware,
     requireRole('admin'),
-    createAdminListJobPositionsHandler({ jobPositionModel })
+    createAdminListJobPositionsHandler()
   )
 
   app.post(
     '/admin/job-positions',
     authMiddleware,
     requireRole('admin'),
-    createAdminCreateJobPositionHandler({ jobPositionModel })
+    createAdminCreateJobPositionHandler()
   )
 
   app.put(
     '/admin/job-positions/:id',
     authMiddleware,
     requireRole('admin'),
-    createAdminUpdateJobPositionHandler({ jobPositionModel })
+    createAdminUpdateJobPositionHandler()
   )
 
   app.delete(
     '/admin/job-positions/:id',
     authMiddleware,
     requireRole('admin'),
-    createAdminDeleteJobPositionHandler({ jobPositionModel })
+    createAdminDeleteJobPositionHandler()
   )
 
   app.get(
     '/admin/users',
     authMiddleware,
     requireRole('admin'),
-    createAdminListUsersHandler({ userModel })
+    createAdminListUsersHandler()
   )
 
   app.patch(
     '/admin/users/:id/role',
     authMiddleware,
     requireRole('admin'),
-    createAdminUpdateUserRoleHandler({ userModel, roleChangeNotifier })
+    createAdminUpdateUserRoleHandler({ roleChangeNotifier })
   )
 
   app.delete(
     '/admin/users/:id',
     authMiddleware,
     requireRole('admin'),
-    createAdminDeleteUserHandler({ userModel })
+    createAdminDeleteUserHandler()
   )
 }
 

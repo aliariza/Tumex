@@ -2,7 +2,9 @@ const express = require('express')
 const cors = require('cors')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-
+const User = require('./models/User')
+const Machine = require('./models/Machine')
+const JobPosition = require('./models/JobPosition')
 const authenticateToken = require('./middleware/authMiddleware')
 const { registerAuthRoutes } = require('./routes/authRoutes')
 const { registerAdminRoutes } = require('./routes/adminRoutes')
@@ -28,6 +30,9 @@ function createApp(options = {}) {
   })
 
   const {
+    userModel = User,
+    machineModel = Machine,
+    jobPositionModel = JobPosition,
     bcryptLib = bcrypt,
     jwtLib = jwt,
     authMiddleware = authenticateToken,
@@ -52,6 +57,7 @@ function createApp(options = {}) {
   app.use(express.json())
 
   registerAuthRoutes(app, {
+    userModel,
     bcryptLib,
     jwtLib,
     tokenSecret,
@@ -61,12 +67,15 @@ function createApp(options = {}) {
   })
 
   registerAdminRoutes(app, {
+    userModel,
+    machineModel,
+    jobPositionModel,
     authMiddleware,
     roleChangeNotifier
   })
 
-  registerMachineRoutes(app)
-  registerJobPositionRoutes(app)
+  registerMachineRoutes(app, { machineModel })
+  registerJobPositionRoutes(app, { jobPositionModel })
 
   app.get('/health', (_req, res) => {
     res.status(200).json({ ok: true })

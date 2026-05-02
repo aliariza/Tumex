@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MachineCategory {
+  abkant
+  laser_cutting
+  laser_welding
+}
+
+model Machine {
+  id              String          @id @default(uuid())
+  category        MachineCategory
+  brand           String?
+  family          String?
+  series          String
+  model           String
+  title           String?
+  description     String?
+  price           Float?
+  isPublished     Boolean         @default(true)
+  image           String?
+  gallery         String[]        @default([])
+
+  pressForceTon   Float?
+  bendingLengthMm Float?
+  powerKw         Float?
+  workingAreaCode String?
+
+  specs           MachineSpec[]
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([category, series, model])
+}
+
+model MachineSpec {
+  id        String   @id @default(uuid())
+  machineId String
+  machine   Machine  @relation(fields: [machineId], references: [id], onDelete: Cascade)
+
+  key       String
+  label     String
+  value     String
+  order     Int      @default(0)
+}
+
+enum UserRole {
+  user
+  dealer
+  admin
+}
+
+model User {
+  id          String   @id @default(uuid())
+  username    String
+  email       String   @unique
+  password    String
+  companyname String?
+  telephone   String?
+  address     String?
+  role        UserRole @default(user)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model JobPosition {
+  id                 String   @id @default(uuid())
+  title              String
+  department         String
+  locationType       String   @default("Ofis içi")
+  employmentType     String   @default("Tam zamanlı")
+  summary            String
+  highlights         String[] @default([])
+  applicationEmail   String   @default("info@tum-ex.com")
+  applicationSubject String   @default("")
+  sortOrder          Int      @default(0)
+  isPublished        Boolean  @default(false)
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([title])
+  @@index([department])
+  @@index([sortOrder])
+  @@index([isPublished])
+}

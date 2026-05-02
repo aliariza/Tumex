@@ -1,7 +1,8 @@
-const prisma = require('../prismaClient.cjs')
+const User = require('../models/User')
 const { normalizeEmail, sendInternalServerError, trimValue } = require('../utils/http')
 
 function createDealerQuoteRequestHandler({
+  userModel = User,
   dealerQuoteRequestNotifier = async () => false
 } = {}) {
   return async (req, res) => {
@@ -21,11 +22,7 @@ function createDealerQuoteRequestHandler({
         return res.status(400).json({ message: 'Lütfen zorunlu alanları doldurun' })
       }
 
-      const dealer = await prisma.user.findUnique({
-        where: {
-          id: req.user._id
-        }
-      })
+      const dealer = await userModel.findById(req.user._id).select('-password')
 
       const payload = {
         productGroup: trimValue(productGroup),

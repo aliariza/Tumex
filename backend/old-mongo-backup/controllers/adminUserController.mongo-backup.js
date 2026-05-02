@@ -1,28 +1,11 @@
-const prisma = require('../prismaClient.cjs')
+const User = require('../models/User')
 const { sendInternalServerError, trimValue } = require('../utils/http')
 
-function toApiUser(user) {
-  if (!user) return user
-
-  const safeUser = {
-    ...user,
-    _id: user.id
-  }
-
-  delete safeUser.password
-  return safeUser
-}
-
-function createAdminListUsersHandler() {
+function createAdminListUsersHandler({ userModel = User } = {}) {
   return async (_req, res) => {
     try {
-      const users = await prisma.user.findMany({
-        orderBy: {
-          createdAt: 'desc'
-        }
-      })
-
-      return res.status(200).json(users.map(toApiUser))
+      const users = await userModel.find({}, '-password').sort({ createdAt: -1 })
+      return res.status(200).json(users)
     } catch (error) {
       return sendInternalServerError(res, '/admin/users GET', error)
     }
@@ -30,6 +13,7 @@ function createAdminListUsersHandler() {
 }
 
 function createAdminUpdateUserRoleHandler({
+  userModel = User,
   roleChangeNotifier = async () => false
 } = {}) {
   return async (req, res) => {
@@ -45,33 +29,27 @@ function createAdminUpdateUserRoleHandler({
         return res.status(400).json({ message: 'Kendi admin yetkinizi kaldıramazsınız' })
       }
 
-      const existingUser = await prisma.user.findUnique({
-        where: {
-          id: req.params.id
-        }
-      })
-
+      const existingUser = await userModel.findById(req.params.id)
       if (!existingUser) {
         return res.status(404).json({ message: 'Kullanıcı bulunamadı' })
       }
 
-      const updatedUser = await prisma.user.update({
-        where: {
-          id: req.params.id
-        },
-        data: {
-          role: nextRole
+      const updatedUser = await userModel.findByIdAndUpdate(
+        req.params.id,
+        { role: nextRole },
+        {
+          new: true,
+          runValidators: true
         }
-      })
+      )
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Kullanıcı bulunamadı' })
+      }
 
       if (existingUser.role !== nextRole) {
         try {
-          const notified = await roleChangeNotifier(
-            toApiUser(updatedUser),
-            existingUser.role,
-            nextRole
-          )
-
+          const notified = await roleChangeNotifier(updatedUser, existingUser.role, nextRole)
           if (notified) {
             console.info(
               `[/admin/users/:id/role notify] role change email sent to ${updatedUser.email} (${existingUser.role} -> ${nextRole})`
@@ -86,35 +64,31 @@ function createAdminUpdateUserRoleHandler({
         }
       }
 
-      return res.status(200).json(toApiUser(updatedUser))
+      const safeUser = typeof updatedUser.toObject === 'function'
+        ? updatedUser.toObject()
+        : { ...updatedUser }
+
+      delete safeUser.password
+
+      return res.status(200).json(safeUser)
     } catch (error) {
       return sendInternalServerError(res, '/admin/users/:id/role PATCH', error)
     }
   }
 }
 
-function createAdminDeleteUserHandler() {
+function createAdminDeleteUserHandler({ userModel = User } = {}) {
   return async (req, res) => {
     try {
       if (String(req.user?._id) === String(req.params.id)) {
         return res.status(400).json({ message: 'Kendi admin hesabınızı silemezsiniz' })
       }
 
-      const existingUser = await prisma.user.findUnique({
-        where: {
-          id: req.params.id
-        }
-      })
+      const deletedUser = await userModel.findByIdAndDelete(req.params.id)
 
-      if (!existingUser) {
+      if (!deletedUser) {
         return res.status(404).json({ message: 'Kullanıcı bulunamadı' })
       }
-
-      await prisma.user.delete({
-        where: {
-          id: req.params.id
-        }
-      })
 
       return res.status(200).json({ message: 'Kullanıcı silindi' })
     } catch (error) {

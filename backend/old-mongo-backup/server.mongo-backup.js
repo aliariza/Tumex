@@ -1,4 +1,6 @@
+const mongoose = require('mongoose')
 const { createApp } = require('./app')
+const JobPosition = require('./models/JobPosition')
 const { createLoginHandler, createRegisterHandler } = require('./controllers/authController')
 const { createDealerQuoteRequestHandler } = require('./controllers/dealerRequestController')
 const {
@@ -12,20 +14,22 @@ const { ensureDefaultJobPositions } = require('./services/jobPositionSeed')
 require('dotenv').config()
 
 const PORT = process.env.PORT || 4000
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tumex'
 
-async function connectToDatabase() {
-  console.log('PostgreSQL/Supabase database ready')
+async function connectToDatabase(uri = MONGO_URI) {
+  await mongoose.connect(uri)
+  console.log('MongoDB bağlandı')
 }
 
 async function startServer(options = {}) {
-  const { port = PORT } = options
+  const { port = PORT, mongoUri = MONGO_URI } = options
   const app = createApp()
 
   try {
-    await connectToDatabase()
-    await ensureDefaultJobPositions()
+    await connectToDatabase(mongoUri)
+    await ensureDefaultJobPositions({ jobPositionModel: JobPosition })
   } catch (err) {
-    console.error('Database startup error:', err.message)
+    console.error('MongoDB bağlantı hatası:', err.message)
     process.exit(1)
   }
 

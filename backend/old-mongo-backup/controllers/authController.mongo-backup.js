@@ -1,25 +1,14 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const prisma = require('../prismaClient.cjs')
+const User = require('../models/User')
 const {
   createRegisterPayload,
   normalizeEmail,
   sendInternalServerError
 } = require('../utils/http')
 
-function toApiUser(user) {
-  if (!user) return user
-
-  const safeUser = {
-    ...user,
-    _id: user.id
-  }
-
-  delete safeUser.password
-  return safeUser
-}
-
 function createLoginHandler({
+  userModel = User,
   bcryptLib = bcrypt,
   jwtLib = jwt,
   tokenSecret = process.env.TOKEN_SECRET
@@ -32,12 +21,7 @@ function createLoginHandler({
         return res.status(400).json({ message: 'E-posta ve şifre gerekli' })
       }
 
-      const user = await prisma.user.findUnique({
-        where: {
-          email: normalizeEmail(email)
-        }
-      })
-
+      const user = await userModel.findOne({ email: normalizeEmail(email) })
       if (!user) {
         return res.status(401).json({ message: 'Yanlış bilgi' })
       }
@@ -55,7 +39,7 @@ function createLoginHandler({
 
       const token = jwtLib.sign(
         {
-          _id: user.id,
+          _id: user._id,
           role: user.role
         },
         tokenSecret,
@@ -74,6 +58,7 @@ function createLoginHandler({
 }
 
 function createRegisterHandler({
+  userModel = User,
   bcryptLib = bcrypt,
   accessRequestNotifier = async () => false
 } = {}) {
@@ -86,40 +71,22 @@ function createRegisterHandler({
       }
 
       const normalizedEmail = normalizeEmail(email)
-
-      const existingUser = await prisma.user.findUnique({
-        where: {
-          email: normalizedEmail
-        }
-      })
+      const existingUser = await userModel.findOne({ email: normalizedEmail })
 
       if (existingUser) {
         return res.status(400).json({ message: 'Bu e-posta zaten kayıtlı' })
       }
 
       const hashedPassword = await bcryptLib.hash(password, 10)
-      const payload = createRegisterPayload(req.body, hashedPassword)
+      const newUser = new userModel(createRegisterPayload(req.body, hashedPassword))
 
-      const newUser = await prisma.user.create({
-        data: {
-          username: payload.username,
-          email: payload.email,
-          password: payload.password,
-          companyname: payload.companyname,
-          telephone: payload.telephone,
-          address: payload.address,
-          role: payload.role || 'user'
-        }
-      })
-
-      const safeUser = toApiUser(newUser)
-
+      await newUser.save()
       try {
-        const notified = await accessRequestNotifier(safeUser)
+        const notified = await accessRequestNotifier(newUser)
         if (notified) {
-          console.info(`[/register notify] access request email sent for ${safeUser.email}`)
+          console.info(`[/register notify] access request email sent for ${newUser.email}`)
         } else {
-          console.info(`[/register notify] email skipped for ${safeUser.email}`)
+          console.info(`[/register notify] email skipped for ${newUser.email}`)
         }
       } catch (notificationError) {
         console.error('[/register notify]', notificationError.message)
@@ -136,6 +103,5 @@ function createRegisterHandler({
 
 module.exports = {
   createLoginHandler,
-  createRegisterHandler,
-  toApiUser
+  createRegisterHandler
 }

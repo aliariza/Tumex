@@ -1,10 +1,11 @@
+const User = require('../models/User')
 const requireRole = require('../middleware/requireRole')
-const prisma = require('../prismaClient.cjs')
-const { createLoginHandler, createRegisterHandler, toApiUser } = require('../controllers/authController')
+const { createLoginHandler, createRegisterHandler } = require('../controllers/authController')
 const { createDealerQuoteRequestHandler } = require('../controllers/dealerRequestController')
 const { sendInternalServerError } = require('../utils/http')
 
 function registerAuthRoutes(app, {
+  userModel = User,
   bcryptLib,
   jwtLib,
   tokenSecret,
@@ -12,22 +13,17 @@ function registerAuthRoutes(app, {
   accessRequestNotifier,
   dealerQuoteRequestNotifier
 } = {}) {
-  app.post('/login', createLoginHandler({ bcryptLib, jwtLib, tokenSecret }))
-  app.post('/register', createRegisterHandler({ bcryptLib, accessRequestNotifier }))
+  app.post('/login', createLoginHandler({ userModel, bcryptLib, jwtLib, tokenSecret }))
+  app.post('/register', createRegisterHandler({ userModel, bcryptLib, accessRequestNotifier }))
 
   app.get('/me', authMiddleware, async (req, res) => {
     try {
-      const user = await prisma.user.findUnique({
-        where: {
-          id: req.user._id
-        }
-      })
-
+      const user = await userModel.findById(req.user._id).select('-password')
       if (!user) {
         return res.status(404).json({ message: 'Kullanıcı bulunamadı' })
       }
 
-      return res.status(200).json(toApiUser(user))
+      return res.status(200).json(user)
     } catch (error) {
       return sendInternalServerError(res, '/me', error)
     }
@@ -41,7 +37,7 @@ function registerAuthRoutes(app, {
     '/protected/quote-request',
     authMiddleware,
     requireRole('dealer', 'admin'),
-    createDealerQuoteRequestHandler({ dealerQuoteRequestNotifier })
+    createDealerQuoteRequestHandler({ userModel, dealerQuoteRequestNotifier })
   )
 }
 
