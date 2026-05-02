@@ -1,5 +1,6 @@
 const prisma = require('../prismaClient.cjs')
 const { buildMachinePayload, sendInternalServerError } = require('../utils/http')
+const { createMachineBrochurePdf } = require('../services/brochurePdfService')
 
 function toPrismaCategory(category) {
   if (category === 'laser-cutting') return 'laser_cutting'
@@ -276,6 +277,43 @@ function createGetMachineByIdHandler() {
   }
 }
 
+function createMachineBrochureHandler() {
+  return async (req, res) => {
+    try {
+      const machine = await prisma.machine.findFirst({
+        where: {
+          id: req.params.id,
+          isPublished: true
+        },
+        include: {
+          specs: {
+            orderBy: {
+              order: 'asc'
+            }
+          }
+        }
+      })
+
+      if (!machine) {
+        return res.status(404).json({ message: 'Makine bulunamadı' })
+      }
+
+      const apiMachine = toApiMachine(machine)
+
+      res.setHeader('Content-Type', 'application/pdf')
+      res.setHeader(
+        'Content-Disposition',
+        `inline; filename="${apiMachine.model || 'machine'}-brochure.pdf"`
+      )
+
+      createMachineBrochurePdf(apiMachine, res)
+    } catch (error) {
+      console.error('[/machines/:id/brochure.pdf GET]', error)
+      return sendInternalServerError(res, '/machines/:id/brochure.pdf GET', error)
+    }
+  }
+}
+
 module.exports = {
   createAdminCreateMachineHandler,
   createAdminDeleteMachineHandler,
@@ -283,5 +321,6 @@ module.exports = {
   createAdminUpdateMachineHandler,
   createGetMachineByIdHandler,
   createGetMachineByModelHandler,
-  createListPublishedMachinesHandler
+  createListPublishedMachinesHandler,
+  createMachineBrochureHandler
 }
