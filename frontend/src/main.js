@@ -3,6 +3,7 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import VueLazyLoad from 'vue3-lazyload'
 import App from './app/App.vue'
+import { inject } from '@vercel/analytics'
 import router from './app/router'
 import store from './app/store'
 import { isRestrictedRoute } from './services/authAccess'
@@ -27,3 +28,5 @@ window.addEventListener('auth:unauthorized', async () => {
 
 // Mount the app
 app.mount('#app')
+
+inject()
